@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <locales>
-  <groups name="quiqqer/cms-import" datatype="php,js">
-    <locale name="package.title">
-      <de><![CDATA[QUIQQER CMS Import]]></de>
-      <en><![CDATA[QUIQQER CMS Import]]></en>
-    </locale>
-  <locale name="package.description"><de><![CDATA[Importiere Daten und Strukturen von fremden CMS-System in deine QUIQQER-Installation]]></de><en><![CDATA[Import data and structure of third party CMS systems into your QUIQQER system]]></en></locale></groups>
+    <groups name="quiqqer/cms-import" datatype="php,js">
+        <locale name="package.title">
+            <de><![CDATA[QUIQQER CMS Import]]></de>
+            <en><![CDATA[QUIQQER CMS Import]]></en>
+        </locale>
+        <locale name="package.description">
+            <de><![CDATA[Importiere Daten und Strukturen von fremden CMS-System in deine QUIQQER-Installation]]></de>
+            <en><![CDATA[Import data and structure of third party CMS systems into your QUIQQER system]]></en>
+        </locale>
+    </groups>
 </locales>
