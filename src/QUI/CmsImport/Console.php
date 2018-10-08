@@ -27,8 +27,12 @@ class Console extends QUI\System\Console\Tool
      */
     public function execute()
     {
-        if (!QUI\Permissions\Permission::isSU()) {
-            $this->exitFail("The QUIQQER CMS Import can only be executed by a SuperUser!");
+        QUI::getLocale()->setCurrent('de'); // @todo keep variable
+
+        $rootUserId = (int)QUI::conf('globals', 'rootuser');
+
+        if (QUI::getUserBySession()->getId() !== $rootUserId) {
+            $this->exitFail("The QUIQQER CMS Import can only be executed by the root user!");
         }
 
         if (!$this->isSystemEmpty()) {
@@ -41,7 +45,7 @@ class Console extends QUI\System\Console\Tool
 
         $userInput = $this->writePrompt(
             'Do you want do CLEANUP your QUIQQER system before executing the import?'
-            . ' (This will delete all non-standard users, groups and all projects that'
+            .' (This will delete all users (except for the root user), groups and all projects that'
             .' are not in the import data) (Y/n)'
         );
 
@@ -51,7 +55,44 @@ class Console extends QUI\System\Console\Tool
             $cleanup = true;
         }
 
+        // Choose ImportProvider
+        do {
+            $this->writeInfo("Please choose the ImportProvider you want to execute:\n");
 
+            $providers = $this->getImportProviders();
+
+            foreach ($providers as $k => $ImportProvider) {
+                $this->writeLn("[".($k + 1)."] ".$ImportProvider->getTitle()." - ".$ImportProvider->getDescription());
+            }
+
+            $key = $this->writePrompt("Which ImportProvider shall be executed?");
+
+            if (empty($key)) {
+                continue;
+            }
+
+            $key = $key - 1;
+
+            if (empty($providers[$key])) {
+                continue;
+            }
+
+            $SelectedProvider = $providers[$key];
+            break;
+        } while (true);
+
+        $Import = new Import($SelectedProvider, [
+            'cleanup' => $cleanup
+        ]);
+
+        $Import->setConsoleTool($this);
+
+        try {
+            $SelectedProvider->promptForConfig($this);
+            $Import->start();
+        } catch (\Exception $Exception) {
+            $this->exitFail($Exception->getMessage());
+        }
 
         $this->exitSuccess();
     }
@@ -94,12 +135,24 @@ class Console extends QUI\System\Console\Tool
      * Output and return a user prompt
      *
      * @param string $msg
+     * @param string $defaultValue (optional)
      * @return string
      */
-    protected function writePrompt($msg)
+    public function writePrompt($msg, $defaultValue = null)
     {
-        $this->writeLn("[Q] - ".$msg.": ", 'white');
-        return $this->readInput();
+        if (empty($defaultValue)) {
+            $this->writeLn("[Q] - ".$msg.": ", 'white');
+        } else {
+            $this->writeLn("[Q] - ".$msg." [".$defaultValue."]: ", 'white');
+        }
+
+        $input = $this->readInput();
+
+        if (empty($defaultValue)) {
+            return $input;
+        }
+
+        return empty($input) ? $defaultValue : $input;
     }
 
     /**
@@ -108,7 +161,7 @@ class Console extends QUI\System\Console\Tool
      * @param string $msg
      * @return void
      */
-    protected function writeInfo($msg)
+    public function writeInfo($msg)
     {
         $this->writeLn("[INFO] - ".$msg, 'cyan');
     }
@@ -119,7 +172,7 @@ class Console extends QUI\System\Console\Tool
      * @param string $msg
      * @return void
      */
-    protected function writeWarning($msg)
+    public function writeWarning($msg)
     {
         $this->writeLn("[WARNING] - ".$msg, 'yellow');
     }
@@ -130,9 +183,22 @@ class Console extends QUI\System\Console\Tool
      * @param string $msg
      * @return void
      */
-    protected function writeError($msg)
+    public function writeError($msg)
     {
         $this->writeLn("[ERROR] - ".$msg, 'red');
+    }
+
+    /**
+     * Write a header
+     *
+     * @param string $title
+     * @return void
+     */
+    public function writeHeader($title)
+    {
+        $this->writeLn("\n##########################################", "green");
+        $this->writeLn("\t$title", "green");
+        $this->writeLn("##########################################", "green");
     }
 
     /**
@@ -160,5 +226,40 @@ class Console extends QUI\System\Console\Tool
         $this->writeLn("\n[SCRIPT ABORTED! IMPORT WAS NOT COMPLETED.]\n\n", 'red');
 
         exit(1);
+    }
+
+    /**
+     * Get all available Import Providers
+     *
+     * @return ImportProviderInterface[]
+     */
+    protected function getImportProviders()
+    {
+        $providers = [];
+        $installed = QUI::getPackageManager()->getInstalled();
+
+        foreach ($installed as $package) {
+            try {
+                $Package = QUI::getPackage($package['name']);
+
+                if (!$Package->isQuiqqerPackage()) {
+                    continue;
+                }
+
+                $importProviderClasses = $Package->getProvider('cms-import');
+
+                foreach ($importProviderClasses as $class) {
+                    $ImportProvider = new $class();
+
+                    if ($ImportProvider instanceof ImportProviderInterface) {
+                        $providers[] = $ImportProvider;
+                    }
+                }
+            } catch (QUI\Exception $Exception) {
+                QUI\System\Log::writeException($Exception);
+            }
+        }
+
+        return $providers;
     }
 }
