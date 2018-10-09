@@ -88,7 +88,6 @@ class Console extends QUI\System\Console\Tool
         $Import->setConsoleTool($this);
 
         try {
-            $SelectedProvider->promptForConfig($this);
             $Import->start();
         } catch (\Exception $Exception) {
             $this->exitFail($Exception->getMessage());
@@ -196,9 +195,9 @@ class Console extends QUI\System\Console\Tool
      */
     public function writeHeader($title)
     {
-        $this->writeLn("\n##########################################", "green");
+        $this->writeLn("\n#######################################################", "green");
         $this->writeLn("\t$title", "green");
-        $this->writeLn("##########################################", "green");
+        $this->writeLn("#######################################################", "green");
     }
 
     /**
@@ -248,8 +247,9 @@ class Console extends QUI\System\Console\Tool
 
                 $importProviderClasses = $Package->getProvider('cms-import');
 
+                /** @var ImportProviderInterface $class */
                 foreach ($importProviderClasses as $class) {
-                    $ImportProvider = new $class();
+                    $ImportProvider = new $class($this);
 
                     if ($ImportProvider instanceof ImportProviderInterface) {
                         $providers[] = $ImportProvider;

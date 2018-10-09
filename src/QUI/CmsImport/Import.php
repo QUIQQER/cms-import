@@ -56,10 +56,80 @@ class Import extends QUI\QDOM
             $this->cleanUpSystem();
         }
 
-        // Projects
+        // ImportProvider config
+        $this->ImportProvider->promptForConfig();
 
+        // Projects
+        $this->importProjects();
+
+        // Delete old standard project
+        if ($this->getAttribute('cleanup')) {
+            $this->writeHeader('delete_old_standard_project');
+
+            $Projects   = QUI::getProjectManager();
+            $OldProject = $Projects->getProject('old_standard_project');
+            $Projects->deleteProject($OldProject);
+        }
 
         // Sites
+    }
+
+    /**
+     * Start project import
+     *
+     * @return void
+     */
+    protected function importProjects()
+    {
+        $projects = $this->ImportProvider->getProjects();
+        $Projects = QUI::getProjectManager();
+
+        foreach ($projects as $ImportProject) {
+            $this->writeHeader('project', ['project' => $ImportProject->getName()]);
+
+            try {
+                // this is a badfix! QUIQQER caches the content of the main conf file
+                // and at this point may have old config data
+                QUI::$Configs = [];
+
+                $NewProject = $Projects->createProject(
+                    $ImportProject->getName(),
+                    $ImportProject->getDefaultLang(),
+                    $ImportProject->getLangs()
+                );
+
+                $Projects->setConfigForProject($NewProject->getName(), $ImportProject->getAttributes());
+            } catch (\Exception $Exception) {
+                QUI\System\Log::writeException($Exception);
+                $this->writeError($Exception->getMessage());
+
+                continue;
+            }
+
+            $this->writeInfo('project.success', ['project' => $NewProject->getName()]);
+        }
+    }
+
+    protected function importSites()
+    {
+        $Projects = QUI::getProjectManager();
+        $projects = $Projects->getProjects(true);
+
+        /** @var QUI\Projects\Project $Project */
+        foreach ($projects as $Project) {
+            $langs   = $Project->getLanguages();
+            $project = $Project->getName();
+
+            foreach ($langs as $lang) {
+                $TargetProject = $Projects->getProject($project, $lang);
+                $importSites   = $this->ImportProvider->getSites($project, $lang);
+
+                foreach ($importSites as $ImportSite) {
+                    
+                }
+            }
+        }
+
     }
 
     /**
@@ -81,10 +151,10 @@ class Import extends QUI\QDOM
      */
     protected function cleanUpSystem()
     {
-        $this->ConsoleTool->writeHeader("Cleaning up QUIQQER system...");
+        $this->writeHeader('cleanup');
 
         // Delete all user except for the root user
-        $this->write("Deleting all users (except non-root)");
+        $this->writeInfo('cleanup.delete_users');
 
         $rootUserId = (int)QUI::conf('globals', 'rootuser');
 
@@ -106,7 +176,7 @@ class Import extends QUI\QDOM
         }
 
         // Delete all non-essential groups
-        $this->write("Deleting all non-essential groups...");
+        $this->writeInfo('cleanup.delete_groups');
 
         $rootGroupId = (int)QUI::conf('globals', 'root');
 
@@ -128,14 +198,17 @@ class Import extends QUI\QDOM
         }
 
         // Delete all projects (but leave one for now)
-        $this->write("Deleting all projcets (except for the standard project)...");
+        $this->writeInfo('cleanup.delete_projects');
 
         $Projects        = QUI::getProjectManager();
         $StandardProject = $Projects->getStandard();
+        $StandardProject->rename('old_standard_project');
 
         /** @var QUI\Projects\Project $Project */
         foreach ($Projects->getProjects(true) as $Project) {
             if ($Project->getName() === $StandardProject->getName()) {
+                // standard project is deleted at a later time
+                // because QUIQQER needs at least 1 project at any time
                 continue;
             }
 
@@ -147,12 +220,52 @@ class Import extends QUI\QDOM
      * Write info to Console tool
      *
      * @param string $msg
+     * @param array $localeVars (optional) - Variables for msg locale
      * @return void
      */
-    protected function write($msg)
+    protected function writeInfo($msg, $localeVars = [])
     {
+        if (is_null($this->ConsoleTool)) {
+            return;
+        }
+
+        $msg = QUI::getLocale()->get('quiqqer/cms-import', 'import.msg.'.$msg, $localeVars);
+
         if (!is_null($this->ConsoleTool)) {
             $this->ConsoleTool->writeInfo($msg);
+        }
+    }
+
+    /**
+     * Write error to Console tool
+     *
+     * @param string $msg
+     * @return void
+     */
+    protected function writeError($msg)
+    {
+        if (!is_null($this->ConsoleTool)) {
+            $this->ConsoleTool->writeError($msg);
+        }
+    }
+
+    /**
+     * Write header to Console tool
+     *
+     * @param string $msg
+     * @param array $localeVars (optional) - Variables for msg locale
+     * @return void
+     */
+    protected function writeHeader($msg, $localeVars = [])
+    {
+        if (is_null($this->ConsoleTool)) {
+            return;
+        }
+
+        $msg = QUI::getLocale()->get('quiqqer/cms-import', 'import.header.'.$msg, $localeVars);
+
+        if (!is_null($this->ConsoleTool)) {
+            $this->ConsoleTool->writeHeader($msg);
         }
     }
 }

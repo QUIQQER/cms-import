@@ -10,4 +10,40 @@
             <en><![CDATA[Import data and structure of third party CMS systems into your QUIQQER system]]></en>
         </locale>
     </groups>
+
+    <groups name="quiqqer/cms-import" datatype="php">
+        <!-- General import messages -->
+        <locale name="import.header.delete_old_standard_project">
+            <de><![CDATA[Lösche altes Standard-Projekt...]]></de>
+            <en><![CDATA[Deleting old default project...]]></en>
+        </locale>
+
+        <!-- Project import -->
+        <locale name="import.header.project">
+            <de><![CDATA[Importiere Projekt "[project]"]]></de>
+            <en><![CDATA[Importing project "[project]"]]></en>
+        </locale>
+        <locale name="import.msg.project.success">
+            <de><![CDATA[Projekt "[project]" wurde erfolgreich importiert!]]></de>
+            <en><![CDATA[Project "[project]" was imported successfully!]]></en>
+        </locale>
+
+        <!-- Cleanup -->
+        <locale name="import.header.cleanup">
+            <de><![CDATA[Räume QUIQQER-System auf...]]></de>
+            <en><![CDATA[Cleaning up QUIQQER system...]]></en>
+        </locale>
+        <locale name="import.msg.cleanup.delete_users">
+            <de><![CDATA[Lösche alle Benutzer (außer root-Benutzer)...]]></de>
+            <en><![CDATA[Deleting all users (except root user)...]]></en>
+        </locale>
+        <locale name="import.msg.cleanup.delete_groups">
+            <de><![CDATA[Lösche alle nicht-essentiellen Gruppen...]]></de>
+            <en><![CDATA[Deleting all non-essential groups...]]></en>
+        </locale>
+        <locale name="import.msg.cleanup.delete_projects">
+            <de><![CDATA[Lösche alle Projekte (außer dem Standard-Projekt)...]]></de>
+            <en><![CDATA[Deleting all projcets (except for the standard project)...]]></en>
+        </locale>
+    </groups>
 </locales>

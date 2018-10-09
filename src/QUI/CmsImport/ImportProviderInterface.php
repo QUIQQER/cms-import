@@ -13,6 +13,13 @@ use QUI\CmsImport\Entities\ImportSite;
 interface ImportProviderInterface
 {
     /**
+     * ImportProviderInterface constructor.
+     *
+     * @param Console $ImportConsole - The main QUIQQER Import console tool
+     */
+    public function __construct(Console $ImportConsole);
+
+    /**
      * Get title of this Import Provider
      *
      * @return string
@@ -37,9 +44,10 @@ interface ImportProviderInterface
      * Get all QUIQQER sites that should be imported (for a project)
      *
      * @param string $project - Project name
+     * @param string $lang - Project lang
      * @return ImportSite[]
      */
-    public function getSites($project);
+    public function getSites($project, $lang);
 
     /**
      * Get all QUIQQER system languages that should be imported
@@ -58,16 +66,13 @@ interface ImportProviderInterface
     public function getSystemConfig();
 
     /**
-     * This method is called by the main Import Console Tool before the actual Import is started
-     *
-     * Its purpose is to prompt the user for necessary configuration data (like paths, DB credentials...)
-     * regarding the system the the import data is pulled from.
+     * The purpose of this method is to prompt the user for necessary configuration data (like paths, DB credentials...)
+     * regarding the system the import data is pulled from.
      *
      * If the ImportProvider collects its configuration in a different manner (e.g. a config file) this method
      * does not have to actually do anything.
      *
-     * @param Console $Console
      * @return void
      */
-    public function promptForConfig(Console $Console);
+    public function promptForConfig();
 }

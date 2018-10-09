@@ -12,6 +12,21 @@ use QUI;
 class ImportProject extends QUI\QDOM
 {
     /**
+     * @var string
+     */
+    protected $name;
+
+    /**
+     * @var string
+     */
+    protected $defaultLang;
+
+    /**
+     * @var array
+     */
+    protected $langs = [];
+
+    /**
      * ImportProject constructor.
      *
      * @param string $name
@@ -21,13 +36,34 @@ class ImportProject extends QUI\QDOM
      */
     public function __construct($name, $lang, $languages = [], $attributes = [])
     {
-        $this->setAttributes(array_merge(
-            $attributes,
-            [
-                'name'      => $name,
-                'lang'      => $lang,
-                'languages' => $languages
-            ]
-        ));
+        $this->name        = $name;
+        $this->defaultLang = $lang;
+        $this->langs       = $languages;
+
+        $this->setAttributes($attributes);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultLang()
+    {
+        return $this->defaultLang;
+    }
+
+    /**
+     * @return array
+     */
+    public function getLangs()
+    {
+        return $this->langs;
     }
 }

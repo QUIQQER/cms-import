@@ -26,23 +26,99 @@ class ImportSite extends QUI\QDOM
     protected $languageLinks = [];
 
     /**
+     * @var string
+     */
+    protected $project;
+
+    /**
+     * @var string
+     */
+    protected $name;
+
+    /**
+     * @var int|null
+     */
+    protected $id;
+
+    /**
+     * @var false|int
+     */
+    protected $parentId;
+
+    /**
+     * @var string
+     */
+    protected $lang;
+
+    /**
+     * @var bool
+     */
+    protected $isFlaggedForReview = false;
+
+    /**
+     * @var string
+     */
+    protected $reviewText = '';
+
+    /**
      * ImportProject constructor.
      *
      * @param string $project - The name of the project this Site belongs to
      * @param string $name - Name of the Site (this is the part that is seen in the URL)
+     * @param string $lang - Language of the site
+     * @param int|false $parentId - If this is FALSE this Site is supposed to be the root site!
      * @param int $id (optional) - Provide an ID if the Site should have a fixed ID
      * @param array $attributes (optional) - Additional Site attributes
      */
-    public function __construct($project, $name, $id = null, $attributes = [])
+    public function __construct($project, $lang, $name, $parentId, $id = null, $attributes = [])
     {
-        $this->setAttributes(array_merge(
-            $attributes,
-            [
-                'project' => $project,
-                'name'    => $name,
-                'id'      => $id
-            ]
-        ));
+        $this->project  = $project;
+        $this->name     = $name;
+        $this->lang     = $lang;
+        $this->id       = $id;
+        $this->parentId = $parentId;
+
+        $this->setAttributes($attributes);
+    }
+
+    /**
+     * @return string
+     */
+    public function getProject()
+    {
+        return $this->project;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return int|false
+     */
+    public function getParentId()
+    {
+        return $this->parentId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLang()
+    {
+        return $this->lang;
     }
 
     /**
@@ -104,5 +180,32 @@ class ImportSite extends QUI\QDOM
     public function getLanguageLinks()
     {
         return $this->languageLinks;
+    }
+
+    /**
+     * Flag this site for review, so it is listed in a special "todo.txt" after import
+     *
+     * @param string $reason (optional) - The reaseon why this site is flagged for review
+     */
+    public function flagForReview($reason = '')
+    {
+        $this->isFlaggedForReview = true;
+        $this->reviewText         = $reason;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFlaggedForReview()
+    {
+        return $this->isFlaggedForReview;
+    }
+
+    /**
+     * @return string
+     */
+    public function getReviewText()
+    {
+        return $this->reviewText;
     }
 }
