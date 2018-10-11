@@ -41,13 +41,24 @@ interface ImportProviderInterface
     public function getProjects();
 
     /**
-     * Get all QUIQQER sites that should be imported (for a project)
+     * Get a site that should be imported
+     *
+     * @param string $identifier - A unique ImportSite identifier
+     * @param string $project - Project name
+     * @param string $lang - Project lang
+     * @return ImportSite
+     */
+    public function getSite($identifier, $project, $lang);
+
+    /**
+     * Get the complete hierarchical site structure as an associative array
+     * with unique ImportSite identifiers
      *
      * @param string $project - Project name
      * @param string $lang - Project lang
-     * @return ImportSite[]
+     * @return array
      */
-    public function getSites($project, $lang);
+    public function getSiteHierarchy($project, $lang);
 
     /**
      * Get all QUIQQER system languages that should be imported

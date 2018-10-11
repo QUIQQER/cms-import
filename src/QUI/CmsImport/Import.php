@@ -72,6 +72,7 @@ class Import extends QUI\QDOM
         }
 
         // Sites
+        $this->importSites();
     }
 
     /**
@@ -89,7 +90,8 @@ class Import extends QUI\QDOM
 
             try {
                 // this is a badfix! QUIQQER caches the content of the main conf file
-                // and at this point may have old config data
+                // and at this point may have old config data; this forces QUIQQER to reload
+                // the config from the filesystem.
                 QUI::$Configs = [];
 
                 $NewProject = $Projects->createProject(
@@ -110,6 +112,12 @@ class Import extends QUI\QDOM
         }
     }
 
+    /**
+     * Start import of sites
+     *
+     * @throws QUI\Exception
+     * @return void
+     */
     protected function importSites()
     {
         $Projects = QUI::getProjectManager();
@@ -117,19 +125,118 @@ class Import extends QUI\QDOM
 
         /** @var QUI\Projects\Project $Project */
         foreach ($projects as $Project) {
-            $langs   = $Project->getLanguages();
-            $project = $Project->getName();
+            $langs         = $Project->getLanguages();
+            $project       = $Project->getName();
+            $importedSites = [];
 
+            // Create sites
             foreach ($langs as $lang) {
                 $TargetProject = $Projects->getProject($project, $lang);
-                $importSites   = $this->ImportProvider->getSites($project, $lang);
+                $siteHierarchy = $this->ImportProvider->getSiteHierarchy($project, $lang);
+                $RootSite      = new QUIQQERImportSite($TargetProject, 1);
 
-                foreach ($importSites as $ImportSite) {
-                    
+                $importedSites[$lang] = $this->createSitesFromHierarchy($RootSite, $siteHierarchy, $TargetProject);
+            }
+
+            // Create language links for $lang
+            foreach ($importedSites as $lang => $importSites) {
+                $SourceProject = $Projects->getProject($project, $lang);
+
+                foreach ($importSites as $quiqqerSiteId => $siteIdentifier) {
+                    $ImportSite  = $this->ImportProvider->getSite($siteIdentifier, $project, $lang);
+                    $QuiqqerSite = new QUI\Projects\Site\Edit($SourceProject, $quiqqerSiteId);
+
+                    $this->writeInfo('site_create_lang_links', [
+                        'siteId'    => $ImportSite->getId(),
+                        'siteTitle' => $ImportSite->getAttribute('title')
+                    ]);
+
+                    foreach ($ImportSite->getLanguageLinks() as $targetLang => $linkedSiteIdentifier) {
+                        $TargetProject     = $Projects->getProject($project, $targetLang);
+                        $quiqqerLinkSiteId = array_search($linkedSiteIdentifier, $importedSites[$targetLang]);
+
+                        if (empty($quiqqerLinkSiteId)) {
+                            $this->writeWarning('site_lang_links_site_not_found', [
+                                'siteIdentifier' => $linkedSiteIdentifier,
+                                'targetLang'     => $targetLang
+                            ]);
+                            continue;
+                        }
+
+                        $LinkQuiqqerSite = new QUI\Projects\Site\Edit($TargetProject, $quiqqerLinkSiteId);
+                        $QuiqqerSite->addLanguageLink($targetLang, $LinkQuiqqerSite->getId());
+                    }
                 }
             }
         }
+    }
 
+    /**
+     * Create sites from a site hierarchy
+     *
+     * @param QUIQQERImportSite $RootSite
+     * @param array $siteHierarchy
+     * @param QUI\Projects\Project $Project - The QUIQQER project that the sites are imported to
+     * @param array &$importedSiteIds (optional) - Collects site IDs that have already been imported
+     * @return array - Mapping of QUIQQER site id -> ImportSite identifier for all imported sites
+     */
+    protected function createSitesFromHierarchy($RootSite, $siteHierarchy, $Project, &$importedSiteIds = [])
+    {
+        $project = $Project->getName();
+        $lang    = $Project->getLang();
+
+        foreach ($siteHierarchy as $siteIdentifier => $children) {
+            $ImportSite           = $this->ImportProvider->getSite($siteIdentifier, $project, $lang);
+            $importSiteId         = (int)$ImportSite->getId();
+            $importSiteAttributes = $ImportSite->getAttributes();
+
+            $this->writeInfo('site_start', [
+                'siteId'    => $importSiteId,
+                'siteTitle' => $ImportSite->getAttribute('title')
+            ]);
+
+            // Check if site ID has already been imported
+            if (!empty($importSiteId) && isset($importedSiteIds[$importSiteId])) {
+                $this->writeWarning(
+                    'site_duplicate_id',
+                    [
+                        'siteId'    => $importSiteId,
+                        'siteTitle' => $ImportSite->getAttribute('title')
+                    ]
+                );
+
+                continue;
+            }
+
+            // Special case: QUIQQER root site
+            if ($importSiteId === 1) {
+                $RootSite->setAttributes($importSiteAttributes);
+                $RootSite->save();
+
+                $NewSite = $RootSite;
+            } else {
+                $newSiteId = $RootSite->createChild(array_merge($importSiteAttributes, ['id' => $importSiteId]));
+
+                // Set all attributes to the site
+                $NewSite = new QUIQQERImportSite($Project, $newSiteId);
+                $NewSite->setAttributes($importSiteAttributes);
+                $NewSite->save();
+            }
+
+            if ($importSiteAttributes['active']) {
+                $NewSite->activate();
+            }
+
+            $importedSiteIds[$NewSite->getId()] = $siteIdentifier;
+
+            $this->writeInfo('site_finish');
+
+            if (!empty($children)) {
+                $this->createSitesFromHierarchy($NewSite, $children, $Project, $importedSiteIds);
+            }
+        }
+
+        return $importedSiteIds;
     }
 
     /**
@@ -233,6 +340,26 @@ class Import extends QUI\QDOM
 
         if (!is_null($this->ConsoleTool)) {
             $this->ConsoleTool->writeInfo($msg);
+        }
+    }
+
+    /**
+     * Write warning to Console tool
+     *
+     * @param string $msg
+     * @param array $localeVars (optional) - Variables for msg locale
+     * @return void
+     */
+    protected function writeWarning($msg, $localeVars = [])
+    {
+        if (is_null($this->ConsoleTool)) {
+            return;
+        }
+
+        $msg = QUI::getLocale()->get('quiqqer/cms-import', 'import.warning.'.$msg, $localeVars);
+
+        if (!is_null($this->ConsoleTool)) {
+            $this->ConsoleTool->writeWarning($msg);
         }
     }
 

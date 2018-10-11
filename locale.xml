@@ -28,6 +28,30 @@
             <en><![CDATA[Project "[project]" was imported successfully!]]></en>
         </locale>
 
+        <!-- Site import -->
+        <locale name="import.warning.site_duplicate_id">
+            <de><![CDATA[Seite #[siteId] ("[siteTitle]") wurde nicht importiert, da bereits eine Seite mit derselben ID importiert wurde.]]></de>
+            <en><![CDATA[Site #[siteId] ("[siteTitle]") has not been imported because a Site with the same ID has already been imported.]]></en>
+        </locale>
+        <locale name="import.msg.site_start">
+            <de><![CDATA[Importiere Seite #[siteId] ("[siteTitle]")]]></de>
+            <en><![CDATA[Import site #[siteId] ("[siteTitle]")]]></en>
+        </locale>
+        <locale name="import.msg.site_finish">
+            <de><![CDATA[Seite erfolgreich importiert]]></de>
+            <en><![CDATA[Site imported successfully]]></en>
+        </locale>
+
+        <!-- Language links -->
+        <locale name="import.msg.site_create_lang_links">
+            <de><![CDATA[Erstelle Sprachverknüpfungen von Seite #[siteId] ("[siteTitle]")]]></de>
+            <en><![CDATA[Creating language links for site #[siteId] ("[siteTitle]")]]></en>
+        </locale>
+        <locale name="import.warning.site_lang_links_site_not_found">
+            <de><![CDATA[Kann Sprachverknüpfung zu Import-Seite #[siteIdentifier] ([targetLang]) nicht erstellen, da diese nicht im QUIQQER-System angelegt wurde.]]></de>
+            <en><![CDATA[Cannot create language link to import site #[siteIdentifier] ([targetLang]) because the site was not created in the QUIQQER system.]]></en>
+        </locale>
+
         <!-- Cleanup -->
         <locale name="import.header.cleanup">
             <de><![CDATA[Räume QUIQQER-System auf...]]></de>

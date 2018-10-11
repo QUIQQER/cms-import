@@ -36,14 +36,9 @@ class ImportSite extends QUI\QDOM
     protected $name;
 
     /**
-     * @var int|null
+     * @var string|int
      */
-    protected $id;
-
-    /**
-     * @var false|int
-     */
-    protected $parentId;
+    protected $siteIdentifier;
 
     /**
      * @var string
@@ -61,24 +56,49 @@ class ImportSite extends QUI\QDOM
     protected $reviewText = '';
 
     /**
+     * @var int
+     */
+    protected $quiqqerSiteId = null;
+
+    /**
      * ImportProject constructor.
      *
      * @param string $project - The name of the project this Site belongs to
      * @param string $name - Name of the Site (this is the part that is seen in the URL)
      * @param string $lang - Language of the site
-     * @param int|false $parentId - If this is FALSE this Site is supposed to be the root site!
-     * @param int $id (optional) - Provide an ID if the Site should have a fixed ID
+     * @param string|int $siteIdentifier - Internal unique identification string for this ImportSite (import module specific!)
      * @param array $attributes (optional) - Additional Site attributes
      */
-    public function __construct($project, $lang, $name, $parentId, $id = null, $attributes = [])
+    public function __construct($project, $lang, $name, $siteIdentifier, $attributes = [])
     {
-        $this->project  = $project;
-        $this->name     = $name;
-        $this->lang     = $lang;
-        $this->id       = $id;
-        $this->parentId = $parentId;
+        $this->project        = $project;
+        $this->name           = $name;
+        $this->lang           = $lang;
+        $this->siteIdentifier = $siteIdentifier;
 
-        $this->setAttributes($attributes);
+        $this->setAttributes(array_merge($attributes, [
+            'name' => $this->name
+        ]));
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getQuiqqerSiteId()
+    {
+        return $this->quiqqerSiteId;
+    }
+
+    /**
+     * Set a custom QUIQQER site id
+     *
+     * The import process will try to assign this ID to the QUIQQER site
+     *
+     * @param int $quiqqerSiteId
+     */
+    public function setQuiqqerSiteId($quiqqerSiteId)
+    {
+        $this->quiqqerSiteId = $quiqqerSiteId;
     }
 
     /**
@@ -95,22 +115,6 @@ class ImportSite extends QUI\QDOM
     public function getName()
     {
         return $this->name;
-    }
-
-    /**
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return int|false
-     */
-    public function getParentId()
-    {
-        return $this->parentId;
     }
 
     /**
@@ -167,11 +171,11 @@ class ImportSite extends QUI\QDOM
      * Set a language link to a Site in another language
      *
      * @param string $lang
-     * @param int $siteId
+     * @param int $siteIdentifier - ImportSite identifier
      */
-    public function setLanguageLink($lang, $siteId)
+    public function setLanguageLink($lang, $siteIdentifier)
     {
-        $this->languageLinks[$lang] = $siteId;
+        $this->languageLinks[$lang] = $siteIdentifier;
     }
 
     /**
@@ -183,7 +187,7 @@ class ImportSite extends QUI\QDOM
     }
 
     /**
-     * Flag this site for review, so it is listed in a special "todo.txt" after import
+     * Flag this site for review, so it is listed in a special "todo.log" after import
      *
      * @param string $reason (optional) - The reaseon why this site is flagged for review
      */

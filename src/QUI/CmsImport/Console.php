@@ -90,6 +90,7 @@ class Console extends QUI\System\Console\Tool
         try {
             $Import->start();
         } catch (\Exception $Exception) {
+            \QUI\System\Log::writeDebugException($Exception);
             $this->exitFail($Exception->getMessage());
         }
 
