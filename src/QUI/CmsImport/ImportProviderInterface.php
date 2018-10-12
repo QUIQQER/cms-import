@@ -61,6 +61,22 @@ interface ImportProviderInterface
     public function getSiteHierarchy($project, $lang);
 
     /**
+     * Get all tags
+     *
+     * @return array - "tag title" => ['description' => "description"]
+     */
+    public function getTags($project, $lang);
+
+    /**
+     * Get all tag groups
+     *
+     * @param $project
+     * @param $lang
+     * @return array - Associative array ("tag group title" => ['description' => "description", 'tags' => [array of associated tag titles])
+     */
+    public function getTagGroups($project, $lang);
+
+    /**
      * Get all QUIQQER system languages that should be imported
      *
      * @return string[]

@@ -12,11 +12,18 @@ use QUI;
 class ImportSite extends QUI\QDOM
 {
     /**
-     * List of tag titles associated with the Site
+     * Collection of tag titles associated with the Site
      *
      * @var array
      */
     protected $tags = [];
+
+    /**
+     * Collection of tag group titles and their associated tag titles
+     *
+     * @var array
+     */
+    protected $tagGroups = [];
 
     /**
      * List of language links
@@ -158,13 +165,25 @@ class ImportSite extends QUI\QDOM
     }
 
     /**
-     * Set tags
+     * Add a tag group that is associated with this Site
      *
-     * @param array $tags - Tag titles (not QUIQQER internal tag names!)
+     * @param $title
+     * @return void
      */
-    public function setTags($tags)
+    public function addTagGroup($title)
     {
-        $this->tags = $tags;
+        $this->tagGroups[] = $title;
+    }
+
+    /**
+     * Add a tag that is associated with this Site
+     *
+     * @param string $title
+     * @return void
+     */
+    public function addTag($title)
+    {
+        $this->tags[] = $title;
     }
 
     /**
@@ -172,7 +191,15 @@ class ImportSite extends QUI\QDOM
      */
     public function getTags()
     {
-        return $this->tags;
+        return array_values(array_unique($this->tags));
+    }
+
+    /**
+     * @return array
+     */
+    public function getTagGroups()
+    {
+        return array_values(array_unique($this->tagGroups));
     }
 
     /**

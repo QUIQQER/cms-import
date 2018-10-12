@@ -41,6 +41,34 @@
             <de><![CDATA[Seite #[siteIdentifier] wurde erfolgreich als QUIQQER-Seite #[quiqqerSiteId] ("[quiqqerSiteTitle]") importiert.]]></de>
             <en><![CDATA[Site #[siteIdentifier] was imported successfully as QUIQQER site #[quiqqerSiteId] ("[quiqqerSiteTitle]").]]></en>
         </locale>
+        <locale name="import.msg.site_tags_start">
+            <de><![CDATA[Importiere Seiten-Tags]]></de>
+            <en><![CDATA[Importing site tags]]></en>
+        </locale>
+        <locale name="import.msg.site_tag_create">
+            <de><![CDATA[Erstelle QUIQQER-Tag "[tagTitle]"]]></de>
+            <en><![CDATA[Creating QUIQQER tag "[tagTitle]"]]></en>
+        </locale>
+        <locale name="import.warning.site_tags_plugin_missing">
+            <de><![CDATA[Kann Tags nicht importieren, da quiqqer/tags nicht installiert ist.]]></de>
+            <en><![CDATA[Cannot import tags because quiqqer/tags is not installed.]]></en>
+        </locale>
+        <locale name="import.warning.site_tags_tag_not_found">
+            <de><![CDATA[Tag #[tagTitle] konnte der Seite nicht zugewiesen werden, da er in QUIQQER nicht existiert.]]></de>
+            <en><![CDATA[Tag #[tagTitle] could not be added to the site, because it does not exist in QUIQQER.]]></en>
+        </locale>
+
+        <!-- Tag Groups import -->
+        <locale name="import.header.project_tag_groups">
+            <de><![CDATA[Importiere Tag-Gruppen für "[projectIdentifier]"]]></de>
+            <en><![CDATA[Importing tag groups for "[projectIdentifier]"]]></en>
+        </locale>
+
+        <!-- Tags import -->
+        <locale name="import.header.project_tags">
+            <de><![CDATA[Importiere Tags für "[projectIdentifier]"]]></de>
+            <en><![CDATA[Importing tags for "[projectIdentifier]"]]></en>
+        </locale>
 
         <!-- Language links -->
         <locale name="import.msg.site_create_lang_links">
