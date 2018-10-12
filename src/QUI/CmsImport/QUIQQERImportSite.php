@@ -10,6 +10,9 @@ class QUIQQERImportSite extends Edit
     /**
      * Create a new Child
      *
+     * @internal This is an almost exact copy of QUI\Projects\Site\Edit::createChild with the only difference
+     * that a custom ID can be provided for a new Site ($params['id'])
+     *
      * @param array $params
      * @param array $childPermissions - [optional] permissions for the child
      * @param boolean|QUI\Users\User|QUI\Users\SystemUser $User - [optional] the user which create the site, optional

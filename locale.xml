@@ -34,12 +34,12 @@
             <en><![CDATA[Site #[siteId] ("[siteTitle]") has not been imported because a Site with the same ID has already been imported.]]></en>
         </locale>
         <locale name="import.msg.site_start">
-            <de><![CDATA[Importiere Seite #[siteId] ("[siteTitle]")]]></de>
-            <en><![CDATA[Import site #[siteId] ("[siteTitle]")]]></en>
+            <de><![CDATA[Importiere Seite #[siteIdentifier] ("[siteTitle]")]]></de>
+            <en><![CDATA[Import site #[siteIdentifier] ("[siteTitle]")]]></en>
         </locale>
         <locale name="import.msg.site_finish">
-            <de><![CDATA[Seite erfolgreich importiert]]></de>
-            <en><![CDATA[Site imported successfully]]></en>
+            <de><![CDATA[Seite #[siteIdentifier] wurde erfolgreich als QUIQQER-Seite #[quiqqerSiteId] ("[quiqqerSiteTitle]") importiert.]]></de>
+            <en><![CDATA[Site #[siteIdentifier] was imported successfully as QUIQQER site #[quiqqerSiteId] ("[quiqqerSiteTitle]").]]></en>
         </locale>
 
         <!-- Language links -->

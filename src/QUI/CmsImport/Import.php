@@ -147,8 +147,8 @@ class Import extends QUI\QDOM
                     $QuiqqerSite = new QUI\Projects\Site\Edit($SourceProject, $quiqqerSiteId);
 
                     $this->writeInfo('site_create_lang_links', [
-                        'siteId'    => $ImportSite->getId(),
-                        'siteTitle' => $ImportSite->getAttribute('title')
+                        'siteId'    => $quiqqerSiteId,
+                        'siteTitle' => $QuiqqerSite->getAttribute('title')
                     ]);
 
                     foreach ($ImportSite->getLanguageLinks() as $targetLang => $linkedSiteIdentifier) {
@@ -160,6 +160,7 @@ class Import extends QUI\QDOM
                                 'siteIdentifier' => $linkedSiteIdentifier,
                                 'targetLang'     => $targetLang
                             ]);
+
                             continue;
                         }
 
@@ -172,6 +173,9 @@ class Import extends QUI\QDOM
     }
 
     /**
+     * @todo Exceptions abfangen und warnings ausgeben pro Seite
+     * @todo Bei Seiten-Fehler Seiten in todo.log packen
+     *
      * Create sites from a site hierarchy
      *
      * @param QUIQQERImportSite $RootSite
@@ -182,26 +186,27 @@ class Import extends QUI\QDOM
      */
     protected function createSitesFromHierarchy($RootSite, $siteHierarchy, $Project, &$importedSiteIds = [])
     {
-        $project = $Project->getName();
-        $lang    = $Project->getLang();
+        $project             = $Project->getName();
+        $lang                = $Project->getLang();
+        $tagsPluginInstalled = QUI::getPackageManager()->isInstalled('quiqqer/tags');
 
         foreach ($siteHierarchy as $siteIdentifier => $children) {
             $ImportSite           = $this->ImportProvider->getSite($siteIdentifier, $project, $lang);
-            $importSiteId         = (int)$ImportSite->getId();
+            $importQuiqqerSiteId  = $ImportSite->getQuiqqerSiteId();
             $importSiteAttributes = $ImportSite->getAttributes();
 
             $this->writeInfo('site_start', [
-                'siteId'    => $importSiteId,
+                'siteId'    => $siteIdentifier,
                 'siteTitle' => $ImportSite->getAttribute('title')
             ]);
 
             // Check if site ID has already been imported
-            if (!empty($importSiteId) && isset($importedSiteIds[$importSiteId])) {
+            if (!empty($importQuiqqerSiteId) && isset($importedSiteIds[$importQuiqqerSiteId])) {
                 $this->writeWarning(
                     'site_duplicate_id',
                     [
-                        'siteId'    => $importSiteId,
-                        'siteTitle' => $ImportSite->getAttribute('title')
+                        'siteIdentifier' => $importQuiqqerSiteId,
+                        'siteTitle'      => $ImportSite->getAttribute('title')
                     ]
                 );
 
@@ -209,13 +214,19 @@ class Import extends QUI\QDOM
             }
 
             // Special case: QUIQQER root site
-            if ($importSiteId === 1) {
+            if (empty($importedSiteIds) || $importQuiqqerSiteId === 1) {
                 $RootSite->setAttributes($importSiteAttributes);
                 $RootSite->save();
 
                 $NewSite = $RootSite;
             } else {
-                $newSiteId = $RootSite->createChild(array_merge($importSiteAttributes, ['id' => $importSiteId]));
+                $createAttributes = $importSiteAttributes;
+
+                if (!empty($importQuiqqerSiteId)) {
+                    $createAttributes['id'] = $importQuiqqerSiteId;
+                }
+
+                $newSiteId = $RootSite->createChild($createAttributes);
 
                 // Set all attributes to the site
                 $NewSite = new QUIQQERImportSite($Project, $newSiteId);
@@ -223,13 +234,27 @@ class Import extends QUI\QDOM
                 $NewSite->save();
             }
 
+            // Activate site
             if ($importSiteAttributes['active']) {
                 $NewSite->activate();
             }
 
+            // Import QUIQQER tags
+            if ($tagsPluginInstalled) {
+
+
+                foreach ($ImportSite->getTags() as $tagTitle) {
+
+                }
+            }
+
             $importedSiteIds[$NewSite->getId()] = $siteIdentifier;
 
-            $this->writeInfo('site_finish');
+            $this->writeInfo('site_finish', [
+                'siteIdentifier'   => $siteIdentifier,
+                'quiqqerSiteId'    => $NewSite->getId(),
+                'quiqqerSiteTitle' => $NewSite->getAttribute('title')
+            ]);
 
             if (!empty($children)) {
                 $this->createSitesFromHierarchy($NewSite, $children, $Project, $importedSiteIds);

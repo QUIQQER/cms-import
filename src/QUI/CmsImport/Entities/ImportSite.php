@@ -164,7 +164,15 @@ class ImportSite extends QUI\QDOM
      */
     public function setTags($tags)
     {
-        $this->setAttribute('tags', $tags);
+        $this->tags = $tags;
+    }
+
+    /**
+     * @return array
+     */
+    public function getTags()
+    {
+        return $this->tags;
     }
 
     /**
