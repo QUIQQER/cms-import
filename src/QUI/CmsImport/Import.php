@@ -5,6 +5,12 @@ namespace QUI\CmsImport;
 use QUI;
 use QUI\Tags\Manager as TagManager;
 use QUI\Tags\Groups\Handler as TagGroupManager;
+use QUI\CmsImport\Entities\ImportSite;
+use QUI\CmsImport\Entities\ImportProject;
+use QUI\Cron\Manager as CronManager;
+use QUI\CmsImport\Hierarchy\SiteHierarchy;
+use QUI\CmsImport\Hierarchy\SiteItem;
+use QUI\CmsImport\Hierarchy\ChildrenIteratorInterface;
 
 /**
  * Class Import
@@ -38,6 +44,13 @@ class Import extends QUI\QDOM
     protected $importData = [];
 
     /**
+     * @var array ['package' => isInstalled]
+     */
+    protected $quiqqerPackages = [
+        'quiqqer/tags' => false
+    ];
+
+    /**
      * Import constructor.
      *
      * @param ImportProviderInterface $ImportProvider
@@ -51,6 +64,12 @@ class Import extends QUI\QDOM
 
         $this->setAttributes($settings);
         $this->ImportProvider = $ImportProvider;
+
+        $PackageManager = QUI::getPackageManager();
+
+        foreach ($this->quiqqerPackages as $package => $isInstalled) {
+            $this->quiqqerPackages[$package] = $PackageManager->isInstalled($package);
+        }
     }
 
     /**
@@ -72,12 +91,6 @@ class Import extends QUI\QDOM
         // Projects
         $this->importProjects();
 
-        // Tags
-        $this->importTags();
-
-        // Tag groups
-        $this->importTagGroups();
-
         // Delete old standard project
         if ($this->getAttribute('cleanup')) {
             $this->writeHeader('delete_old_standard_project');
@@ -87,7 +100,13 @@ class Import extends QUI\QDOM
             $Projects->deleteProject($OldProject);
         }
 
-        return;
+        // Tags / tag groups
+        if (QUI::getPackageManager()->isInstalled('quiqqer/tags')) {
+            $this->importTags();
+            $this->importTagGroups();
+        } else {
+            $this->writeWarning('tags_package_not_installed');
+        }
 
         // Sites
         $this->importSites();
@@ -142,28 +161,60 @@ class Import extends QUI\QDOM
      */
     protected function importTagGroups()
     {
+        /**
+         * @var string $projectIdentifier
+         * @var QUI\Projects\Project $QuiqqerProject
+         */
         foreach ($this->importData['projects'] as $projectIdentifier => $QuiqqerProject) {
-            $this->writeHeader('project_tag_groups', ['projectIdentifier' => $projectIdentifier]);
+            foreach ($QuiqqerProject->getLanguages() as $lang) {
+                $this->writeHeader('project_tag_groups', [
+                    'projectIdentifier' => $projectIdentifier,
+                    'lang'              => $lang
+                ]);
 
-            $tagGroups  = $this->ImportProvider->getTagGroups($projectIdentifier, $QuiqqerProject->getLang());
-            $TagManager = new TagManager($QuiqqerProject);
+                $TagProject  = QUI::getProject($QuiqqerProject->getName(), $lang);
+                $TagManager  = new TagManager($TagProject);
+                $tagGroups   = $this->ImportProvider->getTagGroups($projectIdentifier, $lang);
+                $tagGroupIds = [];
 
-            foreach ($tagGroups as $tagGroup => $data) {
-                $TagGroup = TagGroupManager::create($QuiqqerProject, $tagGroup);
+                // import tag groups
+                foreach ($tagGroups as $tagGroup => $data) {
+                    if (empty($tagGroup)) {
+                        continue;
+                    }
 
-                $TagGroup->setGenerator('quiqqer/cms-import');
-                $TagGroup->setGenerateStatus(true);
+                    $this->writeInfo('project_tag_group', [
+                        'tagGroupTitle' => $tagGroup
+                    ]);
 
-                if (!empty($data['description'])) {
-                    $TagGroup->setDescription($data['description']);
+                    $TagGroup = TagGroupManager::create($TagProject, $tagGroup);
+
+                    $TagGroup->setGenerator('quiqqer/cms-import');
+                    $TagGroup->setGenerateStatus(true);
+
+                    if (!empty($data['description'])) {
+                        $TagGroup->setDescription($data['description']);
+                    }
+
+                    // Add tags to tag group
+                    foreach ($data['tags'] as $tagTitle) {
+                        $tag = $TagManager->getByTitle($tagTitle);
+                        $TagGroup->addTag($tag['tag']);
+                    }
+
+                    $TagGroup->save();
+                    $tagGroupIds[$tagGroup] = $TagGroup->getId();
                 }
 
-                $TagGroup->save();
+                // set parent tag groups
+                foreach ($tagGroups as $tagGroup => $data) {
+                    if (empty($data['parentGroup'])) {
+                        continue;
+                    }
 
-                // Add tags to tag group
-                foreach ($data['tags'] as $tagTitle) {
-                    $tag = $TagManager->getByTitle($tagTitle);
-                    $TagGroup->addTag($tag['tag']);
+                    $TagGroup = TagGroupManager::get($TagProject, $tagGroupIds[$tagGroup]);
+                    $TagGroup->setParentGroup($tagGroupIds[$data['parentGroup']]);
+                    $TagGroup->save();
                 }
             }
         }
@@ -176,20 +227,38 @@ class Import extends QUI\QDOM
      */
     protected function importTags()
     {
+        /**
+         * @var string $projectIdentifier
+         * @var QUI\Projects\Project $QuiqqerProject
+         */
         foreach ($this->importData['projects'] as $projectIdentifier => $QuiqqerProject) {
-            $this->writeHeader('project_tags', ['projectIdentifier' => $projectIdentifier]);
+            foreach ($QuiqqerProject->getLanguages() as $lang) {
+                $this->writeHeader('project_tags', [
+                    'projectIdentifier' => $projectIdentifier,
+                    'lang'              => $lang
+                ]);
 
-            $tags       = $this->ImportProvider->getTags($projectIdentifier, $QuiqqerProject->getLang());
-            $TagManager = new TagManager($QuiqqerProject);
+                $TagProject = QUI::getProject($QuiqqerProject->getName(), $lang);
+                $TagManager = new TagManager($TagProject);
+                $tags       = $this->ImportProvider->getTags($projectIdentifier, $lang);
 
-            foreach ($tags as $tagTitle => $data) {
-                $tagAttributes = [];
+                foreach ($tags as $tagTitle => $data) {
+                    if (empty($tagTitle)) {
+                        continue;
+                    }
 
-                if (!empty($data['description'])) {
-                    $tagAttributes['desc'] = $data['description'];
+                    $this->writeInfo('project_tag', [
+                        'tagTitle' => $tagTitle
+                    ]);
+
+                    $tagAttributes = [];
+
+                    if (!empty($data['description'])) {
+                        $tagAttributes['desc'] = $data['description'];
+                    }
+
+                    $TagManager->add($tagTitle, $tagAttributes);
                 }
-
-                $TagManager->add($tagTitle, $tagAttributes);
             }
         }
     }
@@ -213,11 +282,10 @@ class Import extends QUI\QDOM
 
             // Create sites
             foreach ($langs as $lang) {
-                $TargetProject = $Projects->getProject($project, $lang);
-                $siteHierarchy = $this->ImportProvider->getSiteHierarchy($project, $lang);
-                $RootSite      = new QUIQQERImportSite($TargetProject, 1);
-
-                $importedSites[$lang] = $this->createSitesFromHierarchy($RootSite, $siteHierarchy, $TargetProject);
+                $TargetProject        = $Projects->getProject($project, $lang);
+                $SiteHierarchy        = $this->ImportProvider->getSiteHierarchy($project, $lang);
+                $importedSites[$lang] = $this->createSites($TargetProject, $SiteHierarchy);
+                $this->createSiteLinks($TargetProject, $SiteHierarchy, $importedSites[$lang]);
             }
 
             // Create language links for $lang
@@ -234,6 +302,12 @@ class Import extends QUI\QDOM
                     ]);
 
                     foreach ($ImportSite->getLanguageLinks() as $targetLang => $linkedSiteIdentifier) {
+                        // Do not create langauge links for languages that have not been imported
+                        // for the project
+                        if (!in_array($targetLang, $langs)) {
+                            continue;
+                        }
+
                         $TargetProject     = $Projects->getProject($project, $targetLang);
                         $quiqqerLinkSiteId = array_search($linkedSiteIdentifier, $importedSites[$targetLang]);
 
@@ -255,31 +329,37 @@ class Import extends QUI\QDOM
     }
 
     /**
-     * @todo Exceptions abfangen und warnings ausgeben pro Seite
-     * @todo Bei Seiten-Fehler Seiten in todo.log packen
-     *
-     * Create sites from a site hierarchy
-     *
-     * @param QUIQQERImportSite $RootSite
-     * @param array $siteHierarchy
-     * @param QUI\Projects\Project $Project - The QUIQQER project that the sites are imported to
-     * @param array &$importedSiteIds (optional) - Collects site IDs that have already been imported
-     * @return array - Mapping of QUIQQER site id -> ImportSite identifier for all imported sites
+     * @param QUI\Projects\Project $QuiqqerProject
+     * @param ChildrenIteratorInterface $ChildrenIterator
+     * @param QUIQQERImportSite|null $RootQuiqqerSite
+     * @param array &$importedSiteIds
+     * @return array
+     * @throws QUI\Exception
      */
-    protected function createSitesFromHierarchy($RootSite, $siteHierarchy, $Project, &$importedSiteIds = [])
-    {
-        $project             = $Project->getName();
-        $lang                = $Project->getLang();
-        $tagsPluginInstalled = QUI::getPackageManager()->isInstalled('quiqqer/tags');
+    protected function createSites(
+        QUI\Projects\Project $QuiqqerProject,
+        ChildrenIteratorInterface $ChildrenIterator,
+        QUIQQERImportSite $RootQuiqqerSite = null,
+        &$importedSiteIds = []
+    ) {
+        $project = $QuiqqerProject->getName();
+        $lang    = $QuiqqerProject->getLang();
 
-        foreach ($siteHierarchy as $siteIdentifier => $children) {
+        /** @var SiteItem $ChildSiteItem */
+        foreach ($ChildrenIterator->walkChildren() as $ChildSiteItem) {
+            // Site links are not created as actual sites but as links (created after all sites are created)
+            if ($ChildSiteItem->isLink()) {
+                continue;
+            }
+
+            $siteIdentifier       = $ChildSiteItem->getId();
             $ImportSite           = $this->ImportProvider->getSite($siteIdentifier, $project, $lang);
             $importQuiqqerSiteId  = $ImportSite->getQuiqqerSiteId();
             $importSiteAttributes = $ImportSite->getAttributes();
 
             $this->writeInfo('site_start', [
-                'siteId'    => $siteIdentifier,
-                'siteTitle' => $ImportSite->getAttribute('title')
+                'siteIdentifier' => $siteIdentifier,
+                'siteTitle'      => $ImportSite->getAttribute('title')
             ]);
 
             // Check if site ID has already been imported
@@ -296,11 +376,12 @@ class Import extends QUI\QDOM
             }
 
             // Special case: QUIQQER root site
-            if (empty($importedSiteIds) || $importQuiqqerSiteId === 1) {
-                $RootSite->setAttributes($importSiteAttributes);
-                $RootSite->save();
+            if (empty($RootQuiqqerSite)) {
+                $RootQuiqqerSite = new QUIQQERImportSite($QuiqqerProject, 1);
+                $RootQuiqqerSite->setAttributes($importSiteAttributes);
+                $RootQuiqqerSite->save();
 
-                $NewSite = $RootSite;
+                $NewSite = $RootQuiqqerSite;
             } else {
                 $createAttributes = $importSiteAttributes;
 
@@ -308,10 +389,10 @@ class Import extends QUI\QDOM
                     $createAttributes['id'] = $importQuiqqerSiteId;
                 }
 
-                $newSiteId = $RootSite->createChild($createAttributes);
+                $newSiteId = $RootQuiqqerSite->createChild($createAttributes);
 
                 // Set all attributes to the site
-                $NewSite = new QUIQQERImportSite($Project, $newSiteId);
+                $NewSite = new QUIQQERImportSite($QuiqqerProject, $newSiteId);
                 $NewSite->setAttributes($importSiteAttributes);
                 $NewSite->save();
             }
@@ -326,26 +407,13 @@ class Import extends QUI\QDOM
             // Import QUIQQER tags
             $tags = $ImportSite->getTags();
 
-            if ($tagsPluginInstalled) {
-                $TagManager = new TagManager($Project);
-
-                $this->writeInfo('site_tags_start');
-
-                foreach ($tags as $tagTitle) {
-                    if (!$TagManager->existsTagTitle($tagTitle)) {
-                        $this->writeWarning('site_tags_tag_not_found', [
-                            'tagTitle' => $tagTitle
-                        ]);
-
-                        continue;
-                    }
-
-                    $tag = $TagManager->getByTitle($tagTitle);
-                    $TagManager->addTagToSite($newSiteId, $tag['tag']);
-                }
+            if ($this->quiqqerPackages['quiqqer/tags']) {
+                $this->importSiteTags($ImportSite, $NewSite);
             } elseif (!empty($tags)) {
                 $this->writeWarning('site_tags_plugin_missing');
             }
+
+            $NewSite->save();
 
             // Save
             $importedSiteIds[$newSiteId] = $siteIdentifier;
@@ -356,12 +424,137 @@ class Import extends QUI\QDOM
                 'quiqqerSiteTitle' => $NewSite->getAttribute('title')
             ]);
 
-            if (!empty($children)) {
-                $this->createSitesFromHierarchy($NewSite, $children, $Project, $importedSiteIds);
+            if ($ChildSiteItem->hasChildren()) {
+                $this->createSites($QuiqqerProject, $ChildSiteItem, $NewSite, $importedSiteIds);
             }
         }
 
         return $importedSiteIds;
+    }
+
+    /**
+     * @param QUI\Projects\Project $QuiqqerProject
+     * @param ChildrenIteratorInterface $ChildrenIterator
+     * @param array $importSiteMap - Map of imported sites (quiqqer site id => siteIdentifier)
+     * @return void
+     * @throws QUI\Exception
+     */
+    protected function createSiteLinks(
+        QUI\Projects\Project $QuiqqerProject,
+        ChildrenIteratorInterface $ChildrenIterator,
+        $importSiteMap
+    ) {
+        /** @var SiteItem $ChildSiteItem */
+        foreach ($ChildrenIterator->walkChildren() as $ChildSiteItem) {
+            if (!$ChildSiteItem->isLink() || !$ChildSiteItem->getParentId()) {
+                if ($ChildSiteItem->hasChildren()) {
+                    $this->createSiteLinks($QuiqqerProject, $ChildSiteItem, $importSiteMap);
+                }
+
+                continue;
+            }
+
+            $quiqqerSiteIdentifier = $ChildSiteItem->getId();
+            $linkSiteIdentifier    = $ChildSiteItem->getParentId();
+            $childQuiqqerSiteId    = false;
+            $linkQuiqqerSiteId     = false;
+
+            foreach ($importSiteMap as $quiqqerSiteId => $siteIdentifier) {
+                if ($siteIdentifier === $linkSiteIdentifier) {
+                    $linkQuiqqerSiteId = $quiqqerSiteId;
+                }
+
+                if ($siteIdentifier === $quiqqerSiteIdentifier) {
+                    $childQuiqqerSiteId = $quiqqerSiteId;
+                }
+            }
+
+            if (!empty($linkQuiqqerSiteId) && !empty($childQuiqqerSiteId)) {
+                $QuiqqerSite = new QUIQQERImportSite($QuiqqerProject, $childQuiqqerSiteId);
+                $QuiqqerSite->linked($linkQuiqqerSiteId);
+
+                $this->writeInfo('site_link', [
+                    'sourceId'    => $QuiqqerSite->getId(),
+                    'sourceTitle' => $QuiqqerSite->getAttribute('title'),
+                    'targetId'    => $linkQuiqqerSiteId
+                ]);
+            }
+
+            if ($ChildSiteItem->hasChildren()) {
+                $this->createSiteLinks($QuiqqerProject, $ChildSiteItem, $importSiteMap);
+            }
+        }
+    }
+
+    /**
+     * Import tags of an ImportSite to a QUIQQER Site
+     *
+     * @param ImportSite $ImportSite
+     * @param QUI\Projects\Site\Edit $QuiqqerSite
+     * @return void
+     * @throws QUI\Exception
+     */
+    protected function importSiteTags(ImportSite $ImportSite, QUI\Projects\Site\Edit $QuiqqerSite)
+    {
+        $QuiqqerProject = $QuiqqerSite->getProject();
+        $TagManager     = new TagManager($QuiqqerProject);
+
+        // Tags
+        $this->writeInfo('site_tags_start');
+
+        foreach ($ImportSite->getTags() as $tagTitle) {
+            if (!$TagManager->existsTagTitle($tagTitle)) {
+                $this->writeWarning('site_tags_tag_not_found', [
+                    'tagTitle' => $tagTitle
+                ]);
+
+                continue;
+            }
+
+            $tag = $TagManager->getByTitle($tagTitle);
+            $TagManager->addTagToSite($QuiqqerSite->getId(), $tag['tag']);
+        }
+
+        // Tag Groups
+        $this->writeInfo('site_tag_groups_start');
+
+        foreach ($ImportSite->getTagGroups() as $tagGroupTitle) {
+            $groups = TagGroupManager::getGroups($QuiqqerProject, [
+                'where' => [
+                    'title' => $tagGroupTitle
+                ]
+            ]);
+
+            if (empty($groups)) {
+                $this->writeWarning('site_tags_tag_group_not_found', [
+                    'tagGroupTitle' => $tagGroupTitle
+                ]);
+
+                continue;
+            }
+
+            $siteTagGroups = $QuiqqerSite->getAttribute('quiqqer.tags.tagGroups');
+
+            if (empty($siteTagGroups)) {
+                $siteTagGroups = [];
+            } else {
+                $siteTagGroups = explode(',', $siteTagGroups);
+            }
+
+            /** @var QUI\Tags\Groups\Group $TagGroup */
+            $TagGroup   = current($groups);
+            $tagGroupId = $TagGroup->getId();
+
+            if (in_array($tagGroupId, $siteTagGroups)) {
+                continue;
+            }
+
+            $siteTagGroups[] = $tagGroupId;
+            $QuiqqerSite->setAttribute('quiqqer.tags.tagGroups', implode(',', $siteTagGroups));
+        }
+
+        // Refresh site data
+        $QuiqqerSite->load('quiqqer/tags');
     }
 
     /**
@@ -446,6 +639,21 @@ class Import extends QUI\QDOM
 
             $Projects->deleteProject($Project);
         }
+
+        // Delete all crons
+        $result = QUI::getDataBase()->fetch([
+            'select' => ['id'],
+            'from'   => CronManager::table()
+        ]);
+
+        $cronIds = [];
+
+        foreach ($result as $row) {
+            $cronIds[] = $row['id'];
+        }
+
+        $CronManager = new CronManager();
+        $CronManager->deleteCronIds($cronIds);
     }
 
     /**

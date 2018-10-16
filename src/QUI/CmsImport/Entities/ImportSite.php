@@ -58,9 +58,9 @@ class ImportSite extends QUI\QDOM
     protected $isFlaggedForReview = false;
 
     /**
-     * @var string
+     * @var array
      */
-    protected $reviewText = '';
+    protected $reviewFlags = [];
 
     /**
      * @var int
@@ -226,25 +226,16 @@ class ImportSite extends QUI\QDOM
      *
      * @param string $reason (optional) - The reaseon why this site is flagged for review
      */
-    public function flagForReview($reason = '')
+    public function addReviewFlag($reason = '')
     {
-        $this->isFlaggedForReview = true;
-        $this->reviewText         = $reason;
+        $this->reviewFlags[] = $reason;
     }
 
     /**
-     * @return bool
+     * @return []
      */
-    public function isFlaggedForReview()
+    public function getReviewFlags()
     {
-        return $this->isFlaggedForReview;
-    }
-
-    /**
-     * @return string
-     */
-    public function getReviewText()
-    {
-        return $this->reviewText;
+        return $this->reviewFlags;
     }
 }

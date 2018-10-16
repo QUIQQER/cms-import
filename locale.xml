@@ -54,20 +54,38 @@
             <en><![CDATA[Cannot import tags because quiqqer/tags is not installed.]]></en>
         </locale>
         <locale name="import.warning.site_tags_tag_not_found">
-            <de><![CDATA[Tag #[tagTitle] konnte der Seite nicht zugewiesen werden, da er in QUIQQER nicht existiert.]]></de>
-            <en><![CDATA[Tag #[tagTitle] could not be added to the site, because it does not exist in QUIQQER.]]></en>
+            <de><![CDATA[Tag "[tagTitle]" konnte der Seite nicht zugewiesen werden, da er in QUIQQER nicht existiert.]]></de>
+            <en><![CDATA[Tag "[tagTitle]" could not be added to the site, because it does not exist in QUIQQER.]]></en>
         </locale>
-
-        <!-- Tag Groups import -->
-        <locale name="import.header.project_tag_groups">
-            <de><![CDATA[Importiere Tag-Gruppen für "[projectIdentifier]"]]></de>
-            <en><![CDATA[Importing tag groups for "[projectIdentifier]"]]></en>
+        <locale name="import.msg.site_tag_groups_start">
+            <de><![CDATA[Importiere Seiten-Tag-Gruppen]]></de>
+            <en><![CDATA[Importing site tag groups]]></en>
+        </locale>
+        <locale name="import.warning.site_tags_tag_group_not_found">
+            <de><![CDATA[Tag-Gruppe "[tagGroupTitle]" konnte der Seite nicht zugewiesen werden, da sie in QUIQQER nicht existiert.]]></de>
+            <en><![CDATA[Tag group "[tagGroupTitle]" could not be added to the site, because it does not exist in QUIQQER.]]></en>
         </locale>
 
         <!-- Tags import -->
+        <locale name="import.header.tags_package_not_installed">
+            <de><![CDATA[Tags- und Tag-Gruppen können nicht importiert werden, da quiqqer/tags nicht installiert ist.]]></de>
+            <en><![CDATA[Tags and tag groups cannot be imported because quiqqer/tags is not installed.]]></en>
+        </locale>
         <locale name="import.header.project_tags">
-            <de><![CDATA[Importiere Tags für "[projectIdentifier]"]]></de>
-            <en><![CDATA[Importing tags for "[projectIdentifier]"]]></en>
+            <de><![CDATA[Importiere Tags für "[projectIdentifier]" ([lang])]]></de>
+            <en><![CDATA[Importing tags for "[projectIdentifier]" ([lang])]]></en>
+        </locale>
+        <locale name="import.msg.project_tag">
+            <de><![CDATA[Importiere Tag "[tagTitle]"]]></de>
+            <en><![CDATA[Importing tag "[tagTitle]"]]></en>
+        </locale>
+        <locale name="import.header.project_tag_groups">
+            <de><![CDATA[Importiere Tag-Gruppen für "[projectIdentifier]" ([lang])]]></de>
+            <en><![CDATA[Importing tag groups for "[projectIdentifier]" ([lang])]]></en>
+        </locale>
+        <locale name="import.msg.project_tag_group">
+            <de><![CDATA[Importiere Tag-Gruppe "[tagGroupTitle]"]]></de>
+            <en><![CDATA[Importing tag group "[tagGroupTitle]"]]></en>
         </locale>
 
         <!-- Language links -->

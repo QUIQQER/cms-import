@@ -196,9 +196,9 @@ class Console extends QUI\System\Console\Tool
      */
     public function writeHeader($title)
     {
-        $this->writeLn("\n#######################################################", "green");
+        $this->writeLn("\n#################################################################", "green");
         $this->writeLn("\t$title", "green");
-        $this->writeLn("#######################################################", "green");
+        $this->writeLn("#################################################################", "green");
     }
 
     /**

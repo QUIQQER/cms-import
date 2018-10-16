@@ -4,6 +4,7 @@ namespace QUI\CmsImport;
 
 use QUI\CmsImport\Entities\ImportProject;
 use QUI\CmsImport\Entities\ImportSite;
+use QUI\CmsImport\Hierarchy\SiteHierarchy;
 
 /**
  * Interface ImportProviderInterface
@@ -51,12 +52,11 @@ interface ImportProviderInterface
     public function getSite($identifier, $project, $lang);
 
     /**
-     * Get the complete hierarchical site structure as an associative array
-     * with unique ImportSite identifiers
+     * Get the complete hierarchical site structure (structure only, not actual site data!)
      *
      * @param string $project - Project name
      * @param string $lang - Project lang
-     * @return array
+     * @return SiteHierarchy
      */
     public function getSiteHierarchy($project, $lang);
 
