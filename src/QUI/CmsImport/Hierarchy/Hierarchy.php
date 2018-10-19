@@ -54,7 +54,7 @@ class Hierarchy implements ChildrenIteratorInterface
     {
         /** @var HierarchyItem $Child */
         foreach ($this->walkTree($this->children) as $Child) {
-            if ($Child->getId() === $id) {
+            if ($Child->getId() == $id) {
                 return $Child;
             }
         }

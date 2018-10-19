@@ -5,6 +5,13 @@ namespace QUI\CmsImport;
 abstract class AbstractImportProvider implements ImportProviderInterface
 {
     /**
+     * Instance of QUI\CmsImport\Import that is orchestrating the current import process
+     *
+     * @var Import
+     */
+    protected $Import = null;
+
+    /**
      * The main QUIQQER Import console tool
      *
      * @var Console
@@ -75,5 +82,26 @@ abstract class AbstractImportProvider implements ImportProviderInterface
     protected function writeHeader($title)
     {
         $this->ImportConsole->writeHeader($title);
+    }
+
+    /**
+     * Set instance of QUI\CmsImport\Import that is orchestrating the current import process
+     *
+     * @param Import $Import
+     * @return void
+     */
+    public function setImport(Import $Import)
+    {
+        $this->Import = $Import;
+    }
+
+    /**
+     * Get instance of QUI\CmsImport\Import that is orchestrating the current import process
+     *
+     * @return Import
+     */
+    public function getImport()
+    {
+        return $this->Import;
     }
 }

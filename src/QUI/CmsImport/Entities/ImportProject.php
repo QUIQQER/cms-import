@@ -9,7 +9,7 @@ use QUI;
  *
  * Represents a QUIQQER project that is imported
  */
-class ImportProject extends QUI\QDOM
+class ImportProject extends AbstractImportEntity
 {
     /**
      * @var string
@@ -27,20 +27,35 @@ class ImportProject extends QUI\QDOM
     protected $langs = [];
 
     /**
+     * @var string|int
+     */
+    protected $identifier;
+
+    /**
      * ImportProject constructor.
      *
-     * @param string $name
+     * @param string|int $identifier - Project identifier
+     * @param string $name - Project name
      * @param string $lang - Project standard language
      * @param array $languages (optional) - All available Project languages
      * @param array $attributes (optional) - Additional attributes
      */
-    public function __construct($name, $lang, $languages = [], $attributes = [])
+    public function __construct($identifier, $name, $lang, $languages = [], $attributes = [])
     {
+        $this->identifier  = $identifier;
         $this->name        = $name;
         $this->defaultLang = $lang;
         $this->langs       = $languages;
 
         $this->setAttributes($attributes);
+    }
+
+    /**
+     * @return int|string
+     */
+    public function getIdentifier()
+    {
+        return $this->identifier;
     }
 
     /**

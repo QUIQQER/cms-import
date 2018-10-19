@@ -11,6 +11,8 @@ use QUI\Cron\Manager as CronManager;
 use QUI\CmsImport\Hierarchy\SiteHierarchy;
 use QUI\CmsImport\Hierarchy\SiteItem;
 use QUI\CmsImport\Hierarchy\ChildrenIteratorInterface;
+use QUI\Permissions\Manager as PermissionManager;
+use QUI\CmsImport\ItemList\UserList;
 
 /**
  * Class Import
@@ -19,6 +21,12 @@ use QUI\CmsImport\Hierarchy\ChildrenIteratorInterface;
  */
 class Import extends QUI\QDOM
 {
+    const IMPORT_SECTION_GENERAL = 'general';
+    const IMPORT_SECTION_SITES   = 'sites';
+    const IMPORT_SECTION_MEDIA   = 'media';
+    const IMPORT_SECTION_USERS   = 'users';
+    const IMPROT_SECTION_GROUPS  = 'groups';
+
     const TAGS_UNGROUPED = 'quiqqer_cms_import_ungrouped_tags';
 
     /**
@@ -51,6 +59,20 @@ class Import extends QUI\QDOM
     ];
 
     /**
+     * Collection of review messages
+     *
+     * @var array
+     */
+    protected $reviewFlags = [];
+
+    /**
+     * Var dir of quiqqer/cms-import
+     *
+     * @var string
+     */
+    protected $varDir;
+
+    /**
      * Import constructor.
      *
      * @param ImportProviderInterface $ImportProvider
@@ -59,17 +81,26 @@ class Import extends QUI\QDOM
     public function __construct(ImportProviderInterface $ImportProvider, $settings = [])
     {
         $this->setAttributes([
-            'cleanup' => true
+            'cleanup'            => true,
+            'importTags'         => false,
+            'importSites'        => false,
+            'importMedia'        => false,
+            'importUsers'        => false,
+            'importGroups'       => false,
+            'importSystemConfig' => true
         ]);
 
         $this->setAttributes($settings);
         $this->ImportProvider = $ImportProvider;
+        $this->ImportProvider->setImport($this);
 
         $PackageManager = QUI::getPackageManager();
 
         foreach ($this->quiqqerPackages as $package => $isInstalled) {
             $this->quiqqerPackages[$package] = $PackageManager->isInstalled($package);
         }
+
+        $this->varDir = QUI::getPackage('quiqqer/cms-import')->getVarDir();
     }
 
     /**
@@ -101,15 +132,39 @@ class Import extends QUI\QDOM
         }
 
         // Tags / tag groups
-        if (QUI::getPackageManager()->isInstalled('quiqqer/tags')) {
-            $this->importTags();
-            $this->importTagGroups();
-        } else {
-            $this->writeWarning('tags_package_not_installed');
+        if ($this->getAttribute('importTags')) {
+            if (QUI::getPackageManager()->isInstalled('quiqqer/tags')) {
+                $this->importTags();
+                $this->importTagGroups();
+            } else {
+                $this->writeWarning('tags_package_not_installed');
+            }
+        }
+
+        // Groups
+        if ($this->getAttribute('importGroups')) {
+            $this->importGroups();
+        }
+
+        // Users
+        if ($this->getAttribute('importUsers')) {
+            $this->importUsers();
         }
 
         // Sites
-        $this->importSites();
+        if ($this->getAttribute('importSites')) {
+            $this->importSites();
+        }
+
+        // Media
+        if ($this->getAttribute('importMedia')) {
+            $this->importMedia();
+        }
+
+        // System config
+        if ($this->getAttribute('importSystemConfig')) {
+            $this->importSystemConfig();
+        }
     }
 
     /**
@@ -271,29 +326,31 @@ class Import extends QUI\QDOM
      */
     protected function importSites()
     {
-        $Projects = QUI::getProjectManager();
-        $projects = $Projects->getProjects(true);
+        $this->writeHeader('sites_start');
 
-        /** @var QUI\Projects\Project $Project */
-        foreach ($projects as $Project) {
-            $langs         = $Project->getLanguages();
-            $project       = $Project->getName();
-            $importedSites = [];
+        $Projects = QUI::getProjectManager();
+
+        /** @var QUI\Projects\Project $QuiqqerProject */
+        foreach ($this->importData['projects'] as $projectIdentifier => $QuiqqerProject) {
+            $langs          = $QuiqqerProject->getLanguages();
+            $quiqqerProject = $QuiqqerProject->getName();
+            $importedSites  = [];
 
             // Create sites
             foreach ($langs as $lang) {
-                $TargetProject        = $Projects->getProject($project, $lang);
-                $SiteHierarchy        = $this->ImportProvider->getSiteHierarchy($project, $lang);
-                $importedSites[$lang] = $this->createSites($TargetProject, $SiteHierarchy);
+                $TargetProject = $Projects->getProject($quiqqerProject, $lang);
+                $SiteHierarchy = $this->ImportProvider->getSiteHierarchy($projectIdentifier, $lang);
+
+                $importedSites[$lang] = $this->createSites($TargetProject, $projectIdentifier, $SiteHierarchy);
                 $this->createSiteLinks($TargetProject, $SiteHierarchy, $importedSites[$lang]);
             }
 
             // Create language links for $lang
             foreach ($importedSites as $lang => $importSites) {
-                $SourceProject = $Projects->getProject($project, $lang);
+                $SourceProject = $Projects->getProject($quiqqerProject, $lang);
 
                 foreach ($importSites as $quiqqerSiteId => $siteIdentifier) {
-                    $ImportSite  = $this->ImportProvider->getSite($siteIdentifier, $project, $lang);
+                    $ImportSite  = $this->ImportProvider->getSite($siteIdentifier, $projectIdentifier, $lang);
                     $QuiqqerSite = new QUI\Projects\Site\Edit($SourceProject, $quiqqerSiteId);
 
                     $this->writeInfo('site_create_lang_links', [
@@ -308,7 +365,7 @@ class Import extends QUI\QDOM
                             continue;
                         }
 
-                        $TargetProject     = $Projects->getProject($project, $targetLang);
+                        $TargetProject     = $Projects->getProject($quiqqerProject, $targetLang);
                         $quiqqerLinkSiteId = array_search($linkedSiteIdentifier, $importedSites[$targetLang]);
 
                         if (empty($quiqqerLinkSiteId)) {
@@ -329,8 +386,115 @@ class Import extends QUI\QDOM
     }
 
     /**
+     * Start complete media structure
+     *
+     * @throws QUI\Exception
+     * @return void
+     */
+    protected function importMedia()
+    {
+        $this->writeHeader('media_start');
+
+        /** @var QUI\Projects\Project $QuiqqerProject */
+        foreach ($this->importData['projects'] as $projectIdentifier => $QuiqqerProject) {
+            // Create media items
+            $MediaHierarchy = $this->ImportProvider->getMediaHierarchy($projectIdentifier);
+            $this->createMedia($QuiqqerProject, $projectIdentifier, $MediaHierarchy);
+        }
+    }
+
+    /**
+     * Import QUIQQER groups
+     *
+     * @throws QUI\Exception
+     * @return void
+     */
+    protected function importGroups()
+    {
+        $this->writeHeader('groups_start');
+
+        $this->importData['groups'] = [];
+
+        $GroupHierarchy = $this->ImportProvider->getGroupHierarchy();
+        $this->createGroups($GroupHierarchy);
+    }
+
+    /**
+     * Import QUIQQER users
+     *
+     * @return void
+     */
+    protected function importUsers()
+    {
+        $this->writeHeader('users_start');
+
+        $this->importData['users'] = [];
+
+        $UserList = $this->ImportProvider->getUserList();
+        $this->createUsers($UserList);
+    }
+
+    /**
+     * Import QUIQQER system config (etc/conf.ini.php)
+     *
+     * @throws QUI\Exception
+     * @return void
+     */
+    protected function importSystemConfig()
+    {
+        $this->writeHeader('system_config_start');
+
+        $quiqqerConfigFile = CMS_DIR.'etc/conf.ini.php';
+
+        $prompt = $this->ConsoleTool->writePrompt(
+            QUI::getLocale()->get(
+                'quiqqer/cms-import',
+                'prompt.system_config.backup',
+                [
+                    'configFile' => $quiqqerConfigFile
+                ]
+            ),
+            'y'
+        );
+
+        if (mb_strtolower($prompt) !== 'n') {
+            $backupFile = $quiqqerConfigFile.'.bak';
+
+            $this->writeInfo('system_config_backup', [
+                'backupFile' => $backupFile
+            ]);
+
+            if (file_exists($backupFile)) {
+                unlink($backupFile);
+            }
+
+            copy($quiqqerConfigFile, $backupFile);
+        }
+
+        $config      = $this->ImportProvider->getSystemConfig();
+        $QuiqqerConf = QUI::getConfig('etc/conf.ini.php');
+
+        foreach ($config as $section => $settings) {
+            foreach ($settings as $k => $v) {
+                $this->writeInfo('system_config_entry', [
+                    'section' => $section,
+                    'key'     => $k,
+                    'value'   => $v
+                ]);
+
+                $QuiqqerConf->set($section, $k, $v);
+            }
+        }
+
+        $QuiqqerConf->save();
+    }
+
+    /**
+     * Create sites in the QUIQQER system
+     *
      * @param QUI\Projects\Project $QuiqqerProject
-     * @param ChildrenIteratorInterface $ChildrenIterator
+     * @param string|int $projectIdentifier - Unique ImportProject identifier
+     * @param ChildrenIteratorInterface $SiteTree
      * @param QUIQQERImportSite|null $RootQuiqqerSite
      * @param array &$importedSiteIds
      * @return array
@@ -338,22 +502,23 @@ class Import extends QUI\QDOM
      */
     protected function createSites(
         QUI\Projects\Project $QuiqqerProject,
-        ChildrenIteratorInterface $ChildrenIterator,
+        $projectIdentifier,
+        ChildrenIteratorInterface $SiteTree,
         QUIQQERImportSite $RootQuiqqerSite = null,
         &$importedSiteIds = []
     ) {
-        $project = $QuiqqerProject->getName();
-        $lang    = $QuiqqerProject->getLang();
+        $lang     = $QuiqqerProject->getLang();
+        $sitesTbl = QUI::getDBProjectTableName('sites', $QuiqqerProject);
 
         /** @var SiteItem $ChildSiteItem */
-        foreach ($ChildrenIterator->walkChildren() as $ChildSiteItem) {
+        foreach ($SiteTree->walkChildren() as $ChildSiteItem) {
             // Site links are not created as actual sites but as links (created after all sites are created)
             if ($ChildSiteItem->isLink()) {
                 continue;
             }
 
             $siteIdentifier       = $ChildSiteItem->getId();
-            $ImportSite           = $this->ImportProvider->getSite($siteIdentifier, $project, $lang);
+            $ImportSite           = $this->ImportProvider->getSite($siteIdentifier, $projectIdentifier, $lang);
             $importQuiqqerSiteId  = $ImportSite->getQuiqqerSiteId();
             $importSiteAttributes = $ImportSite->getAttributes();
 
@@ -397,12 +562,25 @@ class Import extends QUI\QDOM
                 $NewSite->save();
             }
 
+            $newSiteId = $NewSite->getId();
+
+            // Set c_date in database
+            if (!empty($importSiteAttributes['c_date'])) {
+                QUI::getDataBase()->update(
+                    $sitesTbl,
+                    [
+                        'c_date' => $importSiteAttributes['c_date']
+                    ],
+                    [
+                        'id' => $newSiteId
+                    ]
+                );
+            }
+
             // Activate site
             if ($importSiteAttributes['active']) {
                 $NewSite->activate();
             }
-
-            $newSiteId = $NewSite->getId();
 
             // Import QUIQQER tags
             $tags = $ImportSite->getTags();
@@ -425,7 +603,7 @@ class Import extends QUI\QDOM
             ]);
 
             if ($ChildSiteItem->hasChildren()) {
-                $this->createSites($QuiqqerProject, $ChildSiteItem, $NewSite, $importedSiteIds);
+                $this->createSites($QuiqqerProject, $projectIdentifier, $ChildSiteItem, $NewSite, $importedSiteIds);
             }
         }
 
@@ -434,18 +612,18 @@ class Import extends QUI\QDOM
 
     /**
      * @param QUI\Projects\Project $QuiqqerProject
-     * @param ChildrenIteratorInterface $ChildrenIterator
+     * @param ChildrenIteratorInterface $SiteTree
      * @param array $importSiteMap - Map of imported sites (quiqqer site id => siteIdentifier)
      * @return void
      * @throws QUI\Exception
      */
     protected function createSiteLinks(
         QUI\Projects\Project $QuiqqerProject,
-        ChildrenIteratorInterface $ChildrenIterator,
+        ChildrenIteratorInterface $SiteTree,
         $importSiteMap
     ) {
         /** @var SiteItem $ChildSiteItem */
-        foreach ($ChildrenIterator->walkChildren() as $ChildSiteItem) {
+        foreach ($SiteTree->walkChildren() as $ChildSiteItem) {
             if (!$ChildSiteItem->isLink() || !$ChildSiteItem->getParentId()) {
                 if ($ChildSiteItem->hasChildren()) {
                     $this->createSiteLinks($QuiqqerProject, $ChildSiteItem, $importSiteMap);
@@ -558,6 +736,377 @@ class Import extends QUI\QDOM
     }
 
     /**
+     * Create media items/structure in the QUIQQER system
+     *
+     * @param QUI\Projects\Project $QuiqqerProject
+     * @param string|int $projectIdentifier - Unique ImportProject identifier
+     * @param ChildrenIteratorInterface $MediaTree
+     * @param QUIQQERImportMediaFolder $RootQuiqqerMediaFolder
+     * @param array &$importedMediaIds
+     * @return array
+     * @throws QUI\Exception
+     */
+    protected function createMedia(
+        QUI\Projects\Project $QuiqqerProject,
+        $projectIdentifier,
+        ChildrenIteratorInterface $MediaTree,
+        QUIQQERImportMediaFolder $RootQuiqqerMediaFolder = null,
+        &$importedMediaIds = []
+    ) {
+        if (empty($RootQuiqqerMediaFolder)) {
+            $RootQuiqqerMediaFolder = $this->getQuiqqerImportMediaFolder(1, $QuiqqerProject);
+        }
+
+        /** @var QUI\CmsImport\Hierarchy\MediaItem $ChildMediaItem */
+        foreach ($MediaTree->walkChildren() as $ChildMediaItem) {
+            $mediaItemIdentifier   = $ChildMediaItem->getId();
+            $ImportMediaItem       = $this->ImportProvider->getMediaItem($mediaItemIdentifier, $projectIdentifier);
+            $importQuiqqerMediaId  = $ImportMediaItem->getQuiqqerMediaId();
+            $importMediaAttributes = $ImportMediaItem->getAttributes();
+
+            if ($ImportMediaItem->isFolder()) {
+                $this->writeInfo('media_folder_start', [
+                    'identifier' => $mediaItemIdentifier,
+                    'title'      => $ImportMediaItem->getTitle()
+                ]);
+            } else {
+                $this->writeInfo('media_item_start', [
+                    'identifier' => $mediaItemIdentifier,
+                    'title'      => $ImportMediaItem->getTitle()
+                ]);
+            }
+
+            // Check if site ID has already been imported
+            if (!empty($importQuiqqerMediaId) && isset($importedMediaIds[$importQuiqqerMediaId])) {
+                $this->writeWarning(
+                    'media_duplicate_id',
+                    [
+                        'identifier' => $mediaItemIdentifier,
+                        'title'      => $ImportMediaItem->getTitle()
+                    ]
+                );
+
+                continue;
+            }
+
+            $newRootId = false;
+
+            /**
+             * $importQuiqqerMediaId may not be 1 because this is the QUIQQER Media root
+             * folder ID (which can neither be changed nor deleted)
+             */
+            if ($importQuiqqerMediaId == 1) {
+                $newRootId = 1;
+            } else {
+                if ($ImportMediaItem->isFolder()) {
+                    $NewItem = $RootQuiqqerMediaFolder->createFolder(
+                        $ImportMediaItem->getTitle(),
+                        $importQuiqqerMediaId ?: null
+                    );
+
+                    $NewItem->setAttributes($importMediaAttributes);
+                    $NewItem->save();
+
+                    // Activate media item
+                    if ($importMediaAttributes['active']) {
+                        $NewItem->activate();
+                    }
+
+                    $newRootId = $NewItem->getId();
+                } else {
+                    $mediaFile = $ImportMediaItem->getFile();
+
+                    // Check if file was given and/or exists first
+                    if (empty($mediaFile)) {
+                        $this->writeWarning('media_file_not_set', [
+                            'identifier' => $mediaItemIdentifier
+                        ]);
+                    } elseif (!file_exists($mediaFile)) {
+                        $this->writeWarning('media_file_not_found', [
+                            'identifier' => $mediaItemIdentifier,
+                            'file'       => $mediaFile
+                        ]);
+                    } else {
+                        $mediaFileName         = basename($mediaFile);
+                        $deleteFileAfterUpload = false;
+
+                        if ($RootQuiqqerMediaFolder->fileWithNameExists($mediaFileName)) {
+                            $filePrefix = '1-';
+
+                            if (!empty($importQuiqqerMediaId)) {
+                                $filePrefix = $importQuiqqerMediaId.'-';
+                            }
+
+                            copy($mediaFile, $this->varDir.$filePrefix.$mediaFileName);
+
+                            $mediaFile             = $this->varDir.$filePrefix.$mediaFileName;
+                            $deleteFileAfterUpload = true;
+
+                            $this->writeWarning('media_file_rename', [
+                                'originalFileName' => $mediaFileName,
+                                'newFileName'      => $filePrefix.$mediaFileName
+                            ]);
+                        }
+
+                        $NewItem = $RootQuiqqerMediaFolder->uploadFile(
+                            $mediaFile,
+                            QUIQQERImportMediaFolder::FILE_OVERWRITE_NONE,
+                            $importQuiqqerMediaId ?: null
+                        );
+
+                        if ($deleteFileAfterUpload) {
+                            unlink($mediaFile);
+                        }
+
+                        $importMediaAttributes['title'] = $ImportMediaItem->getTitle();
+
+                        $NewItem->setAttributes($importMediaAttributes);
+                        $NewItem->save();
+
+                        // Activate media item
+                        if ($importMediaAttributes['active']) {
+                            $NewItem->activate();
+                        }
+
+                        $newRootId = $NewItem->getId();
+                    }
+                }
+
+                if ($newRootId && $ImportMediaItem->isFolder()) {
+                    $this->writeInfo('media_folder_finish', [
+                        'identifier'        => $mediaItemIdentifier,
+                        'quiqqerMediaId'    => $NewItem->getId(),
+                        'quiqqerMediaTitle' => $NewItem->getAttribute('title')
+                    ]);
+                } else {
+                    $this->writeInfo('media_item_finish', [
+                        'identifier'        => $mediaItemIdentifier,
+                        'quiqqerMediaId'    => $NewItem->getId(),
+                        'quiqqerMediaTitle' => $NewItem->getAttribute('title')
+                    ]);
+                }
+            }
+
+            // @todo c_date setzen
+            // Set c_date in database
+//            if (!empty($importSiteAttributes['c_date'])) {
+//                QUI::getDataBase()->update(
+//                    $sitesTbl,
+//                    [
+//                        'c_date' => $importSiteAttributes['c_date']
+//                    ],
+//                    [
+//                        'id' => $newSiteId
+//                    ]
+//                );
+//            }
+
+            $importedMediaIds[$newRootId] = true;
+
+            if ($ChildMediaItem->hasChildren()) {
+                if ($ImportMediaItem->isFolder()) {
+                    $this->createMedia(
+                        $QuiqqerProject,
+                        $projectIdentifier,
+                        $ChildMediaItem,
+                        $this->getQuiqqerImportMediaFolder($newRootId, $QuiqqerProject),
+                        $importedMediaIds
+                    );
+                } else {
+                    $this->writeWarning('media_file_cannot_have_children', [
+                        'identifier' => $mediaItemIdentifier
+                    ]);
+                }
+            }
+        }
+
+        return $importedMediaIds;
+    }
+
+    /**
+     * Create group hierarchy in the QUIQQER system
+     *
+     * @param ChildrenIteratorInterface $GroupTree
+     * @param QUIQQERImportGroup $RootQuiqqerGroup
+     * @return void
+     * @throws QUI\Exception
+     */
+    protected function createGroups(
+        ChildrenIteratorInterface $GroupTree,
+        QUIQQERImportGroup $RootQuiqqerGroup = null
+    ) {
+        $quiqqerRootGroupId = QUI::conf('globals', 'root');
+        $Permission         = new PermissionManager();
+
+        if (empty($RootQuiqqerGroup)) {
+            $RootQuiqqerGroup = new QUIQQERImportGroup($quiqqerRootGroupId);
+        }
+
+        /** @var QUI\CmsImport\Hierarchy\GroupItem $ChildGroupItem */
+        foreach ($GroupTree->walkChildren() as $ChildGroupItem) {
+            $groupIdentifier       = $ChildGroupItem->getId();
+            $ImportGroup           = $this->ImportProvider->getGroup($groupIdentifier);
+            $importQuiqqerGroupId  = $ImportGroup->getQuiqqerGroupId();
+            $importGroupAttributes = array_merge(
+                $ImportGroup->getAttributes(),
+                [
+                    'name' => $ImportGroup->getName()
+                ]
+            );
+
+            $this->writeInfo('group_start', [
+                'identifier' => $groupIdentifier
+            ]);
+
+            // Check if group ID has already been imported
+            if (!empty($importQuiqqerGroupId)
+                && in_array($importQuiqqerGroupId, $this->importData['groups'])
+            ) {
+                $this->writeWarning(
+                    'group_duplicate_id',
+                    [
+                        'identifier' => $groupIdentifier,
+                        'id'         => $importQuiqqerGroupId
+                    ]
+                );
+
+                continue;
+            }
+
+            if ($importQuiqqerGroupId == 1 && $RootQuiqqerGroup->getId() == $quiqqerRootGroupId) {
+                $NewGroup = $RootQuiqqerGroup;
+            } else {
+                $NewGroup = $RootQuiqqerGroup->createChild(
+                    $ImportGroup->getName(),
+                    null,
+                    $importQuiqqerGroupId ?: null
+                );
+            }
+
+            $NewGroup->setAttributes($importGroupAttributes);
+            $NewGroup->save();
+
+            // Activate group
+            if (!empty($importGroupAttributes['active'])) {
+                $NewGroup->activate();
+            }
+
+            // Set admin access permission
+            if ($ImportGroup->hasAdminAccess()) {
+                $groupPermissions                  = $Permission->getPermissions($NewGroup);
+                $groupPermissions['quiqqer.admin'] = true;
+                $Permission->setPermissions($NewGroup, $groupPermissions);
+            }
+
+            $this->importData['groups'][$groupIdentifier] = $NewGroup->getId();
+
+            $this->writeInfo('group_finish', [
+                'identifier'       => $groupIdentifier,
+                'quiqqerGroupId'   => $NewGroup->getId(),
+                'quiqqerGroupName' => $NewGroup->getName()
+            ]);
+
+            if ($ChildGroupItem->hasChildren()) {
+                $this->createGroups($ChildGroupItem, new QUIQQERImportGroup($NewGroup->getId()));
+            }
+        }
+    }
+
+    /**
+     * Create QUIQQER users from a UserList
+     *
+     * @param UserList $UserList
+     * @return void
+     */
+    protected function createUsers(UserList $UserList)
+    {
+        $UserManager = new QUIQQERImportUserManager();
+        $DB          = QUI::getDataBase();
+        $usersTable  = QUI\Users\Manager::table();
+
+        /** @var QUI\CmsImport\ItemList\UserItem $UserItem */
+        foreach ($UserList->walkChildren() as $UserItem) {
+            $ImportUser = $this->ImportProvider->getUser($UserItem->getId());
+
+            $this->writeInfo('user_start', [
+                'identifier' => $ImportUser->getIdentifier(),
+                'username'   => $ImportUser->getUsername()
+            ]);
+
+            try {
+                $NewUser = $UserManager->createChild(
+                    $ImportUser->getUsername(),
+                    null,
+                    $ImportUser->getQuiqqerUserId()
+                );
+            } catch (\Exception $Exception) {
+                $this->writeException($Exception);
+                continue;
+            }
+
+            $importUserAttributes = $ImportUser->getAttributes();
+
+            if ($ImportUser->isSU()) {
+                $importUserAttributes['su'] = true;
+            }
+
+            $NewUser->setAttributes($importUserAttributes);
+
+            // Groups
+            foreach ($ImportUser->getGroups() as $groupIdentifier) {
+                if (!empty($this->importData['groups'][$groupIdentifier])) {
+                    $NewUser->addToGroup($this->importData['groups'][$groupIdentifier]);
+                }
+            }
+
+            // Set password hash to DB
+            if ($ImportUser->getPasswordHash()) {
+                $DB->update($usersTable, [
+                    'password' => $ImportUser->getPasswordHash()
+                ], [
+                    'id' => $NewUser->getId()
+                ]);
+            }
+
+            $NewUser->save();
+            $NewUser->refresh();
+
+            // Activate
+            if ($importUserAttributes['active']) {
+                try {
+                    $NewUser->activate();
+                } catch (\Exception $Exception) {
+                    $this->writeException($Exception);
+                }
+            }
+
+            $this->writeInfo('user_finish', [
+                'quiqqerUserId'   => $NewUser->getId(),
+                'quiqqerUsername' => $NewUser->getUsername()
+            ]);
+        }
+    }
+
+    /**
+     * Get special QUIQQERImportMediaFolder
+     *
+     * @param int $id
+     * @param QUI\Projects\Project $Project
+     * @return QUIQQERImportMediaFolder
+     */
+    protected function getQuiqqerImportMediaFolder($id, QUI\Projects\Project $Project)
+    {
+        $result = QUI::getDataBase()->fetch([
+            'from'  => QUI::getDBProjectTableName('media', $Project, false),
+            'where' => [
+                'id' => $id
+            ]
+        ]);
+
+        return new QUIQQERImportMediaFolder(current($result), $Project->getMedia());
+    }
+
+    /**
      * Set console tool for output purposes
      *
      * @param Console $ConsoleTool
@@ -627,6 +1176,25 @@ class Import extends QUI\QDOM
 
         $Projects        = QUI::getProjectManager();
         $StandardProject = $Projects->getStandard();
+
+        // Delete media files of standard project first
+        $dir = $StandardProject->getMedia()->getPath();
+
+        if (is_dir($dir)) {
+            $it    = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
+            $files = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::CHILD_FIRST);
+
+            foreach ($files as $file) {
+                if ($file->isDir()) {
+                    rmdir($file->getRealPath());
+                } else {
+                    unlink($file->getRealPath());
+                }
+            }
+
+            rmdir($dir);
+        }
+
         $StandardProject->rename('old_standard_project');
 
         /** @var QUI\Projects\Project $Project */
@@ -665,15 +1233,8 @@ class Import extends QUI\QDOM
      */
     protected function writeInfo($msg, $localeVars = [])
     {
-        if (is_null($this->ConsoleTool)) {
-            return;
-        }
-
         $msg = QUI::getLocale()->get('quiqqer/cms-import', 'import.msg.'.$msg, $localeVars);
-
-        if (!is_null($this->ConsoleTool)) {
-            $this->ConsoleTool->writeInfo($msg);
-        }
+        $this->ConsoleTool->writeInfo($msg);
     }
 
     /**
@@ -685,15 +1246,19 @@ class Import extends QUI\QDOM
      */
     protected function writeWarning($msg, $localeVars = [])
     {
-        if (is_null($this->ConsoleTool)) {
-            return;
-        }
-
         $msg = QUI::getLocale()->get('quiqqer/cms-import', 'import.warning.'.$msg, $localeVars);
+        $this->ConsoleTool->writeWarning($msg);
+    }
 
-        if (!is_null($this->ConsoleTool)) {
-            $this->ConsoleTool->writeWarning($msg);
-        }
+    /**
+     * Write Exception message to stdout
+     *
+     * @param \Exception $Exception
+     * @return void
+     */
+    protected function writeException(\Exception $Exception)
+    {
+        $this->ConsoleTool->writeError($Exception->getMessage());
     }
 
     /**
@@ -704,9 +1269,7 @@ class Import extends QUI\QDOM
      */
     protected function writeError($msg)
     {
-        if (!is_null($this->ConsoleTool)) {
-            $this->ConsoleTool->writeError($msg);
-        }
+        $this->ConsoleTool->writeError($msg);
     }
 
     /**
@@ -718,14 +1281,25 @@ class Import extends QUI\QDOM
      */
     protected function writeHeader($msg, $localeVars = [])
     {
-        if (is_null($this->ConsoleTool)) {
-            return;
-        }
-
         $msg = QUI::getLocale()->get('quiqqer/cms-import', 'import.header.'.$msg, $localeVars);
+        $this->ConsoleTool->writeHeader($msg);
+    }
 
-        if (!is_null($this->ConsoleTool)) {
-            $this->ConsoleTool->writeHeader($msg);
+    /**
+     * Add a review flag to the import process
+     *
+     * @param string $msg
+     * @param string $section
+     * @return void
+     */
+    public function addReviewFlag($msg, $section = self::IMPORT_SECTION_GENERAL)
+    {
+        $Now = new \DateTime();
+
+        if (!isset($this->reviewFlags[$section])) {
+            $this->reviewFlags[$section] = [];
         }
+
+        $this->reviewFlags[$section][$Now->format('Y-m-d H:i:s')] = $msg;
     }
 }

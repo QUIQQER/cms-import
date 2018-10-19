@@ -9,7 +9,7 @@ use QUI;
  *
  * Represents a QUIQQER site that is imported
  */
-class ImportSite extends QUI\QDOM
+class ImportSite extends AbstractImportEntity
 {
     /**
      * Collection of tag titles associated with the Site
@@ -33,9 +33,9 @@ class ImportSite extends QUI\QDOM
     protected $languageLinks = [];
 
     /**
-     * @var string
+     * @var string|int
      */
-    protected $project;
+    protected $projectIdentifier;
 
     /**
      * @var string
@@ -58,11 +58,6 @@ class ImportSite extends QUI\QDOM
     protected $isFlaggedForReview = false;
 
     /**
-     * @var array
-     */
-    protected $reviewFlags = [];
-
-    /**
      * @var int
      */
     protected $quiqqerSiteId = null;
@@ -70,22 +65,30 @@ class ImportSite extends QUI\QDOM
     /**
      * ImportProject constructor.
      *
-     * @param string $project - The name of the project this Site belongs to
+     * @param string|int $projectIdentifier - The name of the project this Site belongs to
      * @param string $name - Name of the Site (this is the part that is seen in the URL)
      * @param string $lang - Language of the site
      * @param string|int $siteIdentifier - Internal unique identification string for this ImportSite (import module specific!)
      * @param array $attributes (optional) - Additional Site attributes
      */
-    public function __construct($project, $lang, $name, $siteIdentifier, $attributes = [])
+    public function __construct($projectIdentifier, $lang, $name, $siteIdentifier, $attributes = [])
     {
-        $this->project        = $project;
-        $this->name           = $name;
-        $this->lang           = $lang;
-        $this->siteIdentifier = $siteIdentifier;
+        $this->projectIdentifier = $projectIdentifier;
+        $this->name              = $name;
+        $this->lang              = $lang;
+        $this->siteIdentifier    = $siteIdentifier;
 
         $this->setAttributes(array_merge($attributes, [
             'name' => $this->name
         ]));
+    }
+
+    /**
+     * @return int|string
+     */
+    public function getIdentifier()
+    {
+        return $this->siteIdentifier;
     }
 
     /**
@@ -109,11 +112,11 @@ class ImportSite extends QUI\QDOM
     }
 
     /**
-     * @return string
+     * @return string|int
      */
-    public function getProject()
+    public function getProjectIdentifier()
     {
-        return $this->project;
+        return $this->projectIdentifier;
     }
 
     /**
@@ -219,23 +222,5 @@ class ImportSite extends QUI\QDOM
     public function getLanguageLinks()
     {
         return $this->languageLinks;
-    }
-
-    /**
-     * Flag this site for review, so it is listed in a special "todo.log" after import
-     *
-     * @param string $reason (optional) - The reaseon why this site is flagged for review
-     */
-    public function addReviewFlag($reason = '')
-    {
-        $this->reviewFlags[] = $reason;
-    }
-
-    /**
-     * @return []
-     */
-    public function getReviewFlags()
-    {
-        return $this->reviewFlags;
     }
 }

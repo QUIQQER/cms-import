@@ -2,9 +2,17 @@
 
 namespace QUI\CmsImport;
 
+use QUI\CmsImport\Entities\ImportGroup;
+use QUI\CmsImport\Entities\ImportMediaItem;
 use QUI\CmsImport\Entities\ImportProject;
 use QUI\CmsImport\Entities\ImportSite;
+use QUI\CmsImport\Entities\ImportTranslation;
+use QUI\CmsImport\Entities\ImportUser;
+use QUI\CmsImport\Hierarchy\GroupHierarchy;
+use QUI\CmsImport\Hierarchy\MediaFolderHierarchy;
+use QUI\CmsImport\Hierarchy\MediaItemHierarchy;
 use QUI\CmsImport\Hierarchy\SiteHierarchy;
+use QUI\CmsImport\ItemList\UserList;
 
 /**
  * Interface ImportProviderInterface
@@ -44,37 +52,86 @@ interface ImportProviderInterface
     /**
      * Get a site that should be imported
      *
-     * @param string $identifier - A unique ImportSite identifier
-     * @param string $project - Project name
+     * @param string $siteIdentifier - A unique ImportSite identifier
+     * @param string $projectIdentifier - A unique ImportProject identifier
      * @param string $lang - Project lang
      * @return ImportSite
      */
-    public function getSite($identifier, $project, $lang);
+    public function getSite($siteIdentifier, $projectIdentifier, $lang);
 
     /**
      * Get the complete hierarchical site structure (structure only, not actual site data!)
      *
-     * @param string $project - Project name
+     * @param string $projectIdentifier - A unique ImportProject identifier
      * @param string $lang - Project lang
      * @return SiteHierarchy
      */
-    public function getSiteHierarchy($project, $lang);
+    public function getSiteHierarchy($projectIdentifier, $lang);
+
+    /**
+     * Get the complete hierarchical media item structure (folders, files, images)
+     *
+     * @param $projectIdentifier
+     * @return MediaItemHierarchy
+     */
+    public function getMediaHierarchy($projectIdentifier);
+
+    /**
+     * Get an ImportMediaItem
+     *
+     * @param string|int $mediaItemIdentifier
+     * @param string|int $projectIdentifier
+     * @return ImportMediaItem
+     */
+    public function getMediaItem($mediaItemIdentifier, $projectIdentifier);
+
+    /**
+     * Get complete group hiearchy for QUIQQER group structure
+     *
+     * @return GroupHierarchy
+     */
+    public function getGroupHierarchy();
+
+    /**
+     * Get ImportGroup by identifier
+     *
+     * @param string|int $groupIdentifier
+     * @return ImportGroup
+     */
+    public function getGroup($groupIdentifier);
+
+    /**
+     * Get complete list of QUIQQER users (meta-list, not actual User objects)
+     *
+     * @return UserList
+     */
+    public function getUserList();
+
+    /**
+     * Get ImportUser by identifier
+     *
+     * @param string|int $userIdentifier
+     * @return ImportUser
+     */
+    public function getUser($userIdentifier);
 
     /**
      * Get all tags
      *
+     * @param string $projectIdentifier - A unique ImportProject identifier
+     * @param string $lang - Project lang
      * @return array - "tag title" => ['description' => "description"]
      */
-    public function getTags($project, $lang);
+    public function getTags($projectIdentifier, $lang);
 
     /**
      * Get all tag groups
      *
-     * @param $project
-     * @param $lang
+     * @param string $projectIdentifier - A unique ImportProject identifier
+     * @param string $lang - Project lang
      * @return array - Associative array ("tag group title" => ['description' => "description", 'tags' => [array of associated tag titles])
      */
-    public function getTagGroups($project, $lang);
+    public function getTagGroups($projectIdentifier, $lang);
 
     /**
      * Get all QUIQQER system languages that should be imported
@@ -93,6 +150,14 @@ interface ImportProviderInterface
     public function getSystemConfig();
 
     /**
+     * Get all translations for a project
+     *
+     * @param int|string $projectIdentifier - Unique ImportProject identifier
+     * @return ImportTranslation[]
+     */
+    public function getTranslations($projectIdentifier);
+
+    /**
      * The purpose of this method is to prompt the user for necessary configuration data (like paths, DB credentials...)
      * regarding the system the import data is pulled from.
      *
@@ -102,4 +167,19 @@ interface ImportProviderInterface
      * @return void
      */
     public function promptForConfig();
+
+    /**
+     * Set instance of QUI\CmsImport\Import that is orchestrating the current import process
+     *
+     * @param Import $Import
+     * @return void
+     */
+    public function setImport(Import $Import);
+
+    /**
+     * Get instance of QUI\CmsImport\Import that is orchestrating the current import process
+     *
+     * @return Import
+     */
+    public function getImport();
 }

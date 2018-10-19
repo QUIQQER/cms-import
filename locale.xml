@@ -65,6 +65,94 @@
             <de><![CDATA[Tag-Gruppe "[tagGroupTitle]" konnte der Seite nicht zugewiesen werden, da sie in QUIQQER nicht existiert.]]></de>
             <en><![CDATA[Tag group "[tagGroupTitle]" could not be added to the site, because it does not exist in QUIQQER.]]></en>
         </locale>
+        <locale name="import.msg.site_link">
+            <de><![CDATA[Erstelle Seiten-Verknüpfung von #[sourceId] ("[sourceTitle]") zu Seite #[targetId]]]></de>
+            <en><![CDATA[Creating site link of #[sourceId] ("[sourceTitle]") to site #[targetId]]]></en>
+        </locale>
+        <locale name="import.header.sites_start">
+            <de><![CDATA[Starte Seiten-Import]]></de>
+            <en><![CDATA[Starting sites import]]></en>
+        </locale>
+
+        <!-- Media import -->
+        <locale name="import.msg.media_folder_start">
+            <de><![CDATA[Importiere Media-Ordner #[identifier] ("[title]")]]></de>
+            <en><![CDATA[Importing media folder #[identifier] ("[title]")]]></en>
+        </locale>
+        <locale name="import.msg.media_item_start">
+            <de><![CDATA[Importiere Media-Datei #[identifier] ("[title]")]]></de>
+            <en><![CDATA[Importing media file #[identifier] ("[title]")]]></en>
+        </locale>
+        <locale name="import.msg.media_folder_finish">
+            <de><![CDATA[Media-Order #[identifier] erfolgreich als QUIQQER-Media-Order #[quiqqerMediaId] ("[quiqqerMediaTitle]") importiert.]]></de>
+            <en><![CDATA[Media folder #[identifier] successfully imported as QUIQQER media folder #[quiqqerMediaId] ("[quiqqerMediaTitle]").]]></en>
+        </locale>
+        <locale name="import.msg.media_item_finish">
+            <de><![CDATA[Media-Datei #[identifier] erfolgreich als QUIQQER-Media-Datei #[quiqqerMediaId] ("[quiqqerMediaTitle]") importiert.]]></de>
+            <en><![CDATA[Media file #[identifier] successfully imported as QUIQQER media file #[quiqqerMediaId] ("[quiqqerMediaTitle]").]]></en>
+        </locale>
+        <locale name="import.warning.media_file_rename">
+            <de><![CDATA[Original-Datei "[originalFileName]" wurde im QUIQQER-Media-Ordner umbenannt zu "[newFileName]".]]></de>
+            <en><![CDATA[Original file "[originalFileName]" was renamed to "[newFileName]" in QUIQQER media folder.]]></en>
+        </locale>
+        <locale name="import.warning.media_file_not_set">
+            <de><![CDATA[Datei für #[identifier] wurde nicht angegeben. Media-Item kann nicht importiert werden.]]></de>
+            <en><![CDATA[File for #[identifier] was not given. Media item cannot be imported.]]></en>
+        </locale>
+        <locale name="import.warning.media_file_not_found">
+            <de><![CDATA[Datei "[file]" für #[identifier] wurde existiert nicht. Media-Item kann nicht importiert werden.]]></de>
+            <en><![CDATA[File "[file]" for #[identifier] does not exist. Media item cannot be imported.]]></en>
+        </locale>
+        <locale name="media_file_cannot_have_children">
+            <de><![CDATA[Media-Datei #[identifier] hat laut Media-Hierachie Kinder. Dateien können jedoch keine Kinder haben. Media-Hierarchie nach dieser Datei wird übersprungen.]]></de>
+            <en><![CDATA[Media file #[identifier] has children according to the media hierarchy. Files cannot have children. Media hierarchy after this file will be skipped.]]></en>
+        </locale>
+
+        <!-- Group import -->
+        <locale name="import.msg.group_start">
+            <de><![CDATA[Importiere Gruppe #[identifier]]]></de>
+            <en><![CDATA[Importing group #[identifier]]]></en>
+        </locale>
+        <locale name="import.msg.group_finish">
+            <de><![CDATA[Gruppe #[identifier] erfolgreich als QUIQQER-Gruppe #[quiqqerGroupId] ("[quiqqerGroupName]") importiert.]]></de>
+            <en><![CDATA[Group #[identifier] successfully imported as QUIQQER group #[quiqqerGroupId] ("[quiqqerGroupName]").]]></en>
+        </locale>
+        <locale name="import.warning.group_duplicate_id">
+            <de><![CDATA[Gruppe #[identifier] kann nicht mit ID #[id] importiert werden, da bereits eine Gruppe mit dieser ID importiert wurde.]]></de>
+            <en><![CDATA[Group #[identifier] cannot be imported with ID #[id] because a group with an identical ID has already been imported.]]></en>
+        </locale>
+
+        <!-- User import -->
+        <locale name="import.header.users_start">
+            <de><![CDATA[Starte Benutzer-Import]]></de>
+            <en><![CDATA[Starting user import]]></en>
+        </locale>
+        <locale name="import.msg.user_start">
+            <de><![CDATA[Importiere Benutzer #[identifier] ("[username]")]]></de>
+            <en><![CDATA[Importing user #[identifier] ("[username]")]]></en>
+        </locale>
+        <locale name="import.msg.user_finish">
+            <de><![CDATA[Benutzer erfolgreich als QUIQQER-Benutzer #[quiqqerUserId] ("[quiqqerUsername]") importiert.]]></de>
+            <en><![CDATA[User successfully imported as QUIQQER user #[quiqqerUserId] ("[quiqqerUsername]").]]></en>
+        </locale>
+
+        <!-- System config -->
+        <locale name="import.header.system_config_start">
+            <de><![CDATA[Importiere System-Konfiguration]]></de>
+            <en><![CDATA[Importing system configuration]]></en>
+        </locale>
+        <locale name="import.msg.system_config_entry">
+            <de><![CDATA[Setze "[[section]] [key]" auf Wert "[value]"]]></de>
+            <en><![CDATA[Setting "[[section]] [key]" to value "[value]"]]></en>
+        </locale>
+        <locale name="prompt.system_config.backup">
+            <de><![CDATA[Soll von der aktuellen System-Konfigurationsdatei ([configFile]) ein Backup erstellt werden?]]></de>
+            <en><![CDATA[Do you want to create a backup of the current system config file ([configFile])?]]></en>
+        </locale>
+        <locale name="import.msg.system_config_backup">
+            <de><![CDATA[Erstelle Backup der System-Konfigurationsdatei ([backupFile])]]></de>
+            <en><![CDATA[Creating backup of the system config file ([backupFile])]]></en>
+        </locale>
 
         <!-- Tags import -->
         <locale name="import.header.tags_package_not_installed">
