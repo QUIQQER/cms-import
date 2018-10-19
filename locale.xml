@@ -154,6 +154,20 @@
             <en><![CDATA[Creating backup of the system config file ([backupFile])]]></en>
         </locale>
 
+        <!-- Translations import -->
+        <locale name="import.header.translations_start">
+            <de><![CDATA[Lege Übersetzungen an]]></de>
+            <en><![CDATA[Creating translations]]></en>
+        </locale>
+        <locale name="import.msg.translation_start">
+            <de><![CDATA[Lege Sprachvariable "[[group]] [var]" an.]]></de>
+            <en><![CDATA[Creating translation "[[group]] [var]".]]></en>
+        </locale>
+        <locale name="import.msg.translation_finish">
+            <de><![CDATA[Sprachvariable erfolgreich angelegt.]]></de>
+            <en><![CDATA[Translations sucessfully created.]]></en>
+        </locale>
+        
         <!-- Tags import -->
         <locale name="import.header.tags_package_not_installed">
             <de><![CDATA[Tags- und Tag-Gruppen können nicht importiert werden, da quiqqer/tags nicht installiert ist.]]></de>

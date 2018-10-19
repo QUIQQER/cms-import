@@ -11,18 +11,42 @@ use QUI;
  */
 class ImportTranslation extends AbstractImportEntity
 {
-    protected $group;
+    const DATATYPE_JS     = 'js';
+    const DATATYPE_PHP    = 'php';
+    const DATATYPE_PHP_JS = 'php,js';
+
+    /**
+     * @var string
+     */
     protected $var;
+
+    /**
+     * @var array
+     */
     protected $translations = [];
+
+    /**
+     * @var string
+     */
+    protected $datatype;
+
+    /**
+     * @var bool
+     */
+    protected $isHtml = false;
 
     /**
      * ImportTranslation constructor.
      *
      * @param string $var - Translation variable
+     * @param string $datatype - Translation datatype (one of self::DATATYPE_*)
+     * @param bool $html - Does translation contain HTML?
      */
-    public function __construct($var)
+    public function __construct($var, $datatype = self::DATATYPE_PHP_JS, $html = false)
     {
-        $this->var = $var;
+        $this->var      = $var;
+        $this->datatype = $datatype;
+        $this->isHtml   = $html;
     }
 
     /**
@@ -38,10 +62,34 @@ class ImportTranslation extends AbstractImportEntity
     }
 
     /**
+     * @return string
+     */
+    public function getVar()
+    {
+        return $this->var;
+    }
+
+    /**
      * @return array
      */
     public function getTranslations()
     {
         return $this->translations;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDatatype()
+    {
+        return $this->datatype;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHtml()
+    {
+        return $this->isHtml;
     }
 }

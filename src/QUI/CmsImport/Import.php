@@ -87,7 +87,8 @@ class Import extends QUI\QDOM
             'importMedia'        => false,
             'importUsers'        => false,
             'importGroups'       => false,
-            'importSystemConfig' => true
+            'importSystemConfig' => false,
+            'importTranslations' => true
         ]);
 
         $this->setAttributes($settings);
@@ -121,6 +122,11 @@ class Import extends QUI\QDOM
 
         // Projects
         $this->importProjects();
+
+        // Translations
+        if ($this->getAttribute('importTranslations')) {
+            $this->importTranslations();
+        }
 
         // Delete old standard project
         if ($this->getAttribute('cleanup')) {
@@ -487,6 +493,46 @@ class Import extends QUI\QDOM
         }
 
         $QuiqqerConf->save();
+    }
+
+    /**
+     * Import translations for all projects
+     *
+     * @return void
+     */
+    protected function importTranslations()
+    {
+        /** @var QUI\Projects\Project $QuiqqerProject */
+        foreach ($this->importData['projects'] as $projectIdentifier => $QuiqqerProject) {
+            $translations = $this->ImportProvider->getTranslations($projectIdentifier);
+            $group        = 'project/'.$QuiqqerProject->getName();
+
+            foreach ($translations as $ImportTranslation) {
+                $this->writeInfo('translation_start', [
+                    'group' => $group,
+                    'var'   => $ImportTranslation->getVar()
+                ]);
+
+                $data = [
+                    'package' => 'quiqqer/cms-import'
+                ];
+
+                foreach ($ImportTranslation->getTranslations() as $lang => $text) {
+                    $data[$lang] = $text;
+                }
+
+                try {
+                    QUI\Translator::addUserVar($group, $ImportTranslation->getVar(), $data);
+                } catch (\Exception $Exception) {
+                    $this->writeException($Exception);
+                    continue;
+                }
+
+                $this->writeInfo('translation_finish');
+            }
+
+            QUI\Translator::publish($group);
+        }
     }
 
     /**
