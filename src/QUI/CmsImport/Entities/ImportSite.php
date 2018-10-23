@@ -43,11 +43,6 @@ class ImportSite extends AbstractImportEntity
     protected $name;
 
     /**
-     * @var string|int
-     */
-    protected $siteIdentifier;
-
-    /**
      * @var string
      */
     protected $lang;
@@ -65,30 +60,23 @@ class ImportSite extends AbstractImportEntity
     /**
      * ImportProject constructor.
      *
+     * @param string|int $identifier - Unique identifier for this ImportSite
      * @param string|int $projectIdentifier - The name of the project this Site belongs to
      * @param string $name - Name of the Site (this is the part that is seen in the URL)
      * @param string $lang - Language of the site
-     * @param string|int $siteIdentifier - Internal unique identification string for this ImportSite (import module specific!)
      * @param array $attributes (optional) - Additional Site attributes
      */
-    public function __construct($projectIdentifier, $lang, $name, $siteIdentifier, $attributes = [])
+    public function __construct($identifier, $projectIdentifier, $lang, $name, $attributes = [])
     {
         $this->projectIdentifier = $projectIdentifier;
         $this->name              = $name;
         $this->lang              = $lang;
-        $this->siteIdentifier    = $siteIdentifier;
 
         $this->setAttributes(array_merge($attributes, [
             'name' => $this->name
         ]));
-    }
 
-    /**
-     * @return int|string
-     */
-    public function getIdentifier()
-    {
-        return $this->siteIdentifier;
+        parent::__construct($identifier);
     }
 
     /**
@@ -170,23 +158,23 @@ class ImportSite extends AbstractImportEntity
     /**
      * Add a tag group that is associated with this Site
      *
-     * @param $title
+     * @param string $tagGroupIdentifier
      * @return void
      */
-    public function addTagGroup($title)
+    public function addTagGroup($tagGroupIdentifier)
     {
-        $this->tagGroups[] = $title;
+        $this->tagGroups[] = $tagGroupIdentifier;
     }
 
     /**
      * Add a tag that is associated with this Site
      *
-     * @param string $title
+     * @param string $tagIdentifier
      * @return void
      */
-    public function addTag($title)
+    public function addTag($tagIdentifier)
     {
-        $this->tags[] = $title;
+        $this->tags[] = $tagIdentifier;
     }
 
     /**
@@ -222,5 +210,15 @@ class ImportSite extends AbstractImportEntity
     public function getLanguageLinks()
     {
         return $this->languageLinks;
+    }
+
+    /**
+     * Get the import section the ImportEntitiy belongs to
+     *
+     * @return string
+     */
+    public function getImportSection()
+    {
+        return QUI\CmsImport\Import::IMPORT_SECTION_SITES;
     }
 }

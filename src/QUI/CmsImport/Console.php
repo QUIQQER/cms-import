@@ -81,10 +81,34 @@ class Console extends QUI\System\Console\Tool
             break;
         } while (true);
 
-        $Import = new Import($SelectedProvider, [
+        $importSettings = [
             'cleanup' => $cleanup
-        ]);
+        ];
 
+//        $importAreas = [
+//            'importSites',
+//            'importTags',
+//            'importMedia',
+//            'importUsers',
+//            'importGroups',
+//            'importSystemConfig',
+//            'importTranslations',
+//            'importPermissions'
+//        ];
+//
+//        $L = QUI::getLocale();
+//
+//        $this->writeHeader($L->get('quiqqer/cms-import', 'import.header.areas'));
+//
+//        foreach ($importAreas as $area) {
+//            $prompt = $this->writePrompt($L->get('quiqqer/cms-import', 'import.setting.area.'.$area), 'y');
+//
+//            if (mb_strtolower($prompt) !== 'n') {
+//                $importSettings[$area] = true;
+//            }
+//        }
+
+        $Import = new Import($SelectedProvider, $importSettings);
         $Import->setConsoleTool($this);
 
         try {
@@ -141,9 +165,9 @@ class Console extends QUI\System\Console\Tool
     public function writePrompt($msg, $defaultValue = null)
     {
         if (empty($defaultValue)) {
-            $this->writeLn("[Q] - ".$msg.": ", 'white');
+            $this->writeLn("[?] - ".$msg.": ", 'white');
         } else {
-            $this->writeLn("[Q] - ".$msg." [".$defaultValue."]: ", 'white');
+            $this->writeLn("[?] - ".$msg." [".$defaultValue."]: ", 'white');
         }
 
         $input = $this->readInput();

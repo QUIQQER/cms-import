@@ -17,6 +17,43 @@
             <de><![CDATA[Lösche altes Standard-Projekt...]]></de>
             <en><![CDATA[Deleting old default project...]]></en>
         </locale>
+        <locale name="import.setting.area.importTags">
+            <de><![CDATA[Tags- und Tag-Gruppen]]></de>
+            <en><![CDATA[Tags and tag groups]]></en>
+        </locale>
+        <locale name="import.setting.area.importSites">
+            <de><![CDATA[Seiten (Hierarchie, Inhalte, Einstellungen)]]></de>
+            <en><![CDATA[Sites (Hierarchy, content, settings)]]></en>
+        </locale>
+        <locale name="import.setting.area.importMedia">
+            <de><![CDATA[Media-Bereich (Ordner und Dateien)]]></de>
+            <en><![CDATA[Media (Folders and files)]]></en>
+        </locale>
+        <locale name="import.setting.area.importUsers">
+            <de><![CDATA[Benutzer (inkl. Attribute, soweit möglich)]]></de>
+            <en><![CDATA[Users (incl. attributes, if possible)]]></en>
+        </locale>
+        <locale name="import.setting.area.importGroups">
+            <de><![CDATA[Gruppen (Hierarchie und Attribute, soweit möglich)]]></de>
+            <en><![CDATA[Groups? (Hierarchy and attributes, if possible)]]></en>
+        </locale>
+        <locale name="import.setting.area.importSystemConfig">
+            <de><![CDATA[Systemkonfiguration (etc/conf.ini.php)]]></de>
+            <en><![CDATA[System configuration (etc/conf.ini.php)]]></en>
+        </locale>
+        <locale name="import.setting.area.importTranslations">
+            <de><![CDATA[Projekt-Übersetzungen]]></de>
+            <en><![CDATA[Project translations]]></en>
+        </locale>
+        <locale name="import.setting.area.importPermissions">
+            <de><![CDATA[Berechtigungen]]></de>
+            <en><![CDATA[permissions]]></en>
+        </locale>
+        <locale name="import.header.areas">
+            <de><![CDATA[Bitte wählen Sie, welche Bereiche importiert werden sollen:]]></de>
+            <en><![CDATA[Please choose the areas you want to import:]]></en>
+        </locale>
+        
 
         <!-- Project import -->
         <locale name="import.header.project">
@@ -160,12 +197,16 @@
             <en><![CDATA[Creating translations]]></en>
         </locale>
         <locale name="import.msg.translation_start">
-            <de><![CDATA[Lege Sprachvariable "[[group]] [var]" an.]]></de>
-            <en><![CDATA[Creating translation "[[group]] [var]".]]></en>
+            <de><![CDATA[Erstelle/editiere Sprachvariable "[[group]] [var]".]]></de>
+            <en><![CDATA[Creating/editing translation "[[group]] [var]".]]></en>
         </locale>
         <locale name="import.msg.translation_finish">
-            <de><![CDATA[Sprachvariable erfolgreich angelegt.]]></de>
-            <en><![CDATA[Translations sucessfully created.]]></en>
+            <de><![CDATA[Sprachvariable erfolgreich bearbeitet.]]></de>
+            <en><![CDATA[Translations sucessfully edited.]]></en>
+        </locale>
+        <locale name="import.msg.translations_publish">
+            <de><![CDATA[Veröffentliche Sprachvariablen für Gruppe "[group]".]]></de>
+            <en><![CDATA[Publishing translations for group "[group]".]]></en>
         </locale>
         
         <!-- Tags import -->
@@ -188,6 +229,12 @@
         <locale name="import.msg.project_tag_group">
             <de><![CDATA[Importiere Tag-Gruppe "[tagGroupTitle]"]]></de>
             <en><![CDATA[Importing tag group "[tagGroupTitle]"]]></en>
+        </locale>
+
+        <!-- Permissions import -->
+        <locale name="import.header.permissions_start">
+            <de><![CDATA[Berechtigungen importieren]]></de>
+            <en><![CDATA[Permissions import]]></en>
         </locale>
 
         <!-- Language links -->
@@ -216,6 +263,48 @@
         <locale name="import.msg.cleanup.delete_projects">
             <de><![CDATA[Lösche alle Projekte (außer dem Standard-Projekt)...]]></de>
             <en><![CDATA[Deleting all projcets (except for the standard project)...]]></en>
+        </locale>
+        <locale name="import.msg.cleanup.delete_crons">
+            <de><![CDATA[Lösche alle Crons...]]></de>
+            <en><![CDATA[Deleting all crons...]]></en>
+        </locale>
+        <locale name="import.msg.cleanup.delete_permissions">
+            <de><![CDATA[Lösche alle Berechtigungen, die von quiqqer/cms-import angelegt wurden...]]></de>
+            <en><![CDATA[Deleting all permissions that have been created by quiqqer/cms-import...]]></en>
+        </locale>
+
+        <!-- review.log -->
+        <locale name="review.section.header.general">
+            <de><![CDATA[Allgemein]]></de>
+            <en><![CDATA[General]]></en>
+        </locale>
+        <locale name="review.section.header.sites">
+            <de><![CDATA[Seiten]]></de>
+            <en><![CDATA[Sites]]></en>
+        </locale>
+        <locale name="review.section.header.media">
+            <de><![CDATA[Media]]></de>
+            <en><![CDATA[Media]]></en>
+        </locale>
+        <locale name="review.section.header.users">
+            <de><![CDATA[Benutzer]]></de>
+            <en><![CDATA[Users]]></en>
+        </locale>
+        <locale name="review.section.header.groups">
+            <de><![CDATA[Gruppen]]></de>
+            <en><![CDATA[Groups]]></en>
+        </locale>
+        <locale name="review.section.header.permissions">
+            <de><![CDATA[Berechtigungen]]></de>
+            <en><![CDATA[Permissions]]></en>
+        </locale>
+        <locale name="review.section.header.projects">
+            <de><![CDATA[Projekte]]></de>
+            <en><![CDATA[Projects]]></en>
+        </locale>
+        <locale name="review.section.header.translations">
+            <de><![CDATA[Übersetzungen]]></de>
+            <en><![CDATA[Translations]]></en>
         </locale>
     </groups>
 </locales>

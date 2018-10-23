@@ -17,11 +17,6 @@ class ImportGroup extends AbstractImportEntity
     protected $name;
 
     /**
-     * @var string|int
-     */
-    protected $identifier;
-
-    /**
      * @var bool
      */
     protected $hasAdminAccess = false;
@@ -41,11 +36,11 @@ class ImportGroup extends AbstractImportEntity
      */
     public function __construct($identifier, $name, $hasAdminAccess, $attributes = [])
     {
-        $this->identifier     = $identifier;
         $this->name           = $name;
         $this->hasAdminAccess = $hasAdminAccess;
 
         $this->setAttributes($attributes);
+        parent::__construct($identifier);
     }
 
     /**
@@ -86,5 +81,15 @@ class ImportGroup extends AbstractImportEntity
     public function getQuiqqerGroupId()
     {
         return $this->quiqqerGroupId;
+    }
+
+    /**
+     * Get the import section the ImportEntitiy belongs to
+     *
+     * @return string
+     */
+    public function getImportSection()
+    {
+        return QUI\CmsImport\Import::IMPORT_SECTION_GROUPS;
     }
 }

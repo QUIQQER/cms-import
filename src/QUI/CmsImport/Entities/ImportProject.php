@@ -27,11 +27,6 @@ class ImportProject extends AbstractImportEntity
     protected $langs = [];
 
     /**
-     * @var string|int
-     */
-    protected $identifier;
-
-    /**
      * ImportProject constructor.
      *
      * @param string|int $identifier - Project identifier
@@ -48,6 +43,7 @@ class ImportProject extends AbstractImportEntity
         $this->langs       = $languages;
 
         $this->setAttributes($attributes);
+        parent::__construct($identifier);
     }
 
     /**
@@ -80,5 +76,15 @@ class ImportProject extends AbstractImportEntity
     public function getLangs()
     {
         return $this->langs;
+    }
+
+    /**
+     * Get the import section the ImportEntitiy belongs to
+     *
+     * @return string
+     */
+    public function getImportSection()
+    {
+        return QUI\CmsImport\Import::IMPORT_SECTION_PROJECTS;
     }
 }

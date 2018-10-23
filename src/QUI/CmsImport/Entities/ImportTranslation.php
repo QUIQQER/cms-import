@@ -38,15 +38,17 @@ class ImportTranslation extends AbstractImportEntity
     /**
      * ImportTranslation constructor.
      *
+     * @param string $identifier - Unique identifier for this ImportTranslation
      * @param string $var - Translation variable
      * @param string $datatype - Translation datatype (one of self::DATATYPE_*)
      * @param bool $html - Does translation contain HTML?
      */
-    public function __construct($var, $datatype = self::DATATYPE_PHP_JS, $html = false)
+    public function __construct($identifier, $var, $datatype = self::DATATYPE_PHP_JS, $html = false)
     {
         $this->var      = $var;
         $this->datatype = $datatype;
         $this->isHtml   = $html;
+        parent::__construct($identifier);
     }
 
     /**
@@ -91,5 +93,15 @@ class ImportTranslation extends AbstractImportEntity
     public function isHtml()
     {
         return $this->isHtml;
+    }
+
+    /**
+     * Get the import section the ImportEntitiy belongs to
+     *
+     * @return string
+     */
+    public function getImportSection()
+    {
+        return QUI\CmsImport\Import::IMPORT_SECTION_TRANSLATIONS;
     }
 }

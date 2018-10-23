@@ -17,11 +17,6 @@ class ImportUser extends AbstractImportEntity
     protected $username;
 
     /**
-     * @var string|int
-     */
-    protected $identifier;
-
-    /**
      * @var int
      */
     protected $quiqqerUserId = null;
@@ -52,10 +47,10 @@ class ImportUser extends AbstractImportEntity
      */
     public function __construct($identifier, $username, $attributes = [])
     {
-        $this->identifier = $identifier;
-        $this->username   = $username;
+        $this->username = $username;
 
         $this->setAttributes($attributes);
+        parent::__construct($identifier);
     }
 
     /**
@@ -139,5 +134,15 @@ class ImportUser extends AbstractImportEntity
     public function getQuiqqerUserId()
     {
         return $this->quiqqerUserId;
+    }
+
+    /**
+     * Get the import section the ImportEntitiy belongs to
+     *
+     * @return string
+     */
+    public function getImportSection()
+    {
+        return QUI\CmsImport\Import::IMPORT_SECTION_USERS;
     }
 }

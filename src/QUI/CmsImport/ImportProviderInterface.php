@@ -4,14 +4,19 @@ namespace QUI\CmsImport;
 
 use QUI\CmsImport\Entities\ImportGroup;
 use QUI\CmsImport\Entities\ImportMediaItem;
+use QUI\CmsImport\Entities\ImportPermission;
 use QUI\CmsImport\Entities\ImportProject;
 use QUI\CmsImport\Entities\ImportSite;
+use QUI\CmsImport\Entities\ImportTag;
+use QUI\CmsImport\Entities\ImportTagGroup;
 use QUI\CmsImport\Entities\ImportTranslation;
 use QUI\CmsImport\Entities\ImportUser;
 use QUI\CmsImport\Hierarchy\GroupHierarchy;
 use QUI\CmsImport\Hierarchy\MediaFolderHierarchy;
 use QUI\CmsImport\Hierarchy\MediaItemHierarchy;
 use QUI\CmsImport\Hierarchy\SiteHierarchy;
+use QUI\CmsImport\Hierarchy\TagGroupHierarchy;
+use QUI\CmsImport\ItemList\TagList;
 use QUI\CmsImport\ItemList\UserList;
 
 /**
@@ -116,22 +121,42 @@ interface ImportProviderInterface
     public function getUser($userIdentifier);
 
     /**
-     * Get all tags
+     * Get complete TagGroupHierarchy for a project
      *
      * @param string $projectIdentifier - A unique ImportProject identifier
      * @param string $lang - Project lang
-     * @return array - "tag title" => ['description' => "description"]
+     * @return TagGroupHierarchy
      */
-    public function getTags($projectIdentifier, $lang);
+    public function getTagGroupHierarchy($projectIdentifier, $lang);
 
     /**
-     * Get all tag groups
+     * Get an ImportTagGroup
+     *
+     * @param string|int $identifier - Unique ImportTagGroup identifier
+     * @param string $projectIdentifier - A unique ImportProject identifier
+     * @param string $lang - Project lang
+     * @return ImportTagGroup
+     */
+    public function getTagGroup($identifier, $projectIdentifier, $lang);
+
+    /**
+     * Get complete list of ImportTag identifiers
      *
      * @param string $projectIdentifier - A unique ImportProject identifier
      * @param string $lang - Project lang
-     * @return array - Associative array ("tag group title" => ['description' => "description", 'tags' => [array of associated tag titles])
+     * @return TagList
      */
-    public function getTagGroups($projectIdentifier, $lang);
+    public function getTagList($projectIdentifier, $lang);
+
+    /**
+     * Get an ImportTag
+     *
+     * @param string|int $identifier - Unique ImportTagGroup identifier
+     * @param string $projectIdentifier - A unique ImportProject identifier
+     * @param string $lang - Project lang
+     * @return ImportTag
+     */
+    public function getTag($identifier, $projectIdentifier, $lang);
 
     /**
      * Get all QUIQQER system languages that should be imported
@@ -156,6 +181,13 @@ interface ImportProviderInterface
      * @return ImportTranslation[]
      */
     public function getTranslations($projectIdentifier);
+
+    /**
+     * Get all permissions that shall be imported
+     *
+     * @return ImportPermission[]
+     */
+    public function getPermissions();
 
     /**
      * The purpose of this method is to prompt the user for necessary configuration data (like paths, DB credentials...)

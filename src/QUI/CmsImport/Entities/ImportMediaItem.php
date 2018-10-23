@@ -18,11 +18,6 @@ class ImportMediaItem extends AbstractImportEntity
     /**
      * @var int|string
      */
-    protected $identifier;
-
-    /**
-     * @var int|string
-     */
     protected $projectIdentifier;
 
     /**
@@ -66,12 +61,12 @@ class ImportMediaItem extends AbstractImportEntity
      */
     public function __construct($identifier, $projectIdentifier, $type, $title, $attributes = [])
     {
-        $this->identifier        = $identifier;
         $this->projectIdentifier = $projectIdentifier;
         $this->type              = $type;
         $this->title             = $title;
 
         $this->setAttributes($attributes);
+        parent::__construct($identifier);
     }
 
     /**
@@ -148,5 +143,15 @@ class ImportMediaItem extends AbstractImportEntity
     public function getProjectIdentifier()
     {
         return $this->projectIdentifier;
+    }
+
+    /**
+     * Get the import section the ImportEntitiy belongs to
+     *
+     * @return string
+     */
+    public function getImportSection()
+    {
+        return QUI\CmsImport\Import::IMPORT_SECTION_MEDIA;
     }
 }
