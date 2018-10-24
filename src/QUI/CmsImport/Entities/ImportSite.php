@@ -72,6 +72,11 @@ class ImportSite extends AbstractImportEntity
         $this->name              = $name;
         $this->lang              = $lang;
 
+        // Default values
+        $this->setAttributes([
+            'type' => 'standard'
+        ]);
+
         $this->setAttributes(array_merge($attributes, [
             'name' => $this->name
         ]));

@@ -24,30 +24,28 @@ class Console extends QUI\System\Console\Tool
 
     /**
      * Execute the console tool
+     *
+     * @throws \Exception
      */
     public function execute()
     {
-        QUI::getLocale()->setCurrent('de'); // @todo keep variable
+        $L  = QUI::getLocale();
+        $lg = 'quiqqer/cms-import';
+
+        $importLang = $this->writePrompt('Import language? (en/de)', 'en');
+        $L->setCurrent($importLang);
 
         $rootUserId = (int)QUI::conf('globals', 'rootuser');
 
         if (QUI::getUserBySession()->getId() !== $rootUserId) {
-            $this->exitFail("The QUIQQER CMS Import can only be executed by the root user!");
+            $this->exitFail($L->get($lg, 'error.root_user_only'));
         }
 
         if (!$this->isSystemEmpty()) {
-            $this->writeWarning(
-                'It seems your QUIQQER system is not clean as it contains at least'
-                .' one additional user, group or project. It is advised that you import'
-                .' into a clean QUIQQER system.'
-            );
+            $this->writeWarning($L->get($lg, 'warning.system_not_clean'));
         }
 
-        $userInput = $this->writePrompt(
-            'Do you want do CLEANUP your QUIQQER system before executing the import?'
-            .' (This will delete all users (except for the root user), groups and all projects that'
-            .' are not in the import data) (Y/n)'
-        );
+        $userInput = $this->writePrompt($L->get($lg, 'prompt.cleanup'), 'y');
 
         if (mb_strtolower($userInput) === 'n') {
             $cleanup = false;
@@ -57,7 +55,7 @@ class Console extends QUI\System\Console\Tool
 
         // Choose ImportProvider
         do {
-            $this->writeInfo("Please choose the ImportProvider you want to execute:\n");
+            $this->writeHeader($L->get($lg, 'header.provider_selection'));
 
             $providers = $this->getImportProviders();
 
@@ -65,7 +63,7 @@ class Console extends QUI\System\Console\Tool
                 $this->writeLn("[".($k + 1)."] ".$ImportProvider->getTitle()." - ".$ImportProvider->getDescription());
             }
 
-            $key = $this->writePrompt("Which ImportProvider shall be executed?");
+            $key = $this->writePrompt($L->get($lg, 'prompt.provider_select'));
 
             if (empty($key)) {
                 continue;
@@ -85,28 +83,26 @@ class Console extends QUI\System\Console\Tool
             'cleanup' => $cleanup
         ];
 
-//        $importAreas = [
-//            'importSites',
-//            'importTags',
-//            'importMedia',
-//            'importUsers',
-//            'importGroups',
-//            'importSystemConfig',
-//            'importTranslations',
-//            'importPermissions'
-//        ];
-//
-//        $L = QUI::getLocale();
-//
-//        $this->writeHeader($L->get('quiqqer/cms-import', 'import.header.areas'));
-//
-//        foreach ($importAreas as $area) {
-//            $prompt = $this->writePrompt($L->get('quiqqer/cms-import', 'import.setting.area.'.$area), 'y');
-//
-//            if (mb_strtolower($prompt) !== 'n') {
-//                $importSettings[$area] = true;
-//            }
-//        }
+        $importAreas = [
+            'importSites',
+            'importTags',
+            'importMedia',
+            'importUsers',
+            'importGroups',
+            'importSystemConfig',
+            'importTranslations',
+            'importPermissions'
+        ];
+
+        $this->writeHeader($L->get($lg, 'import.header.areas'));
+
+        foreach ($importAreas as $area) {
+            $prompt = $this->writePrompt($L->get($lg, 'import.setting.area.'.$area), 'y');
+
+            if (mb_strtolower($prompt) !== 'n') {
+                $importSettings[$area] = true;
+            }
+        }
 
         $Import = new Import($SelectedProvider, $importSettings);
         $Import->setConsoleTool($this);

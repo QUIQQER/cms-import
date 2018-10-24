@@ -53,7 +53,30 @@
             <de><![CDATA[Bitte wählen Sie, welche Bereiche importiert werden sollen:]]></de>
             <en><![CDATA[Please choose the areas you want to import:]]></en>
         </locale>
-        
+        <locale name="quiqqer_project_error">
+            <de><![CDATA[Fehler beim Aufbau des QUIQQER-Projekts "[project]" ([lang]) -> [error]]]></de>
+            <en><![CDATA[Error on QUIQQER project creation "[project]" ([lang]) -> [error]]]></en>
+        </locale>
+        <locale name="error.root_user_only">
+            <de><![CDATA[Der QUIQQER CMS Import kann nur vom root-Benutzer der Ziel-Installation durchgeführt werden.]]></de>
+            <en><![CDATA[The QUIQQER CMS Import can only be executed by the root user of the target system!]]></en>
+        </locale>
+        <locale name="warning.system_not_clean">
+            <de><![CDATA[Es scheint als sei das QUIQQER-System nicht frisch. Es befindet sich mindestens ein zusätzlicher Benutzer, eine Gruppe oder ein Projekt im System. Es ist ratsam, den CMS-Import nur in ein frisches QUIQQER-System durchzuführen.]]></de>
+            <en><![CDATA[It seems your QUIQQER system is not clean as it contains at least one additional user, group or project. It is advised that you import into a clean QUIQQER system.]]></en>
+        </locale>
+        <locale name="prompt.cleanup">
+            <de><![CDATA[Möchten Sie Ihre QUIQQER-System aufräumen, bevor der Import durchgeführt wird? Dabei werden alle nicht-essentiellen Benutzer, Gruppen, Projekte und Crons gelöscht. Zudem werden Übersetzungen und Berechtigungen gelöscht, die ggf. bereits in einem vorherigen Import-Vorgang angelegt wurden.]]></de>
+            <en><![CDATA[Do you want to clean up your QUIQQER system before importing? This deletes all non-essential users, groups, projects and crons. In addition, translations and permissions that may have already been created in a previous import process are deleted.]]></en>
+        </locale>
+        <locale name="header.provider_selection">
+            <de><![CDATA[Auswahl des Import-Providers]]></de>
+            <en><![CDATA[Choosing an Import Provider]]></en>
+        </locale>
+        <locale name="prompt.provider_select">
+            <de><![CDATA[Mit welchem Import-Provider möchten Sie den Import durchführen?]]></de>
+            <en><![CDATA[Which Import Provider do you want to use?]]></en>
+        </locale>
 
         <!-- Project import -->
         <locale name="import.header.project">
@@ -63,6 +86,10 @@
         <locale name="import.msg.project.success">
             <de><![CDATA[Projekt "[project]" wurde erfolgreich importiert!]]></de>
             <en><![CDATA[Project "[project]" was imported successfully!]]></en>
+        </locale>
+        <locale name="project_create_error">
+            <de><![CDATA[Fehler beim Erstellen des Projekts: [error]]]></de>
+            <en><![CDATA[Erro on project creation: [error]]]></en>
         </locale>
 
         <!-- Site import -->
@@ -110,6 +137,26 @@
             <de><![CDATA[Starte Seiten-Import]]></de>
             <en><![CDATA[Starting sites import]]></en>
         </locale>
+        <locale name="import.error.site_edit">
+            <de><![CDATA[Konnte Seite nicht bearbeiten -> [error]]]></de>
+            <en><![CDATA[Could not edit site -> [error]]]></en>
+        </locale>
+        <locale name="import.error.site_create">
+            <de><![CDATA[Konnte Seite nicht erstellen -> [error]]]></de>
+            <en><![CDATA[Could not create site -> [error]]]></en>
+        </locale>
+        <locale name="import.error.site_activate">
+            <de><![CDATA[Konnte Seite nicht aktivieren -> [error]]]></de>
+            <en><![CDATA[Could not activate site -> [error]]]></en>
+        </locale>
+        <locale name="import.error.site_refresh">
+            <de><![CDATA[Konnte Seiten-Attribute nicht erneuern -> [error]]]></de>
+            <en><![CDATA[Could not refresh site attributes -> [error]]]></en>
+        </locale>
+        <locale name="import.error.tags_get_groups">
+            <de><![CDATA[Konnte Tag-Gruppen nicht laden -> [error]]]></de>
+            <en><![CDATA[Could not load tag groups -> [error]]]></en>
+        </locale>
 
         <!-- Media import -->
         <locale name="import.msg.media_folder_start">
@@ -140,9 +187,33 @@
             <de><![CDATA[Datei "[file]" für #[identifier] wurde existiert nicht. Media-Item kann nicht importiert werden.]]></de>
             <en><![CDATA[File "[file]" for #[identifier] does not exist. Media item cannot be imported.]]></en>
         </locale>
-        <locale name="media_file_cannot_have_children">
+        <locale name="import.warning.media_file_cannot_have_children">
             <de><![CDATA[Media-Datei #[identifier] hat laut Media-Hierachie Kinder. Dateien können jedoch keine Kinder haben. Media-Hierarchie nach dieser Datei wird übersprungen.]]></de>
             <en><![CDATA[Media file #[identifier] has children according to the media hierarchy. Files cannot have children. Media hierarchy after this file will be skipped.]]></en>
+        </locale>
+        <locale name="import.error.media_folder_create">
+            <de><![CDATA[Konnte Media-Ordner nicht erstellen -> [error]]]></de>
+            <en><![CDATA[Could not create media folder -> [error]]]></en>
+        </locale>
+        <locale name="import.error.media_folder_edit">
+            <de><![CDATA[Konnte Media-Ordner nicht bearbeiten -> [error]]]></de>
+            <en><![CDATA[Could not edit media folder -> [error]]]></en>
+        </locale>
+        <locale name="import.error.media_folder_activate">
+            <de><![CDATA[Konnte Media-Ordner nicht aktivieren -> [error]]]></de>
+            <en><![CDATA[Could not activate media folder -> [error]]]></en>
+        </locale>
+        <locale name="import.error.media_item_create">
+            <de><![CDATA[Konnte Media-Datei nicht erstellen -> [error]]]></de>
+            <en><![CDATA[Could not create media file -> [error]]]></en>
+        </locale>
+        <locale name="import.error.media_item_edit">
+            <de><![CDATA[Konnte Media-Datei nicht bearbeiten -> [error]]]></de>
+            <en><![CDATA[Could not edit media file -> [error]]]></en>
+        </locale>
+        <locale name="import.error.media_item_activate">
+            <de><![CDATA[Konnte Media-Datei nicht aktivieren -> [error]]]></de>
+            <en><![CDATA[Could not activate media file -> [error]]]></en>
         </locale>
 
         <!-- Group import -->
@@ -158,6 +229,27 @@
             <de><![CDATA[Gruppe #[identifier] kann nicht mit ID #[id] importiert werden, da bereits eine Gruppe mit dieser ID importiert wurde.]]></de>
             <en><![CDATA[Group #[identifier] cannot be imported with ID #[id] because a group with an identical ID has already been imported.]]></en>
         </locale>
+        <locale name="import.error.root_group_get">
+            <de><![CDATA[Konnte QUIQQER-Root-Gruppe nicht aufbauen -> [error]]]></de>
+            <en><![CDATA[Could not build QUIQQER root group -> [error]]]></en>
+        </locale>
+        <locale name="import.error.group_create">
+            <de><![CDATA[Konnte Gruppe nicht erstellen -> [error]]]></de>
+            <en><![CDATA[Could not create group -> [error]]]></en>
+        </locale>
+        <locale name="import.error.group_edit">
+            <de><![CDATA[Konnte Gruppe nicht bearbeiten -> [error]]]></de>
+            <en><![CDATA[Could not edit group -> [error]]]></en>
+        </locale>
+        <locale name="import.error.group_activate">
+            <de><![CDATA[Konnte Gruppe nicht aktivieren -> [error]]]></de>
+            <en><![CDATA[Could not activate group -> [error]]]></en>
+        </locale>
+        <locale name="import.error.group_set_permissions">
+            <de><![CDATA[Konnte Gruppe-Berechtigungen nicht setzen -> [error]]]></de>
+            <en><![CDATA[Could not set group permissions -> [error]]]></en>
+        </locale>
+
 
         <!-- User import -->
         <locale name="import.header.users_start">
@@ -171,6 +263,18 @@
         <locale name="import.msg.user_finish">
             <de><![CDATA[Benutzer erfolgreich als QUIQQER-Benutzer #[quiqqerUserId] ("[quiqqerUsername]") importiert.]]></de>
             <en><![CDATA[User successfully imported as QUIQQER user #[quiqqerUserId] ("[quiqqerUsername]").]]></en>
+        </locale>
+        <locale name="import.error.user_create">
+            <de><![CDATA[Konnte Benutzer nicht erstellen -> [error]]]></de>
+            <en><![CDATA[Could not create user -> [error]]]></en>
+        </locale>
+        <locale name="import.error.user_activate">
+            <de><![CDATA[Konnte Benutzer nicht aktivieren -> [error]]]></de>
+            <en><![CDATA[Could not activate user -> [error]]]></en>
+        </locale>
+        <locale name="import.error.user_edit">
+            <de><![CDATA[Konnte Benutzer nicht bearbeiten -> [error]]]></de>
+            <en><![CDATA[Could not edit user -> [error]]]></en>
         </locale>
 
         <!-- System config -->
@@ -208,6 +312,14 @@
             <de><![CDATA[Veröffentliche Sprachvariablen für Gruppe "[group]".]]></de>
             <en><![CDATA[Publishing translations for group "[group]".]]></en>
         </locale>
+        <locale name="import.error.translation_create">
+            <de><![CDATA[Konnte Übersetzung "[var]" nicht anlegen/bearbeiten -> [error]]]></de>
+            <en><![CDATA[Could not create/edit translation "[var]" -> [error]]]></en>
+        </locale>
+        <locale name="import.error.translations_publish">
+            <de><![CDATA[Konnte Übersetzungen für Gruppe "[group]" nicht veröffentlichen -> [error]]]></de>
+            <en><![CDATA[Could not publish translations for group "[group]" -> [error]]]></en>
+        </locale>
         
         <!-- Tags import -->
         <locale name="import.header.tags_package_not_installed">
@@ -230,11 +342,35 @@
             <de><![CDATA[Importiere Tag-Gruppe "[tagGroupTitle]"]]></de>
             <en><![CDATA[Importing tag group "[tagGroupTitle]"]]></en>
         </locale>
+        <locale name="import.warning.project_tag_duplicate_title">
+            <de><![CDATA[Das QUIQQER-Projekt "[project]" ([lang]) hat bereits ein Tag mit dem Titel "[tag]". Tag wurde umbenannt zu "[newTag]".]]></de>
+            <en><![CDATA[The QUIQQER project "[project]" ([lang]) already has a tag with title "[tag]". Tag was renamed wo "[newTag]".]]></en>
+        </locale>
+        <locale name="import.error.tags_set_parent_error">
+            <de><![CDATA[Konnte Parent-Tag-Gruppe nicht setzen -> [error]]]></de>
+            <en><![CDATA[Could not set parent tag group -> [error]]]></en>
+        </locale>
+        <locale name="import.error.tags_set_group_error">
+            <de><![CDATA[Konnte Tag nicht in Tag-Gruppe #[tagGroupIdentifier] setzen -> [error]]]></de>
+            <en><![CDATA[Could not set tag to tag group #[tagGroupIdentifier] -> [error]]]></en>
+        </locale>
+        <locale name="import.error.tag_create">
+            <de><![CDATA[Tag konnte nicht erstellt werden -> [error]]]></de>
+            <en><![CDATA[Tag could not be created -> [error]]]></en>
+        </locale>
+        <locale name="import.error.tag_project_build">
+            <de><![CDATA[Tag-Projekt "[project]" ([lang]) konnte nicht aufgebaut werden -> [error]]]></de>
+            <en><![CDATA[Tag project "[project]" ([lang]) could be built -> [error]]]></en>
+        </locale>
 
         <!-- Permissions import -->
         <locale name="import.header.permissions_start">
             <de><![CDATA[Berechtigungen importieren]]></de>
             <en><![CDATA[Permissions import]]></en>
+        </locale>
+        <locale name="import.error.permission_translation">
+            <de><![CDATA[Konnte Berechtigungs-Sprachvariable nicht erstellen -> [error]]]></de>
+            <en><![CDATA[Could not create permission translation -> [error]]]></en>
         </locale>
 
         <!-- Language links -->
@@ -274,6 +410,14 @@
         </locale>
 
         <!-- review.log -->
+        <locale name="import.header.review">
+            <de><![CDATA[Review]]></de>
+            <en><![CDATA[Review]]></en>
+        </locale>
+        <locale name="import.msg.review_log">
+            <de><![CDATA[Es sind ggf. händische Anpassungen/Prüfungen des Import-Vorgangs notwendig. Bitte schauen Sie dazu in die Datei "[file]".]]></de>
+            <en><![CDATA[Manual adjustments/checks of the import process may be necessary. ]]></en>
+        </locale>
         <locale name="review.section.header.general">
             <de><![CDATA[Allgemein]]></de>
             <en><![CDATA[General]]></en>
@@ -305,6 +449,10 @@
         <locale name="review.section.header.translations">
             <de><![CDATA[Übersetzungen]]></de>
             <en><![CDATA[Translations]]></en>
+        </locale>
+        <locale name="review.section.header.tags">
+            <de><![CDATA[Tags- und Tag-Gruppen]]></de>
+            <en><![CDATA[Tags and Tag Groups]]></en>
         </locale>
     </groups>
 </locales>

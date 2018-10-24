@@ -14,11 +14,6 @@ class ImportTag extends AbstractImportEntity
     /**
      * @var string
      */
-    protected $name;
-
-    /**
-     * @var string
-     */
     protected $title;
 
     /**
@@ -27,36 +22,20 @@ class ImportTag extends AbstractImportEntity
     protected $description;
 
     /**
-     * @var string - ImportTagGroup identifier
+     * @var string[] - ImportTagGroup identifiers
      */
-    protected $tagGroup;
+    protected $tagGroups = [];
 
     /**
      * ImportProject constructor.
      *
      * @param string|int $identifier - ImportTagGroup identifier
-     * @param string $name - Tag name
+     * @param string $title - Tag title
      */
-    public function __construct($identifier, $name)
-    {
-        $this->name = $name;
-        parent::__construct($identifier);
-    }
-
-    /**
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param string $title
-     */
-    public function setTitle($title)
+    public function __construct($identifier, $title)
     {
         $this->title = $title;
+        parent::__construct($identifier);
     }
 
     /**
@@ -84,19 +63,19 @@ class ImportTag extends AbstractImportEntity
     }
 
     /**
-     * @return string
+     * @return string[]
      */
-    public function getTagGroup()
+    public function getTagGroups()
     {
-        return $this->tagGroup;
+        return array_values(array_unique($this->tagGroups));
     }
 
     /**
      * @param string $tagGroup
      */
-    public function setTagGroup($tagGroup)
+    public function addTagGroup($tagGroup)
     {
-        $this->tagGroup = $tagGroup;
+        $this->tagGroups[] = $tagGroup;
     }
 
     /**
