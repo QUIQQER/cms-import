@@ -9,7 +9,7 @@ use QUI;
  *
  * Represents a QUIQQER user group that is imported
  */
-class ImportGroup extends AbstractImportEntity
+class ImportGroup extends AbstractImportEntity implements CustomQuiqqerIdInterface
 {
     /**
      * @var string
@@ -24,7 +24,7 @@ class ImportGroup extends AbstractImportEntity
     /**
      * @var int
      */
-    protected $quiqqerGroupId = null;
+    protected $quiqqerId = null;
 
     /**
      * ImportGroup constructor.
@@ -68,19 +68,24 @@ class ImportGroup extends AbstractImportEntity
     }
 
     /**
-     * @param int $quiqqerGroupId
+     * Set QUIQQER ID
+     *
+     * @param int $id
+     * @return void
      */
-    public function setQuiqqerGroupId($quiqqerGroupId)
+    public function setQuiqqerId(int $id)
     {
-        $this->quiqqerGroupId = $quiqqerGroupId;
+        $this->quiqqerId = $id;
     }
 
     /**
-     * @return int
+     * Return QUIQQER ID
+     *
+     * @return int|null
      */
-    public function getQuiqqerGroupId()
+    public function getQuiqqerId()
     {
-        return $this->quiqqerGroupId;
+        return $this->quiqqerId;
     }
 
     /**

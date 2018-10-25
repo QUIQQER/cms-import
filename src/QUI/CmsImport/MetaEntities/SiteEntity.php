@@ -1,8 +1,8 @@
 <?php
 
-namespace QUI\CmsImport\Hierarchy;
+namespace QUI\CmsImport\MetaEntities;
 
-class SiteItem extends HierarchyItem
+class SiteEntity extends MetaEntity
 {
     /**
      * @var bool
@@ -20,7 +20,6 @@ class SiteItem extends HierarchyItem
     public function __construct($siteIdentifier, $parentIdentifier = null, $isLink = false)
     {
         $this->isLink = $isLink;
-
         parent::__construct($siteIdentifier, $parentIdentifier);
     }
 

@@ -19,28 +19,19 @@ class ImportProject extends AbstractImportEntity
     /**
      * @var string
      */
-    protected $defaultLang;
-
-    /**
-     * @var array
-     */
-    protected $langs = [];
+    protected $lang;
 
     /**
      * ImportProject constructor.
      *
      * @param string|int $identifier - Project identifier
      * @param string $name - Project name
-     * @param string $lang - Project standard language
-     * @param array $languages (optional) - All available Project languages
      * @param array $attributes (optional) - Additional attributes
      */
-    public function __construct($identifier, $name, $lang, $languages = [], $attributes = [])
+    public function __construct($identifier, $name, $attributes = [])
     {
-        $this->identifier  = $identifier;
-        $this->name        = $name;
-        $this->defaultLang = $lang;
-        $this->langs       = $languages;
+        $this->identifier = $identifier;
+        $this->name       = $name;
 
         $this->setAttributes($attributes);
         parent::__construct($identifier);
@@ -60,22 +51,6 @@ class ImportProject extends AbstractImportEntity
     public function getName()
     {
         return $this->name;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getDefaultLang()
-    {
-        return $this->defaultLang;
-    }
-
-    /**
-     * @return array
-     */
-    public function getLangs()
-    {
-        return $this->langs;
     }
 
     /**

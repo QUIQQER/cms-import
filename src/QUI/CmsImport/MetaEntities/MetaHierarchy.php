@@ -1,23 +1,24 @@
 <?php
 
-namespace QUI\CmsImport\Hierarchy;
+namespace QUI\CmsImport\MetaEntities;
 
-class Hierarchy implements ChildrenIteratorInterface
+class MetaHierarchy extends MetaList
 {
-    /**
-     * @var HierarchyItem[]
-     */
-    protected $children = [];
-
     /**
      * @var bool
      */
     protected $sorted = false;
 
-    public function addChild(HierarchyItem $Item)
+    /**
+     * Add a child to the list
+     *
+     * @param MetaEntity $Item
+     * @return void
+     */
+    public function addChild(MetaEntity $Item)
     {
-        $this->children[] = $Item;
-        $this->sorted     = false;
+        $this->sorted = false;
+        parent::addChild($Item);
     }
 
     /**
@@ -27,7 +28,7 @@ class Hierarchy implements ChildrenIteratorInterface
      */
     public function buildTree()
     {
-        /** @var HierarchyItem $Child */
+        /** @var MetaEntity $Child */
         foreach ($this->children as $k => $Child) {
             if (!$Child->getParentId()) {
                 continue;
@@ -48,11 +49,11 @@ class Hierarchy implements ChildrenIteratorInterface
      * Get a child from the tree
      *
      * @param int|string $id
-     * @return bool|HierarchyItem
+     * @return bool|MetaEntity
      */
-    protected function getChild($id)
+    public function getChild($id)
     {
-        /** @var HierarchyItem $Child */
+        /** @var MetaEntity $Child */
         foreach ($this->walkTree($this->children) as $Child) {
             if ($Child->getId() == $id) {
                 return $Child;
@@ -63,7 +64,7 @@ class Hierarchy implements ChildrenIteratorInterface
     }
 
     /**
-     * Walk the tree of children
+     * Walk the list of children
      *
      * @return \Generator
      */
@@ -81,7 +82,7 @@ class Hierarchy implements ChildrenIteratorInterface
     /**
      * Walk the tree of children
      *
-     * @param HierarchyItem[] $children
+     * @param MetaEntity[] $children
      * @return \Generator
      */
     protected function walkTree($children)
@@ -90,16 +91,8 @@ class Hierarchy implements ChildrenIteratorInterface
             yield $k => $Child;
 
             if ($Child->hasChildren()) {
-                yield from $this->walkTree($Child->getChildren());
+                yield from $this->walkTree($Child->getChildrenList()->getChildren());
             }
         }
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasChildren()
-    {
-        return !empty($this->children);
     }
 }
