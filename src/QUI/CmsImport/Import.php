@@ -110,8 +110,6 @@ class Import extends QUI\QDOM
             'importPermissions'  => false
         ]);
 
-        \QUI\System\Log::writeRecursive($settings);
-
         $this->setAttributes($settings);
         $this->ImportProvider = $ImportProvider;
         $this->ImportProvider->setImport($this);
