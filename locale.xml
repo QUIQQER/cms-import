@@ -87,9 +87,9 @@
             <de><![CDATA[Projekt "[project]" wurde erfolgreich importiert!]]></de>
             <en><![CDATA[Project "[project]" was imported successfully!]]></en>
         </locale>
-        <locale name="project_create_error">
+        <locale name="import.error.project_create_error">
             <de><![CDATA[Fehler beim Erstellen des Projekts: [error]]]></de>
-            <en><![CDATA[Erro on project creation: [error]]]></en>
+            <en><![CDATA[Error on project creation: [error]]]></en>
         </locale>
 
         <!-- Site import -->
@@ -159,6 +159,10 @@
         </locale>
 
         <!-- Media import -->
+        <locale name="import.header.media_start">
+            <de><![CDATA[Importiere Media-Ordner und -Dateien]]></de>
+            <en><![CDATA[Importing media folders and files]]></en>
+        </locale>
         <locale name="import.msg.media_folder_start">
             <de><![CDATA[Importiere Media-Ordner #[identifier] ("[title]")]]></de>
             <en><![CDATA[Importing media folder #[identifier] ("[title]")]]></en>
@@ -217,6 +221,10 @@
         </locale>
 
         <!-- Group import -->
+        <locale name="import.header.groups_start">
+            <de><![CDATA[Importiere Gruppen]]></de>
+            <en><![CDATA[Importing groups]]></en>
+        </locale>
         <locale name="import.msg.group_start">
             <de><![CDATA[Importiere Gruppe #[identifier]]]></de>
             <en><![CDATA[Importing group #[identifier]]]></en>
@@ -416,7 +424,7 @@
         </locale>
         <locale name="import.msg.review_log">
             <de><![CDATA[Es sind ggf. händische Anpassungen/Prüfungen des Import-Vorgangs notwendig. Bitte schauen Sie dazu in die Datei "[file]".]]></de>
-            <en><![CDATA[Manual adjustments/checks of the import process may be necessary. ]]></en>
+            <en><![CDATA[Manual adjustments/checks of the import process may be necessary. Please look at "[file]".]]></en>
         </locale>
         <locale name="review.section.header.general">
             <de><![CDATA[Allgemein]]></de>

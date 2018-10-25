@@ -9,7 +9,7 @@ use QUI;
  *
  * Represents a QUIQQER site that is imported
  */
-class ImportSite extends AbstractImportEntity
+class ImportSite extends AbstractImportEntity implements CustomQuiqqerIdInterface
 {
     /**
      * Collection of tag titles associated with the Site
@@ -55,7 +55,7 @@ class ImportSite extends AbstractImportEntity
     /**
      * @var int
      */
-    protected $quiqqerSiteId = null;
+    protected $quiqqerId = null;
 
     /**
      * ImportProject constructor.
@@ -85,23 +85,24 @@ class ImportSite extends AbstractImportEntity
     }
 
     /**
-     * @return int|null
+     * Set QUIQQER ID
+     *
+     * @param int $id
+     * @return void
      */
-    public function getQuiqqerSiteId()
+    public function setQuiqqerId(int $id)
     {
-        return $this->quiqqerSiteId;
+        $this->quiqqerId = $id;
     }
 
     /**
-     * Set a custom QUIQQER site id
+     * Return QUIQQER ID
      *
-     * The import process will try to assign this ID to the QUIQQER site
-     *
-     * @param int $quiqqerSiteId
+     * @return int|null
      */
-    public function setQuiqqerSiteId($quiqqerSiteId)
+    public function getQuiqqerId()
     {
-        $this->quiqqerSiteId = $quiqqerSiteId;
+        return $this->quiqqerId;
     }
 
     /**

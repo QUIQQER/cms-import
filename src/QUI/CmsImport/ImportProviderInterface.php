@@ -11,13 +11,12 @@ use QUI\CmsImport\Entities\ImportTag;
 use QUI\CmsImport\Entities\ImportTagGroup;
 use QUI\CmsImport\Entities\ImportTranslation;
 use QUI\CmsImport\Entities\ImportUser;
-use QUI\CmsImport\Hierarchy\GroupHierarchy;
-use QUI\CmsImport\Hierarchy\MediaFolderHierarchy;
-use QUI\CmsImport\Hierarchy\MediaItemHierarchy;
-use QUI\CmsImport\Hierarchy\SiteHierarchy;
-use QUI\CmsImport\Hierarchy\TagGroupHierarchy;
-use QUI\CmsImport\ItemList\TagList;
-use QUI\CmsImport\ItemList\UserList;
+use QUI\CmsImport\MetaEntities\MetaHierarchy;
+use QUI\CmsImport\MetaEntities\ProjectList;
+use QUI\CmsImport\MetaEntities\SiteHierarchy;
+use QUI\CmsImport\MetaEntities\MetaList;
+use QUI\CmsImport\Provider\PMS\ImportProvider;
+
 
 /**
  * Interface ImportProviderInterface
@@ -50,9 +49,17 @@ interface ImportProviderInterface
     /**
      * Get all QUIQQER projects that should be imported
      *
-     * @return ImportProject[]
+     * @return ProjectList
      */
-    public function getProjects();
+    public function getProjectList();
+
+    /**
+     * Get an ImportProject
+     *
+     * @param int|string $projectIdentifier - Unique ImportProject identifier
+     * @return ImportProject
+     */
+    public function getProject($projectIdentifier);
 
     /**
      * Get a site that should be imported
@@ -77,7 +84,7 @@ interface ImportProviderInterface
      * Get the complete hierarchical media item structure (folders, files, images)
      *
      * @param $projectIdentifier
-     * @return MediaItemHierarchy
+     * @return MetaHierarchy
      */
     public function getMediaHierarchy($projectIdentifier);
 
@@ -91,9 +98,9 @@ interface ImportProviderInterface
     public function getMediaItem($mediaItemIdentifier, $projectIdentifier);
 
     /**
-     * Get complete group hiearchy for QUIQQER group structure
+     * Get complete group hierarchy for QUIQQER group structure
      *
-     * @return GroupHierarchy
+     * @return MetaHierarchy
      */
     public function getGroupHierarchy();
 
@@ -108,7 +115,7 @@ interface ImportProviderInterface
     /**
      * Get complete list of QUIQQER users (meta-list, not actual User objects)
      *
-     * @return UserList
+     * @return MetaList
      */
     public function getUserList();
 
@@ -125,7 +132,7 @@ interface ImportProviderInterface
      *
      * @param string $projectIdentifier - A unique ImportProject identifier
      * @param string $lang - Project lang
-     * @return TagGroupHierarchy
+     * @return MetaHierarchy
      */
     public function getTagGroupHierarchy($projectIdentifier, $lang);
 
@@ -144,7 +151,7 @@ interface ImportProviderInterface
      *
      * @param string $projectIdentifier - A unique ImportProject identifier
      * @param string $lang - Project lang
-     * @return TagList
+     * @return MetaList
      */
     public function getTagList($projectIdentifier, $lang);
 
@@ -159,13 +166,6 @@ interface ImportProviderInterface
     public function getTag($identifier, $projectIdentifier, $lang);
 
     /**
-     * Get all QUIQQER system languages that should be imported
-     *
-     * @return string[]
-     */
-    public function getSystemLanguages();
-
-    /**
      * Get QUIQQER system configuration (as associative array)
      *
      * These are the settings for etc/conf.ini.php
@@ -178,16 +178,33 @@ interface ImportProviderInterface
      * Get all translations for a project
      *
      * @param int|string $projectIdentifier - Unique ImportProject identifier
-     * @return ImportTranslation[]
+     * @return MetaList
      */
-    public function getTranslations($projectIdentifier);
+    public function getTranslationList($projectIdentifier);
+
+    /**
+     * Get an ImportTranslation
+     *
+     * @param int|string $translationIdentifier
+     * @param int|string $projectIdentifier
+     * @return ImportTranslation
+     */
+    public function getTranslation($translationIdentifier, $projectIdentifier);
 
     /**
      * Get all permissions that shall be imported
      *
-     * @return ImportPermission[]
+     * @return MetaList
      */
-    public function getPermissions();
+    public function getPermissionList();
+
+    /**
+     * Get an ImportPermission
+     *
+     * @param int|string $permissionIdentifier
+     * @return ImportPermission
+     */
+    public function getPermission($permissionIdentifier);
 
     /**
      * The purpose of this method is to prompt the user for necessary configuration data (like paths, DB credentials...)

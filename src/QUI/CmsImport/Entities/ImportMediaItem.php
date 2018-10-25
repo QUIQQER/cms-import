@@ -9,7 +9,7 @@ use QUI;
  *
  * Represents a QUIQQER media item that is imported
  */
-class ImportMediaItem extends AbstractImportEntity
+class ImportMediaItem extends AbstractImportEntity implements CustomQuiqqerIdInterface
 {
     const MEDIA_TYPE_IMAGE  = 'image';
     const MEDIA_TYPE_FILE   = 'file';
@@ -43,7 +43,7 @@ class ImportMediaItem extends AbstractImportEntity
     /**
      * @var int
      */
-    protected $quiqqerMediaId = null;
+    protected $quiqqerId = null;
 
     /**
      * @var string - Absolute file path to associated file
@@ -118,23 +118,24 @@ class ImportMediaItem extends AbstractImportEntity
     }
 
     /**
-     * @return int|null
+     * Set QUIQQER ID
+     *
+     * @param int $id
+     * @return void
      */
-    public function getQuiqqerMediaId()
+    public function setQuiqqerId(int $id)
     {
-        return $this->quiqqerMediaId;
+        $this->quiqqerId = $id;
     }
 
     /**
-     * Set a custom QUIQQER media id
+     * Return QUIQQER ID
      *
-     * The import process will try to assign this ID to the QUIQQER media item
-     *
-     * @param int $quiqqerMediaId
+     * @return int|null
      */
-    public function setQuiqqerMediaId($quiqqerMediaId)
+    public function getQuiqqerId()
     {
-        $this->quiqqerMediaId = $quiqqerMediaId;
+        return $this->quiqqerId;
     }
 
     /**

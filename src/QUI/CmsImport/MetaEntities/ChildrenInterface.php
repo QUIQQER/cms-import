@@ -1,8 +1,8 @@
 <?php
 
-namespace QUI\CmsImport\Hierarchy;
+namespace QUI\CmsImport\MetaEntities;
 
-interface ChildrenIteratorInterface
+interface ChildrenInterface
 {
     /**
      * Walk the tree of children

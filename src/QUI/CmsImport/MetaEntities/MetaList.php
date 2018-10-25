@@ -1,28 +1,26 @@
 <?php
 
-namespace QUI\CmsImport\ItemList;
-
-use QUI\CmsImport\Hierarchy\ChildrenIteratorInterface;
+namespace QUI\CmsImport\MetaEntities;
 
 /**
- * Class ChildrenList
+ * Class MetaItemList
  *
- * A simple list of ListItems
+ * A simple list of MetaEntity objects
  */
-class ChildrenList implements ChildrenIteratorInterface
+class MetaList implements ChildrenInterface
 {
     /**
-     * @var ListItem[]
+     * @var MetaEntity[]
      */
     protected $children = [];
 
     /**
      * Add a child to the list
      *
-     * @param ListItem $Item
+     * @param MetaEntity $Item
      * @return void
      */
-    public function addChild(ListItem $Item)
+    public function addChild(MetaEntity $Item)
     {
         $this->children[] = $Item;
     }
@@ -31,11 +29,11 @@ class ChildrenList implements ChildrenIteratorInterface
      * Get a child from the list
      *
      * @param int|string $id
-     * @return bool|ListItem
+     * @return bool|MetaEntity
      */
-    protected function getChild($id)
+    public function getChild($id)
     {
-        /** @var ListItem $Child */
+        /** @var MetaEntity $Child */
         foreach ($this->walkChildren() as $Child) {
             if ($Child->getId() == $id) {
                 return $Child;
@@ -43,6 +41,14 @@ class ChildrenList implements ChildrenIteratorInterface
         }
 
         return false;
+    }
+
+    /**
+     * @return MetaEntity[]
+     */
+    public function getChildren(): array
+    {
+        return $this->children;
     }
 
     /**
