@@ -9,6 +9,8 @@ Package Name:
 
     quiqqer/cms-import
 
+You are a developer and want to build an ImportProvider for your CMS? See our [wiki](https://dev.quiqqer.com/quiqqer/cms-import/wikis/Developing-a-QUIQQER-CMS-Import-Provider)
+on how to create your own ImportProvider.
 
 Features
 --------
