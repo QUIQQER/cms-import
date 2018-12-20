@@ -33,6 +33,10 @@ Installation
 ------------
 The Package Name is: quiqqer/cms-import
 
+Usage
+----------
+You can find a short instruction on how to use the CMS import at https://dev.quiqqer.com/quiqqer/cms-import/wikis/How-to-use
+
 Contribute
 ----------
 - Project: https://dev.quiqqer.com/quiqqer/cms-import
