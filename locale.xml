@@ -62,12 +62,15 @@
             <en><![CDATA[The QUIQQER CMS Import can only be executed by the root user of the target system!]]></en>
         </locale>
         <locale name="warning.system_not_clean">
-            <de><![CDATA[Es scheint als sei das QUIQQER-System nicht frisch. Es befindet sich mindestens ein zusätzlicher Benutzer, eine Gruppe oder ein Projekt im System. Es ist ratsam, den CMS-Import nur in ein frisches QUIQQER-System durchzuführen.]]></de>
+            <de>
+                <![CDATA[Es scheint als sei das QUIQQER-System nicht frisch. Es befindet sich mindestens ein zusätzlicher Benutzer, eine Gruppe oder ein Projekt im System. Es ist ratsam, den CMS-Import nur in ein frisches QUIQQER-System durchzuführen.]]></de>
             <en><![CDATA[It seems your QUIQQER system is not clean as it contains at least one additional user, group or project. It is advised that you import into a clean QUIQQER system.]]></en>
         </locale>
         <locale name="prompt.cleanup">
-            <de><![CDATA[Möchten Sie Ihre QUIQQER-System aufräumen, bevor der Import durchgeführt wird? Dabei werden alle nicht-essentiellen Benutzer, Gruppen, Projekte und Crons gelöscht. Zudem werden Übersetzungen und Berechtigungen gelöscht, die ggf. bereits in einem vorherigen Import-Vorgang angelegt wurden.]]></de>
-            <en><![CDATA[Do you want to clean up your QUIQQER system before importing? This deletes all non-essential users, groups, projects and crons. In addition, translations and permissions that may have already been created in a previous import process are deleted.]]></en>
+            <de>
+                <![CDATA[Möchten Sie Ihre QUIQQER-System aufräumen, bevor der Import durchgeführt wird? Dabei werden alle nicht-essentiellen Benutzer, Gruppen, Projekte und Crons gelöscht. Zudem werden Übersetzungen und Berechtigungen gelöscht, die ggf. bereits in einem vorherigen Import-Vorgang angelegt wurden.]]></de>
+            <en>
+                <![CDATA[Do you want to clean up your QUIQQER system before importing? This deletes all non-essential users, groups, projects and crons. In addition, translations and permissions that may have already been created in a previous import process are deleted.]]></en>
         </locale>
         <locale name="header.provider_selection">
             <de><![CDATA[Auswahl des Import-Providers]]></de>
@@ -328,7 +331,7 @@
             <de><![CDATA[Konnte Übersetzungen für Gruppe "[group]" nicht veröffentlichen -> [error]]]></de>
             <en><![CDATA[Could not publish translations for group "[group]" -> [error]]]></en>
         </locale>
-        
+
         <!-- Tags import -->
         <locale name="import.header.tags_package_not_installed">
             <de><![CDATA[Tags- und Tag-Gruppen können nicht importiert werden, da quiqqer/tags nicht installiert ist.]]></de>
@@ -415,6 +418,48 @@
         <locale name="import.msg.cleanup.delete_permissions">
             <de><![CDATA[Lösche alle Berechtigungen, die von quiqqer/cms-import angelegt wurden...]]></de>
             <en><![CDATA[Deleting all permissions that have been created by quiqqer/cms-import...]]></en>
+        </locale>
+
+        <!-- Section error -->
+        <locale name="error.import_projects">
+            <de><![CDATA[Beim Projekte-Import ist ein Fehler aufgetreten -> [error]]]></de>
+            <en><![CDATA[An error occurred during project import -> [error]]]></en>
+        </locale>
+        <locale name="error.import_translations">
+            <de><![CDATA[Beim Übersetzungs-Import ist ein Fehler aufgetreten -> [error]]]></de>
+            <en><![CDATA[An error occurred during translation import -> [error]]]></en>
+        </locale>
+        <locale name="error.delete_old_standard_project">
+            <de><![CDATA[Beim Löschen des alten Standard-Projekts ist ein Fehler aufgetreten (System-Cleanup) -> [error]]]></de>
+            <en><![CDATA[An error occurred during deletion of the old standard project (cleanup) -> [error]]]></en>
+        </locale>
+        <locale name="error.import_tags">
+            <de><![CDATA[Beim Tag-Import ist ein Fehler aufgetreten -> [error]]]></de>
+            <en><![CDATA[An error occurred during tag import -> [error]]]></en>
+        </locale>
+        <locale name="error.import_permissions">
+            <de><![CDATA[Beim Berechtigungs-Import ist ein Fehler aufgetreten -> [error]]]></de>
+            <en><![CDATA[An error occurred during permission import -> [error]]]></en>
+        </locale>
+        <locale name="error.import_groups">
+            <de><![CDATA[Beim Gruppen-Import ist ein Fehler aufgetreten -> [error]]]></de>
+            <en><![CDATA[An error occurred during groups import -> [error]]]></en>
+        </locale>
+        <locale name="error.import_users">
+            <de><![CDATA[Beim Benutzer-Import ist ein Fehler aufgetreten -> [error]]]></de>
+            <en><![CDATA[An error occurred during users import -> [error]]]></en>
+        </locale>
+        <locale name="error.import_sites">
+            <de><![CDATA[Beim Seiten-Import ist ein Fehler aufgetreten -> [error]]]></de>
+            <en><![CDATA[An error occurred during site import -> [error]]]></en>
+        </locale>
+        <locale name="error.import_media">
+            <de><![CDATA[Beim Media-Import ist ein Fehler aufgetreten -> [error]]]></de>
+            <en><![CDATA[An error occurred during media import -> [error]]]></en>
+        </locale>
+        <locale name="error.import_system_config">
+            <de><![CDATA[Beim System-Konfigurations-Import ist ein Fehler aufgetreten -> [error]]]></de>
+            <en><![CDATA[An error occurred during system config import -> [error]]]></en>
         </locale>
 
         <!-- review.log -->
