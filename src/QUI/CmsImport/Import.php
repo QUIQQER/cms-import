@@ -148,7 +148,7 @@ class Import extends QUI\QDOM
                 ]
             );
         }
-        
+
         // Translations
         if ($this->getAttribute('importTranslations')) {
             try {
@@ -834,7 +834,6 @@ class Import extends QUI\QDOM
             foreach ($ImportTag->getTagGroups() as $tagGroupIdentifier) {
                 if (!empty($tagGroupIdentifier)
                     && isset($this->importData['tagGroups'][$project][$lang][$tagGroupIdentifier])) {
-
                     try {
                         $TagGroup = TagGroupManager::get(
                             $QuiqqerProject,
