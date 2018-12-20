@@ -138,27 +138,63 @@ class Import extends QUI\QDOM
         $this->ImportProvider->promptForConfig();
 
         // Projects
-        $this->importProjects();
-
+        try {
+            $this->importProjects();
+        } catch (\Exception $Exception) {
+            $this->writeWarning(
+                'error.import_projects',
+                [
+                    'error' => $Exception->getMessage()
+                ]
+            );
+        }
+        
         // Translations
         if ($this->getAttribute('importTranslations')) {
-            $this->importTranslations();
+            try {
+                $this->importTranslations();
+            } catch (\Exception $Exception) {
+                $this->writeWarning(
+                    'error.import_translations',
+                    [
+                        'error' => $Exception->getMessage()
+                    ]
+                );
+            }
         }
 
         // Delete old standard project
         if ($this->getAttribute('cleanup')) {
             $this->writeHeader('delete_old_standard_project');
 
-            $Projects   = QUI::getProjectManager();
-            $OldProject = $Projects->getProject('old_standard_project');
-            $Projects->deleteProject($OldProject);
+            try {
+                $Projects   = QUI::getProjectManager();
+                $OldProject = $Projects->getProject('old_standard_project');
+                $Projects->deleteProject($OldProject);
+            } catch (\Exception $Exception) {
+                $this->writeWarning(
+                    'error.delete_old_standard_project',
+                    [
+                        'error' => $Exception->getMessage()
+                    ]
+                );
+            }
         }
 
         // Tags / tag groups
         if ($this->getAttribute('importTags')) {
             if (QUI::getPackageManager()->isInstalled('quiqqer/tags')) {
-                $this->importTagGroups();
-                $this->importTags();
+                try {
+                    $this->importTagGroups();
+                    $this->importTags();
+                } catch (\Exception $Exception) {
+                    $this->writeWarning(
+                        'error.import_tags',
+                        [
+                            'error' => $Exception->getMessage()
+                        ]
+                    );
+                }
             } else {
                 $this->writeWarning('tags_package_not_installed');
             }
@@ -166,32 +202,86 @@ class Import extends QUI\QDOM
 
         // Permissions
         if ($this->getAttribute('importPermissions')) {
-            $this->importPermissions();
+            try {
+                $this->importPermissions();
+            } catch (\Exception $Exception) {
+                $this->writeWarning(
+                    'error.import_permissions',
+                    [
+                        'error' => $Exception->getMessage()
+                    ]
+                );
+            }
         }
 
         // Groups
         if ($this->getAttribute('importGroups')) {
-            $this->importGroups();
+            try {
+                $this->importGroups();
+            } catch (\Exception $Exception) {
+                $this->writeWarning(
+                    'error.import_groups',
+                    [
+                        'error' => $Exception->getMessage()
+                    ]
+                );
+            }
         }
 
         // Users
         if ($this->getAttribute('importUsers')) {
-            $this->importUsers();
+            try {
+                $this->importUsers();
+            } catch (\Exception $Exception) {
+                $this->writeWarning(
+                    'error.import_users',
+                    [
+                        'error' => $Exception->getMessage()
+                    ]
+                );
+            }
         }
 
         // Sites
         if ($this->getAttribute('importSites')) {
-            $this->importSites();
+            try {
+                $this->importSites();
+            } catch (\Exception $Exception) {
+                $this->writeWarning(
+                    'error.import_sites',
+                    [
+                        'error' => $Exception->getMessage()
+                    ]
+                );
+            }
         }
 
         // Media
         if ($this->getAttribute('importMedia')) {
-            $this->importMedia();
+            try {
+                $this->importMedia();
+            } catch (\Exception $Exception) {
+                $this->writeWarning(
+                    'error.import_media',
+                    [
+                        'error' => $Exception->getMessage()
+                    ]
+                );
+            }
         }
 
         // System config
         if ($this->getAttribute('importSystemConfig')) {
-            $this->importSystemConfig();
+            try {
+                $this->importSystemConfig();
+            } catch (\Exception $Exception) {
+                $this->writeWarning(
+                    'error.import_system_config',
+                    [
+                        'error' => $Exception->getMessage()
+                    ]
+                );
+            }
         }
 
         $this->writeReviewLog();
