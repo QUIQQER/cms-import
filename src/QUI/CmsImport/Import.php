@@ -183,6 +183,8 @@ class Import extends QUI\QDOM
 
         // Tags / tag groups
         if ($this->getAttribute('importTags')) {
+            $this->writeHeader('importTags');
+
             if (QUI::getPackageManager()->isInstalled('quiqqer/tags')) {
                 try {
                     $this->importTagGroups();
@@ -315,6 +317,8 @@ class Import extends QUI\QDOM
                 // the config from the filesystem.
                 QUI::$Configs = [];
 
+                $this->deleteProjectTables($ImportProject->getName(), $ProjectEntity->getLanguages());
+
                 $NewProject = $Projects->createProject(
                     $ImportProject->getName(),
                     $ProjectEntity->getDefaultLanguage(),
@@ -336,6 +340,36 @@ class Import extends QUI\QDOM
             $this->importData['projects'][$ImportProject->getName()] = $NewProject;
 
             $this->writeInfo('project.success', ['project' => $NewProject->getName()]);
+        }
+    }
+
+    /**
+     * Delete project tables
+     *
+     * This is used to delete project tables that could not be deleted during
+     * a regular cleanup.
+     *
+     * This may become necessary if an old import process abruptly exited and project
+     * tables still exist in the database but the project itself in not listed in the
+     * projects.ini.php
+     *
+     * @param string $project
+     * @param array $langs
+     * @return void
+     */
+    protected function deleteProjectTables($project, $langs)
+    {
+        $prefix = QUI_DB_PRFX.$project.'_';
+        $tables = QUI::getDataBase()->table()->getTables();
+
+        foreach ($tables as $tbl) {
+            foreach ($langs as $lang) {
+                $tblPrefix = $prefix.$lang.'_';
+
+                if (mb_strpos($tbl, $tblPrefix) === 0) {
+                    QUI::getDataBase()->table()->delete($tbl);
+                }
+            }
         }
     }
 
@@ -1001,12 +1035,14 @@ class Import extends QUI\QDOM
             }
 
             // Import QUIQQER tags
-            $tags = $ImportSite->getTags();
+            if ($this->getAttribute('importTags')) {
+                $tags = $ImportSite->getTags();
 
-            if ($this->quiqqerPackages['quiqqer/tags']) {
-                $this->importSiteTags($ImportSite, $NewSite);
-            } elseif (!empty($tags)) {
-                $this->writeWarning('site_tags_plugin_missing');
+                if ($this->quiqqerPackages['quiqqer/tags']) {
+                    $this->importSiteTags($ImportSite, $NewSite);
+                } elseif (!empty($tags)) {
+                    $this->writeWarning('site_tags_plugin_missing');
+                }
             }
 
             try {
@@ -1114,6 +1150,8 @@ class Import extends QUI\QDOM
                 $this->writeWarning('site_tags_tag_not_found', [
                     'tagTitle' => $tagIdentifier
                 ], $ImportSite);
+
+                continue;
             }
 
             $quiqqerTag = $this->importData['tags'][$project][$lang][$tagIdentifier];
@@ -1141,6 +1179,8 @@ class Import extends QUI\QDOM
                 $this->writeWarning('site_tags_tag_group_not_found', [
                     'tagGroupTitle' => $tagGroupIdentifier
                 ], $ImportSite);
+
+                continue;
             }
 
             $quiqqerTagGroupId = $this->importData['tagGroups'][$project][$lang][$tagGroupIdentifier];
