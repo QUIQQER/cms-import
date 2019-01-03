@@ -56,13 +56,15 @@ class Console extends QUI\System\Console\Tool
         // Choose ImportProvider
         do {
             $this->writeHeader($L->get($lg, 'header.provider_selection'));
+            $this->writeLn("");
 
             $providers = $this->getImportProviders();
 
             foreach ($providers as $k => $ImportProvider) {
-                $this->writeLn("[".($k + 1)."] ".$ImportProvider->getTitle()." - ".$ImportProvider->getDescription());
+                $this->writeLn("[".($k + 1)."] ".$ImportProvider->getTitle()." - ".$ImportProvider->getDescription(), 'blue');
             }
 
+            $this->writeLn("");
             $key = $this->writePrompt($L->get($lg, 'prompt.provider_select'));
 
             if (empty($key)) {

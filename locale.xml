@@ -68,7 +68,7 @@
         </locale>
         <locale name="prompt.cleanup">
             <de>
-                <![CDATA[Möchten Sie Ihre QUIQQER-System aufräumen, bevor der Import durchgeführt wird? Dabei werden alle nicht-essentiellen Benutzer, Gruppen, Projekte und Crons gelöscht. Zudem werden Übersetzungen und Berechtigungen gelöscht, die ggf. bereits in einem vorherigen Import-Vorgang angelegt wurden.]]></de>
+                <![CDATA[Möchten Sie Ihr QUIQQER-System aufräumen, bevor der Import durchgeführt wird? Dabei werden alle nicht-essentiellen Benutzer, Gruppen, Projekte und Crons gelöscht. Zudem werden Übersetzungen und Berechtigungen gelöscht, die ggf. bereits in einem vorherigen Import-Vorgang angelegt wurden.]]></de>
             <en>
                 <![CDATA[Do you want to clean up your QUIQQER system before importing? This deletes all non-essential users, groups, projects and crons. In addition, translations and permissions that may have already been created in a previous import process are deleted.]]></en>
         </locale>
@@ -77,8 +77,8 @@
             <en><![CDATA[Choosing an Import Provider]]></en>
         </locale>
         <locale name="prompt.provider_select">
-            <de><![CDATA[Mit welchem Import-Provider möchten Sie den Import durchführen?]]></de>
-            <en><![CDATA[Which Import Provider do you want to use?]]></en>
+            <de><![CDATA[Mit welchem Import-Provider möchten Sie den Import durchführen? Bitte Nummer eintippen]]></de>
+            <en><![CDATA[Which Import Provider do you want to use? Please input number]]></en>
         </locale>
 
         <!-- Project import -->
