@@ -68,7 +68,7 @@
         </locale>
         <locale name="prompt.cleanup">
             <de>
-                <![CDATA[Möchten Sie Ihre QUIQQER-System aufräumen, bevor der Import durchgeführt wird? Dabei werden alle nicht-essentiellen Benutzer, Gruppen, Projekte und Crons gelöscht. Zudem werden Übersetzungen und Berechtigungen gelöscht, die ggf. bereits in einem vorherigen Import-Vorgang angelegt wurden.]]></de>
+                <![CDATA[Möchten Sie Ihr QUIQQER-System aufräumen, bevor der Import durchgeführt wird? Dabei werden alle nicht-essentiellen Benutzer, Gruppen, Projekte und Crons gelöscht. Zudem werden Übersetzungen und Berechtigungen gelöscht, die ggf. bereits in einem vorherigen Import-Vorgang angelegt wurden.]]></de>
             <en>
                 <![CDATA[Do you want to clean up your QUIQQER system before importing? This deletes all non-essential users, groups, projects and crons. In addition, translations and permissions that may have already been created in a previous import process are deleted.]]></en>
         </locale>
@@ -77,8 +77,8 @@
             <en><![CDATA[Choosing an Import Provider]]></en>
         </locale>
         <locale name="prompt.provider_select">
-            <de><![CDATA[Mit welchem Import-Provider möchten Sie den Import durchführen?]]></de>
-            <en><![CDATA[Which Import Provider do you want to use?]]></en>
+            <de><![CDATA[Mit welchem Import-Provider möchten Sie den Import durchführen? Bitte Nummer eintippen]]></de>
+            <en><![CDATA[Which Import Provider do you want to use? Please input number]]></en>
         </locale>
 
         <!-- Project import -->
@@ -421,43 +421,43 @@
         </locale>
 
         <!-- Section error -->
-        <locale name="error.import_projects">
+        <locale name="import.warning.error.import_projects">
             <de><![CDATA[Beim Projekte-Import ist ein Fehler aufgetreten -> [error]]]></de>
             <en><![CDATA[An error occurred during project import -> [error]]]></en>
         </locale>
-        <locale name="error.import_translations">
+        <locale name="import.warning.error.import_translations">
             <de><![CDATA[Beim Übersetzungs-Import ist ein Fehler aufgetreten -> [error]]]></de>
             <en><![CDATA[An error occurred during translation import -> [error]]]></en>
         </locale>
-        <locale name="error.delete_old_standard_project">
+        <locale name="import.warning.error.delete_old_standard_project">
             <de><![CDATA[Beim Löschen des alten Standard-Projekts ist ein Fehler aufgetreten (System-Cleanup) -> [error]]]></de>
             <en><![CDATA[An error occurred during deletion of the old standard project (cleanup) -> [error]]]></en>
         </locale>
-        <locale name="error.import_tags">
+        <locale name="import.warning.error.import_tags">
             <de><![CDATA[Beim Tag-Import ist ein Fehler aufgetreten -> [error]]]></de>
             <en><![CDATA[An error occurred during tag import -> [error]]]></en>
         </locale>
-        <locale name="error.import_permissions">
+        <locale name="import.warning.error.import_permissions">
             <de><![CDATA[Beim Berechtigungs-Import ist ein Fehler aufgetreten -> [error]]]></de>
             <en><![CDATA[An error occurred during permission import -> [error]]]></en>
         </locale>
-        <locale name="error.import_groups">
+        <locale name="import.warning.error.import_groups">
             <de><![CDATA[Beim Gruppen-Import ist ein Fehler aufgetreten -> [error]]]></de>
             <en><![CDATA[An error occurred during groups import -> [error]]]></en>
         </locale>
-        <locale name="error.import_users">
+        <locale name="import.warning.error.import_users">
             <de><![CDATA[Beim Benutzer-Import ist ein Fehler aufgetreten -> [error]]]></de>
             <en><![CDATA[An error occurred during users import -> [error]]]></en>
         </locale>
-        <locale name="error.import_sites">
+        <locale name="import.warning.error.import_sites">
             <de><![CDATA[Beim Seiten-Import ist ein Fehler aufgetreten -> [error]]]></de>
             <en><![CDATA[An error occurred during site import -> [error]]]></en>
         </locale>
-        <locale name="error.import_media">
+        <locale name="import.warning.error.import_media">
             <de><![CDATA[Beim Media-Import ist ein Fehler aufgetreten -> [error]]]></de>
             <en><![CDATA[An error occurred during media import -> [error]]]></en>
         </locale>
-        <locale name="error.import_system_config">
+        <locale name="import.warning.error.import_system_config">
             <de><![CDATA[Beim System-Konfigurations-Import ist ein Fehler aufgetreten -> [error]]]></de>
             <en><![CDATA[An error occurred during system config import -> [error]]]></en>
         </locale>
