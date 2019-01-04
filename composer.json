@@ -2,22 +2,22 @@
   "name": "quiqqer/cms-import",
   "type": "quiqqer-module",
   "description": "Import data and structure of third party CMS systems into QUIQQER",
-  "version": "dev-master",
+  "version": "1.0.0",
   "license": "GPL-3.0+",
   "authors": [
     {
       "name": "Patrick Müller",
       "email": "p.mueller@pcsg.de",
-      "homepage": "http://www.pcsg.de",
+      "homepage": "https://www.pcsg.de",
       "role": "Developer"
     }
   ],
   "support": {
     "email": "support@pcsg.de",
-    "url": "http://www.pcsg.de"
+    "url": "https://www.pcsg.de"
   },
   "require": {
-    "quiqqer/quiqqer": ">=1.2|*@dev"
+    "quiqqer/quiqqer": ">=1.2"
   },
   "autoload": {
     "psr-4": {
