@@ -39,6 +39,9 @@ You can find a short instruction on how to use the CMS import at https://dev.qui
 
 Contribute
 ----------
+
+If you'd like to develop an ImportProvider module for a CMS of your choice, please follow the instructions at https://dev.quiqqer.com/quiqqer/cms-import/wikis/Developing-a-QUIQQER-CMS-Import-Provider
+
 - Project: https://dev.quiqqer.com/quiqqer/cms-import
 - Issue Tracker: https://dev.quiqqer.com/quiqqer/cms-import/issues
 - Source Code: https://dev.quiqqer.com/quiqqer/cms-import/tree/master
