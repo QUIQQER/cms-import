@@ -476,8 +476,8 @@ class Import extends QUI\QDOM
     /**
      * Start import of sites
      *
-     * @throws QUI\Exception
      * @return void
+     * @throws QUI\Exception
      */
     protected function importSites()
     {
@@ -560,8 +560,8 @@ class Import extends QUI\QDOM
     /**
      * Import QUIQQER groups
      *
-     * @throws QUI\Exception
      * @return void
+     * @throws QUI\Exception
      */
     protected function importGroups()
     {
@@ -1670,9 +1670,19 @@ class Import extends QUI\QDOM
                 $this->reviewEntities[] = $ImportUser;
             }
 
+            $username = $ImportUser->getUsername();
+
+            if (empty($username) && !empty($ImportUser->getAttribute('email'))) {
+                $this->writeInfo('user_set_email_as_username', [
+                    'email' => $ImportUser->getAttribute('email')
+                ]);
+
+                $username = $ImportUser->getAttribute('email');
+            }
+
             try {
                 $NewUser = $UserManager->createChild(
-                    $ImportUser->getUsername(),
+                    $username,
                     null,
                     $ImportUser->getQuiqqerId()
                 );
