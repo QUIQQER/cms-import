@@ -287,6 +287,10 @@
             <de><![CDATA[Konnte Benutzer nicht bearbeiten -> [error]]]></de>
             <en><![CDATA[Could not edit user -> [error]]]></en>
         </locale>
+        <locale name="import.msg.user_generate_password">
+            <de><![CDATA[Benutzer hat kein Passwort. Erstelle Zufalls-Passwort...]]></de>
+            <en><![CDATA[User has no password. Creating random password...]]></en>
+        </locale>
 
         <!-- System config -->
         <locale name="import.header.system_config_start">

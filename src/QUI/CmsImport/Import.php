@@ -1708,6 +1708,16 @@ class Import extends QUI\QDOM
                 ], [
                     'id' => $NewUser->getId()
                 ]);
+            } else {
+                // auto-generate a random password
+                try {
+                    $this->writeInfo('user_generate_password');
+                    $NewUser->setPassword(hash('sha256', random_bytes(128)));
+                } catch (\Exception $Exception) {
+                    $this->writeError('user_edit', [
+                        'error' => $Exception->getMessage()
+                    ], $ImportUser);
+                }
             }
 
             $ImportUser->setAttribute(self::ENTITY_ATTRIBUTE_QUIQQER_ID, $NewUser->getId());
