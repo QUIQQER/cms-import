@@ -291,6 +291,10 @@
             <de><![CDATA[Benutzer hat kein Passwort. Erstelle Zufalls-Passwort...]]></de>
             <en><![CDATA[User has no password. Creating random password...]]></en>
         </locale>
+        <locale name="import.msg.user_set_email_as_username">
+            <de><![CDATA[Benutzer hat keinen Benutzernamen. Setze E-Mail-Adresse als Benutzername ([email]).]]></de>
+            <en><![CDATA[User has no username. Set e-mail address as username ([email]).]]></en>
+        </locale>
 
         <!-- System config -->
         <locale name="import.header.system_config_start">
