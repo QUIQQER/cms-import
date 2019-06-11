@@ -1671,13 +1671,19 @@ class Import extends QUI\QDOM
             }
 
             $username = $ImportUser->getUsername();
+            $email    = $ImportUser->getAttribute('email');
 
-            if (empty($username) && !empty($ImportUser->getAttribute('email'))) {
+            if (empty($username) && !empty($email)) {
                 $this->writeInfo('user_set_email_as_username', [
-                    'email' => $ImportUser->getAttribute('email')
+                    'email' => $email
                 ]);
 
-                $username = $ImportUser->getAttribute('email');
+                $username = $email;
+            }
+
+            if (empty($username) && empty($email)) {
+                $this->writeWarning('user_empty_username_and_email');
+                continue;
             }
 
             try {
