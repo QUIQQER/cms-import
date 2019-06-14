@@ -62,19 +62,23 @@ class QUIQQERImportUserManager extends Manager
         ];
 
         if (!empty($customId)) {
-            $PDO        = QUI::getDataBase()->getPDO();
+//            $PDO        = QUI::getDataBase()->getPDO();
             $table      = self::table();
             $data['id'] = (int)$customId;
 
+            /**
+             * Disabling and re-enabling fo AUTO_INCREMENT for the `id` column is disabled here
+             */
+
             // disable AUTO_INCREMENT
-            $Statement = $PDO->prepare("ALTER TABLE {$table} MODIFY `id` INT(11) NOT NULL");
-            $Statement->execute();
+//            $Statement = $PDO->prepare("ALTER TABLE {$table} MODIFY `id` INT(11) NOT NULL");
+//            $Statement->execute();
 
             QUI::getDataBase()->insert($table, $data);
 
             // re-enable AUTO_INCREMENT
-            $Statement = $PDO->prepare("ALTER TABLE {$table} MODIFY `id` INT(11) NOT NULL AUTO_INCREMENT");
-            $Statement->execute();
+//            $Statement = $PDO->prepare("ALTER TABLE {$table} MODIFY `id` INT(11) NOT NULL AUTO_INCREMENT");
+//            $Statement->execute();
 
             $newId = $data['id'];
         } else {
