@@ -104,4 +104,24 @@ abstract class AbstractImportProvider implements ImportProviderInterface
     {
         return $this->Import;
     }
+
+    /**
+     * Get all import features this Provider provides
+     *
+     * @return array
+     */
+    public function getImportFeatures()
+    {
+        return [
+            'importProjects'     => true,
+            'importSites'        => true,
+            'importTags'         => true,
+            'importMedia'        => true,
+            'importUsers'        => true,
+            'importGroups'       => true,
+            'importSystemConfig' => true,
+            'importTranslations' => true,
+            'importPermissions'  => true
+        ];
+    }
 }

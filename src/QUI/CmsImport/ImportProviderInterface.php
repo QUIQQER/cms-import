@@ -231,4 +231,11 @@ interface ImportProviderInterface
      * @return Import
      */
     public function getImport();
+
+    /**
+     * Get all import features this Provider provides
+     *
+     * @return array
+     */
+    public function getImportFeatures();
 }

@@ -98,6 +98,7 @@ class Import extends QUI\QDOM
     {
         $this->setAttributes([
             'cleanup'            => false,
+            'importProjects'     => false,
             'importTags'         => false,
             'importSites'        => false,
             'importMedia'        => false,
@@ -138,15 +139,17 @@ class Import extends QUI\QDOM
         $this->ImportProvider->promptForConfig();
 
         // Projects
-        try {
-            $this->importProjects();
-        } catch (\Exception $Exception) {
-            $this->writeWarning(
-                'error.import_projects',
-                [
-                    'error' => $Exception->getMessage()
-                ]
-            );
+        if ($this->getAttribute('importProjects')) {
+            try {
+                $this->importProjects();
+            } catch (\Exception $Exception) {
+                $this->writeWarning(
+                    'error.import_projects',
+                    [
+                        'error' => $Exception->getMessage()
+                    ]
+                );
+            }
         }
 
         // Translations

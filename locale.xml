@@ -49,6 +49,10 @@
             <de><![CDATA[Berechtigungen]]></de>
             <en><![CDATA[permissions]]></en>
         </locale>
+        <locale name="import.setting.area.importProjects">
+            <de><![CDATA[Projekte]]></de>
+            <en><![CDATA[Projects]]></en>
+        </locale>
         <locale name="import.header.areas">
             <de><![CDATA[Bitte wählen Sie, welche Bereiche importiert werden sollen:]]></de>
             <en><![CDATA[Please choose the areas you want to import:]]></en>

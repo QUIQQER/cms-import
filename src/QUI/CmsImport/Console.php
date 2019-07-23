@@ -12,6 +12,11 @@ use QUI;
 class Console extends QUI\System\Console\Tool
 {
     /**
+     * @var QUI\Locale
+     */
+    protected $Locale;
+
+    /**
      * Konstruktor
      */
     public function __construct()
@@ -29,23 +34,23 @@ class Console extends QUI\System\Console\Tool
      */
     public function execute()
     {
-        $L  = QUI::getLocale();
-        $lg = 'quiqqer/cms-import';
+        $this->Locale = QUI::getLocale();
+        $lg           = 'quiqqer/cms-import';
 
         $importLang = $this->writePrompt('Import language? (en/de)', 'en');
-        $L->setCurrent($importLang);
+        $this->Locale->setCurrent($importLang);
 
         $rootUserId = (int)QUI::conf('globals', 'rootuser');
 
         if (QUI::getUserBySession()->getId() !== $rootUserId) {
-            $this->exitFail($L->get($lg, 'error.root_user_only'));
+            $this->exitFail($this->Locale->get($lg, 'error.root_user_only'));
         }
 
         if (!$this->isSystemEmpty()) {
-            $this->writeWarning($L->get($lg, 'warning.system_not_clean'));
+            $this->writeWarning($this->Locale->get($lg, 'warning.system_not_clean'));
         }
 
-        $userInput = $this->writePrompt($L->get($lg, 'prompt.cleanup'), 'y');
+        $userInput = $this->writePrompt($this->Locale->get($lg, 'prompt.cleanup'), 'y');
 
         if (mb_strtolower($userInput) === 'n') {
             $cleanup = false;
@@ -55,17 +60,18 @@ class Console extends QUI\System\Console\Tool
 
         // Choose ImportProvider
         do {
-            $this->writeHeader($L->get($lg, 'header.provider_selection'));
+            $this->writeHeader($this->Locale->get($lg, 'header.provider_selection'));
             $this->writeLn("");
 
             $providers = $this->getImportProviders();
 
             foreach ($providers as $k => $ImportProvider) {
-                $this->writeLn("[".($k + 1)."] ".$ImportProvider->getTitle()." - ".$ImportProvider->getDescription(), 'blue');
+                $this->writeLn("[".($k + 1)."] ".$ImportProvider->getTitle()." - ".$ImportProvider->getDescription(),
+                    'blue');
             }
 
             $this->writeLn("");
-            $key = $this->writePrompt($L->get($lg, 'prompt.provider_select'));
+            $key = $this->writePrompt($this->Locale->get($lg, 'prompt.provider_select'));
 
             if (empty($key)) {
                 continue;
@@ -86,6 +92,7 @@ class Console extends QUI\System\Console\Tool
         ];
 
         $importAreas = [
+            'importProjects',
             'importSites',
             'importTags',
             'importMedia',
@@ -96,10 +103,15 @@ class Console extends QUI\System\Console\Tool
             'importPermissions'
         ];
 
-        $this->writeHeader($L->get($lg, 'import.header.areas'));
+        $this->writeHeader($this->Locale->get($lg, 'import.header.areas'));
+        $providerFeatures = $SelectedProvider->getImportFeatures();
 
         foreach ($importAreas as $area) {
-            $prompt = $this->writePrompt($L->get($lg, 'import.setting.area.'.$area), 'y');
+            if (empty($providerFeatures[$area])) {
+                continue;
+            }
+
+            $prompt = $this->writePrompt($this->Locale->get($lg, 'import.setting.area.'.$area), 'y');
 
             if (mb_strtolower($prompt) !== 'n') {
                 $importSettings[$area] = true;
@@ -221,6 +233,14 @@ class Console extends QUI\System\Console\Tool
         $this->writeLn("\n#################################################################", "green");
         $this->writeLn("\t$title", "green");
         $this->writeLn("#################################################################", "green");
+    }
+
+    /**
+     * @return QUI\Locale
+     */
+    public function getLocale()
+    {
+        return $this->Locale;
     }
 
     /**
