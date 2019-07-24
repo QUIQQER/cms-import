@@ -39,6 +39,18 @@ class ImportUser extends AbstractImportEntity implements CustomQuiqqerIdInterfac
     protected $isSU = false;
 
     /**
+     * @var bool
+     */
+    protected $canUseBackend = false;
+
+    /**
+     * Collection of user addresses
+     *
+     * @var array
+     */
+    protected $addresses = [];
+
+    /**
      * ImportUser constructor.
      *
      * @param string|int $identifier - ImportGroup identifier
@@ -139,6 +151,55 @@ class ImportUser extends AbstractImportEntity implements CustomQuiqqerIdInterfac
     public function setIsSU($isSU)
     {
         $this->isSU = $isSU;
+    }
+
+    /**
+     * @return bool
+     */
+    public function canUseBackend()
+    {
+        return $this->canUseBackend;
+    }
+
+    /**
+     * @param bool $canUseBackend
+     */
+    public function setCanUseBackend($canUseBackend)
+    {
+        $this->canUseBackend = $canUseBackend;
+    }
+
+    /**
+     * @param array $address
+     *
+     * Available $address keys:
+     * [
+     *      'default' => true / false
+     *      'salutation',
+     *      'firstname',
+     *      'lastname',
+     *      'mail',
+     *      'company',
+     *      'street_no',
+     *      'zip',
+     *      'city',
+     *      'country',
+     *      'phone' => [123, 312],
+     *      'mobile' => [123, 312],
+     *      'fax' => [123, 321]
+     * ]
+     */
+    public function addAddress($address)
+    {
+        $this->addresses[] = $address;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAddresses()
+    {
+        return $this->addresses;
     }
 
     /**

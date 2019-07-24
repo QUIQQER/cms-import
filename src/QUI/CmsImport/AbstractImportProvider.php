@@ -28,6 +28,8 @@ abstract class AbstractImportProvider implements ImportProviderInterface
         $this->ImportConsole = $ImportConsole;
     }
 
+
+
     /**
      * Write an info msg
      *

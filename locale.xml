@@ -280,28 +280,28 @@
             <en><![CDATA[User successfully imported as QUIQQER user #[quiqqerUserId] ("[quiqqerUsername]").]]></en>
         </locale>
         <locale name="import.error.user_create">
-            <de><![CDATA[Konnte Benutzer nicht erstellen -> [error]]]></de>
-            <en><![CDATA[Could not create user -> [error]]]></en>
+            <de><![CDATA[Konnte Benutzer "[identifier]" nicht erstellen -> [error]]]></de>
+            <en><![CDATA[Could not create user "[identifier]" -> [error]]]></en>
         </locale>
         <locale name="import.error.user_activate">
-            <de><![CDATA[Konnte Benutzer nicht aktivieren -> [error]]]></de>
-            <en><![CDATA[Could not activate user -> [error]]]></en>
+            <de><![CDATA[Konnte Benutzer "[identifier]" nicht aktivieren -> [error]]]></de>
+            <en><![CDATA[Could not activate user "[identifier]" -> [error]]]></en>
         </locale>
         <locale name="import.error.user_edit">
-            <de><![CDATA[Konnte Benutzer nicht bearbeiten -> [error]]]></de>
-            <en><![CDATA[Could not edit user -> [error]]]></en>
+            <de><![CDATA[Konnte Benutzer "[identifier]" nicht bearbeiten -> [error]]]></de>
+            <en><![CDATA[Could not edit user "[identifier]" -> [error]]]></en>
         </locale>
         <locale name="import.msg.user_generate_password">
             <de><![CDATA[Benutzer hat kein Passwort. Erstelle Zufalls-Passwort...]]></de>
             <en><![CDATA[User has no password. Creating random password...]]></en>
         </locale>
         <locale name="import.msg.user_set_email_as_username">
-            <de><![CDATA[Benutzer hat keinen Benutzernamen. Setze E-Mail-Adresse als Benutzername ([email]).]]></de>
-            <en><![CDATA[User has no username. Set e-mail address as username ([email]).]]></en>
+            <de><![CDATA[Benutzer "[identifier]" hat keinen Benutzernamen. Setze E-Mail-Adresse als Benutzername ([email]).]]></de>
+            <en><![CDATA[User "[identifier]" has no username. Set e-mail address as username ([email]).]]></en>
         </locale>
         <locale name="import.warning.user_empty_username_and_email">
-            <de><![CDATA[Benutzer hat weder Benutzername noch E-Mail-Adresse und wird daher nicht importiert.]]></de>
-            <en><![CDATA[User has no username and e-mail address and thus will be not imported.]]></en>
+            <de><![CDATA[Benutzer "[identifier]" hat weder Benutzername noch E-Mail-Adresse und wird daher nicht importiert.]]></de>
+            <en><![CDATA[User "[identifier]" has no username and e-mail address and thus will be not imported.]]></en>
         </locale>
 
         <!-- System config -->

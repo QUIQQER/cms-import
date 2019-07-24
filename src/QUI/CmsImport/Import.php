@@ -167,7 +167,7 @@ class Import extends QUI\QDOM
         }
 
         // Delete old standard project
-        if ($this->getAttribute('cleanup')) {
+        if ($this->getAttribute('importProjects') && $this->getAttribute('cleanup')) {
             $this->writeHeader('delete_old_standard_project');
 
             try {
@@ -1653,12 +1653,15 @@ class Import extends QUI\QDOM
      *
      * @param MetaList $UserList
      * @return void
+     * @throws QUI\Exception
      */
     protected function createUsers(MetaList $UserList)
     {
-        $UserManager = new QUIQQERImportUserManager();
-        $DB          = QUI::getDataBase();
-        $usersTable  = QUI\Users\Manager::table();
+        $UserManager       = new QUIQQERImportUserManager();
+        $SystemUser        = $UserManager->getSystemUser();
+        $PermissionManager = QUI::getPermissionManager();
+        $DB                = QUI::getDataBase();
+        $usersTable        = QUI\Users\Manager::table();
 
         /** @var MetaEntity $UserItem */
         foreach ($UserList->walkChildren() as $UserItem) {
@@ -1685,7 +1688,9 @@ class Import extends QUI\QDOM
             }
 
             if (empty($username) && empty($email)) {
-                $this->writeWarning('user_empty_username_and_email');
+                $this->writeWarning('user_empty_username_and_email', [
+                    'identifier' => $ImportUser->getIdentifier()
+                ]);
                 continue;
             }
 
@@ -1699,7 +1704,8 @@ class Import extends QUI\QDOM
                 QUI\System\Log::writeException($Exception);
 
                 $this->writeError('user_create', [
-                    'error' => $Exception->getMessage()
+                    'identifier' => $ImportUser->getIdentifier(),
+                    'error'      => $Exception->getMessage()
                 ], $ImportUser);
 
                 continue;
@@ -1734,12 +1740,95 @@ class Import extends QUI\QDOM
                     $NewUser->setPassword(hash('sha256', random_bytes(128)));
                 } catch (\Exception $Exception) {
                     $this->writeError('user_edit', [
-                        'error' => $Exception->getMessage()
+                        'identifier' => $ImportUser->getIdentifier(),
+                        'error'      => $Exception->getMessage()
                     ], $ImportUser);
                 }
             }
 
             $ImportUser->setAttribute(self::ENTITY_ATTRIBUTE_QUIQQER_ID, $NewUser->getId());
+
+            // Addresses
+            $defaultAddressSet = false;
+            $NewAddress        = false;
+
+            foreach ($ImportUser->getAddresses() as $address) {
+                $NewAddress = $NewUser->addAddress($address, $SystemUser);
+
+                // phone
+                if (!empty($address['phone'])) {
+                    if (\is_array($address['phone'])) {
+                        foreach ($address['phone'] as $phone) {
+                            $NewAddress->addPhone([
+                                'type' => 'tel',
+                                'no'   => $phone
+                            ]);
+                        }
+                    } elseif (\is_string($address['phone']) || \is_numeric($address['phone'])) {
+                        $NewAddress->addPhone([
+                            'type' => 'tel',
+                            'no'   => $address['phone']
+                        ]);
+                    }
+                }
+
+                // mobile
+                if (!empty($address['mobile'])) {
+                    if (\is_array($address['mobile'])) {
+                        foreach ($address['mobile'] as $mobile) {
+                            $NewAddress->addPhone([
+                                'type' => 'mobile',
+                                'no'   => $mobile
+                            ]);
+                        }
+                    } elseif (\is_string($address['mobile']) || \is_numeric($address['mobile'])) {
+                        $NewAddress->addPhone([
+                            'type' => 'mobile',
+                            'no'   => $address['mobile']
+                        ]);
+                    }
+                }
+
+                // fax
+                if (!empty($address['fax'])) {
+                    if (\is_array($address['fax'])) {
+                        foreach ($address['fax'] as $fax) {
+                            $NewAddress->addPhone([
+                                'type' => 'fax',
+                                'no'   => $fax
+                            ]);
+                        }
+                    } elseif (\is_string($address['fax']) || \is_numeric($address['fax'])) {
+                        $NewAddress->addPhone([
+                            'type' => 'fax',
+                            'no'   => $address['fax']
+                        ]);
+                    }
+                }
+
+                $NewAddress->save($SystemUser);
+
+                if (!$defaultAddressSet && !empty($address['default'])) {
+                    $NewUser->setAttribute('address', $NewAddress->getId());
+                    $defaultAddressSet = true;
+                }
+            }
+
+            // Fallback default address
+            if (!$defaultAddressSet && $NewAddress) {
+                $NewUser->setAttribute('address', $NewAddress->getId());
+            }
+
+            // Backend usage
+            if ($ImportUser->canUseBackend()) {
+                $PermissionManager->setPermissions(
+                    $NewUser,
+                    [
+                        'quiqqer.admin' => true
+                    ],
+                    $SystemUser
+                );
+            }
 
             try {
                 $NewUser->save();
@@ -1748,7 +1837,8 @@ class Import extends QUI\QDOM
                 QUI\System\Log::writeException($Exception);
 
                 $this->writeError('user_edit', [
-                    'error' => $Exception->getMessage()
+                    'identifier' => $ImportUser->getIdentifier(),
+                    'error'      => $Exception->getMessage()
                 ], $ImportUser);
 
                 continue;
@@ -1762,7 +1852,8 @@ class Import extends QUI\QDOM
                     QUI\System\Log::writeException($Exception);
 
                     $this->writeError('user_activate', [
-                        'error' => $Exception->getMessage()
+                        'identifier' => $ImportUser->getIdentifier(),
+                        'error'      => $Exception->getMessage()
                     ], $ImportUser);
                 }
             }
