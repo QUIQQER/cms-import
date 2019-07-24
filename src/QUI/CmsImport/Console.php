@@ -66,8 +66,10 @@ class Console extends QUI\System\Console\Tool
             $providers = $this->getImportProviders();
 
             foreach ($providers as $k => $ImportProvider) {
-                $this->writeLn("[".($k + 1)."] ".$ImportProvider->getTitle()." - ".$ImportProvider->getDescription(),
-                    'blue');
+                $this->writeLn(
+                    "[".($k + 1)."] ".$ImportProvider->getTitle()." - ".$ImportProvider->getDescription(),
+                    'blue'
+                );
             }
 
             $this->writeLn("");

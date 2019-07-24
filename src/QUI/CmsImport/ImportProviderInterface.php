@@ -15,8 +15,6 @@ use QUI\CmsImport\MetaEntities\MetaHierarchy;
 use QUI\CmsImport\MetaEntities\ProjectList;
 use QUI\CmsImport\MetaEntities\SiteHierarchy;
 use QUI\CmsImport\MetaEntities\MetaList;
-use QUI\CmsImport\Provider\PMS\ImportProvider;
-
 
 /**
  * Interface ImportProviderInterface
