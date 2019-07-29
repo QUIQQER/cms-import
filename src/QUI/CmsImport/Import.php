@@ -290,6 +290,8 @@ class Import extends QUI\QDOM
         }
 
         $this->writeReviewLog();
+
+        $this->ImportProvider->onImportFinished();
     }
 
     /**
@@ -1609,20 +1611,24 @@ class Import extends QUI\QDOM
                 }
             }
 
-            // Set admin access permission
+            // Set permission
+            $groupPermissions = array_merge(
+                $Permission->getPermissions($NewGroup),
+                $ImportGroup->getQuiqqerPermissions()
+            );
+
             if ($ImportGroup->hasAdminAccess()) {
-                $groupPermissions                  = $Permission->getPermissions($NewGroup);
                 $groupPermissions['quiqqer.admin'] = true;
+            }
 
-                try {
-                    $Permission->setPermissions($NewGroup, $groupPermissions);
-                } catch (\Exception $Exception) {
-                    QUI\System\Log::writeException($Exception);
+            try {
+                $Permission->setPermissions($NewGroup, $groupPermissions);
+            } catch (\Exception $Exception) {
+                QUI\System\Log::writeException($Exception);
 
-                    $this->writeError('group_set_permissions', [
-                        'error' => $Exception->getMessage()
-                    ], $ImportGroup);
-                }
+                $this->writeError('group_set_permissions', [
+                    'error' => $Exception->getMessage()
+                ], $ImportGroup);
             }
 
             $this->importData['groups'][$groupIdentifier] = $NewGroup->getId();
@@ -1726,6 +1732,10 @@ class Import extends QUI\QDOM
                 }
             }
 
+            if ($ImportUser->isAdmin()) {
+                $NewUser->addToGroup(QUI::conf('globals', 'root'));
+            }
+
             // Set password hash to DB
             if ($ImportUser->getPasswordHash()) {
                 $DB->update($usersTable, [
@@ -1817,17 +1827,6 @@ class Import extends QUI\QDOM
             // Fallback default address
             if (!$defaultAddressSet && $NewAddress) {
                 $NewUser->setAttribute('address', $NewAddress->getId());
-            }
-
-            // Backend usage
-            if ($ImportUser->canUseBackend()) {
-                $PermissionManager->setPermissions(
-                    $NewUser,
-                    [
-                        'quiqqer.admin' => true
-                    ],
-                    $SystemUser
-                );
             }
 
             try {

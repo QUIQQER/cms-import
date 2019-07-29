@@ -236,4 +236,12 @@ interface ImportProviderInterface
      * @return array
      */
     public function getImportFeatures();
+
+    /**
+     * This methods is executed after the import process finished. This allows the ImportProvider to do some
+     * own cleanup stuff and/or other features.
+     *
+     * @return void
+     */
+    public function onImportFinished();
 }

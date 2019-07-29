@@ -39,9 +39,11 @@ class ImportUser extends AbstractImportEntity implements CustomQuiqqerIdInterfac
     protected $isSU = false;
 
     /**
+     * Administrator flag - administrators have QUIQQER backend access
+     *
      * @var bool
      */
-    protected $canUseBackend = false;
+    protected $isAdmin = false;
 
     /**
      * Collection of user addresses
@@ -156,17 +158,17 @@ class ImportUser extends AbstractImportEntity implements CustomQuiqqerIdInterfac
     /**
      * @return bool
      */
-    public function canUseBackend()
+    public function isAdmin(): bool
     {
-        return $this->canUseBackend;
+        return $this->isAdmin;
     }
 
     /**
-     * @param bool $canUseBackend
+     * @param bool $isAdmin
      */
-    public function setCanUseBackend($canUseBackend)
+    public function setIsAdmin(bool $isAdmin): void
     {
-        $this->canUseBackend = $canUseBackend;
+        $this->isAdmin = $isAdmin;
     }
 
     /**
