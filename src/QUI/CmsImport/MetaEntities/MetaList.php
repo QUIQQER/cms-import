@@ -70,4 +70,69 @@ class MetaList implements ChildrenInterface
     {
         return !empty($this->children);
     }
+
+    /**
+     * @param string $attribute - Name of the attribute that is sorted by
+     * @param string $type - Type of sort (see ChildrenInterface::SORT_TYPE_*)
+     * @return void
+     */
+    public function sortChildren($attribute, $type = self::SORT_TYPE_ASC)
+    {
+        usort($this->children, function ($ChildA, $ChildB) use ($attribute, $type) {
+            /**
+             * @var MetaEntity $ChildA
+             * @var MetaEntity $ChildB
+             */
+            $valA = $ChildA->getAttribute($type);
+            $valB = $ChildB->getAttribute($type);
+
+            // Numeric comparison
+            if ((\is_int($valA) || \is_float($valA)) && (\is_int($valB) || \is_float($valB))) {
+                if ($valA < $valB) {
+                    switch ($type) {
+                        case self::SORT_TYPE_DESC:
+                            return 1;
+                            break;
+
+                        default:
+                            return -1;
+                    }
+                }
+
+                if ($valA > $valB) {
+                    switch ($type) {
+                        case self::SORT_TYPE_DESC:
+                            return -1;
+                            break;
+
+                        default:
+                            return 1;
+                    }
+                }
+
+                return 0;
+            }
+
+            // String comparison
+            switch ($type) {
+                case self::SORT_TYPE_DESC:
+                    return \strcmp($valA, $valB) * (-1);
+                    break;
+
+                default:
+                    return \strcmp($valA, $valB);
+            }
+        });
+    }
+
+    /**
+     * Sort children by a custom sort function
+     *
+     * @param callable $sortFunc
+     * @return void
+     */
+    public function sortChildrenCustom(callable $sortFunc)
+    {
+        usort($this->children, $sortFunc);
+    }
 }
