@@ -22,6 +22,11 @@ class ImportUser extends AbstractImportEntity implements CustomQuiqqerIdInterfac
     protected $quiqqerId = null;
 
     /**
+     * @var int[]
+     */
+    protected $quiqqerGroupIds = [];
+
+    /**
      * @var int|string[] - Group identifiers
      */
     protected $groups = [];
@@ -51,6 +56,11 @@ class ImportUser extends AbstractImportEntity implements CustomQuiqqerIdInterfac
      * @var array
      */
     protected $addresses = [];
+
+    /**
+     * @var string|false
+     */
+    protected $image = false;
 
     /**
      * ImportUser constructor.
@@ -102,6 +112,24 @@ class ImportUser extends AbstractImportEntity implements CustomQuiqqerIdInterfac
     public function getQuiqqerId()
     {
         return $this->quiqqerId;
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getQuiqqerGroupIds(): array
+    {
+        return $this->quiqqerGroupIds;
+    }
+
+    /**
+     * Set IDs of existing QUIQQER groups
+     *
+     * @param int[] $quiqqerGroupIds
+     */
+    public function setQuiqqerGroupIds(array $quiqqerGroupIds): void
+    {
+        $this->quiqqerGroupIds = $quiqqerGroupIds;
     }
 
     /**
@@ -212,5 +240,25 @@ class ImportUser extends AbstractImportEntity implements CustomQuiqqerIdInterfac
     public function getImportSection()
     {
         return QUI\CmsImport\Import::IMPORT_SECTION_USERS;
+    }
+
+    /**
+     * Get filepath to user image
+     *
+     * @return string|false
+     */
+    public function getImage(): string
+    {
+        return $this->image;
+    }
+
+    /**
+     * Set filepath to user image
+     *
+     * @param string $image
+     */
+    public function setImage(string $image): void
+    {
+        $this->image = $image;
     }
 }

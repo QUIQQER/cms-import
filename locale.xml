@@ -303,6 +303,10 @@
             <de><![CDATA[Benutzer "[identifier]" hat weder Benutzername noch E-Mail-Adresse und wird daher nicht importiert.]]></de>
             <en><![CDATA[User "[identifier]" has no username and e-mail address and thus will be not imported.]]></en>
         </locale>
+        <locale name="import.error.user_image_file_unavailable">
+            <de><![CDATA[Die Bild-Datei "[imageFile]" konnte nicht importiert werden, da sie nicht existiert oder kein Zugriff darauf möglich ist.]]></de>
+            <en><![CDATA[The image file "[imageFile]" could not be imported because it does not exist or ist not accessible.]]></en>
+        </locale>
 
         <!-- System config -->
         <locale name="import.header.system_config_start">

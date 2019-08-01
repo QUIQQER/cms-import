@@ -1663,11 +1663,11 @@ class Import extends QUI\QDOM
      */
     protected function createUsers(MetaList $UserList)
     {
-        $UserManager       = new QUIQQERImportUserManager();
-        $SystemUser        = $UserManager->getSystemUser();
-        $PermissionManager = QUI::getPermissionManager();
-        $DB                = QUI::getDataBase();
-        $usersTable        = QUI\Users\Manager::table();
+        $UserManager = new QUIQQERImportUserManager();
+        $SystemUser  = $UserManager->getSystemUser();
+        $DB          = QUI::getDataBase();
+        $usersTable  = QUI\Users\Manager::table();
+        $Media       = QUI::getProjectManager()->getStandard()->getMedia();
 
         /** @var MetaEntity $UserItem */
         foreach ($UserList->walkChildren() as $UserItem) {
@@ -1732,8 +1732,60 @@ class Import extends QUI\QDOM
                 }
             }
 
+            foreach ($ImportUser->getQuiqqerGroupIds() as $quiqqerGroupId) {
+                try {
+                    $NewUser->addToGroup($quiqqerGroupId);
+                } catch (\Exception $Exception) {
+                    $this->writeError('user_edit', [
+                        'identifier' => $ImportUser->getIdentifier(),
+                        'error'      => $Exception->getMessage()
+                    ], $ImportUser);
+                }
+            }
+
             if ($ImportUser->isAdmin()) {
                 $NewUser->addToGroup(QUI::conf('globals', 'root'));
+            }
+
+            // Image
+            $userImageFile = $ImportUser->getImage();
+
+            if (!empty($userImageFile)) {
+                if (!\file_exists($userImageFile) || !\is_readable($userImageFile)) {
+                    $this->writeError('user_edit', [
+                        'identifier' => $ImportUser->getIdentifier(),
+                        'error'      => QUI::getLocale()->get(
+                            'quiqqer/cms-import',
+                            'import.error.user_image_file_unavailable',
+                            [
+                                'imageFile' => $userImageFile
+                            ]
+                        )
+                    ], $ImportUser);
+                } else {
+                    try {
+                        $UserImageFolder = $Media->getChildByPath('users/');
+                    } catch (\Exception $Exception) {
+                        $UserImageFolder = $Media->get(1)->createFolder('users');
+                        $UserImageFolder->activate();
+                        $UserImageFolder = $Media->getChildByPath('users/');
+                    }
+
+                    /** @var QUI\Projects\Media\Folder $UserImageFolder */
+                    try {
+                        $UserImage = $UserImageFolder->uploadFile(
+                            $ImportUser->getImage(),
+                            $UserImageFolder::FILE_OVERWRITE_TRUE
+                        );
+
+                        $NewUser->setAttribute('avatar', $UserImage->getUrl());
+                    } catch (\Exception $Exception) {
+                        $this->writeError('user_edit', [
+                            'identifier' => $ImportUser->getIdentifier(),
+                            'error'      => $Exception->getMessage()
+                        ], $ImportUser);
+                    }
+                }
             }
 
             // Set password hash to DB
