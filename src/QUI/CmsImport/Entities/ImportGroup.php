@@ -27,6 +27,13 @@ class ImportGroup extends AbstractImportEntity implements CustomQuiqqerIdInterfa
     protected $quiqqerId = null;
 
     /**
+     * QUIQQER permissions for this group
+     *
+     * @var array
+     */
+    protected $quiqqerPermissions = [];
+
+    /**
      * ImportGroup constructor.
      *
      * @param string|int $identifier - ImportGroup identifier
@@ -96,5 +103,25 @@ class ImportGroup extends AbstractImportEntity implements CustomQuiqqerIdInterfa
     public function getImportSection()
     {
         return QUI\CmsImport\Import::IMPORT_SECTION_GROUPS;
+    }
+
+    /**
+     * Get QUIQQER permissions ($permissions => $permissionValue) for this group
+     *
+     * @return array
+     */
+    public function getQuiqqerPermissions(): array
+    {
+        return $this->quiqqerPermissions;
+    }
+
+    /**
+     * Set QUIQQER permissions ($permissions => $permissionValue) for this group
+     *
+     * @param array $quiqqerPermissions
+     */
+    public function setQuiqqerPermissions(array $quiqqerPermissions): void
+    {
+        $this->quiqqerPermissions = $quiqqerPermissions;
     }
 }

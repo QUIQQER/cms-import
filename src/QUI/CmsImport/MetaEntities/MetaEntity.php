@@ -99,4 +99,25 @@ class MetaEntity extends QUI\QDOM implements ChildrenInterface
     {
         return $this->parentId;
     }
+
+    /**
+     * @param string $attribute - Name of the attribute that is sorted by
+     * @param string $type - Type of sort (see ChildrenInterface::SORT_TYPE_*)
+     * @return void
+     */
+    public function sortChildren($attribute, $type = self::SORT_TYPE_ASC)
+    {
+        $this->ChildrenList->sortChildren($attribute, $type);
+    }
+
+    /**
+     * Sort children by a custom sort function
+     *
+     * @param callable $sortFunc
+     * @return void
+     */
+    public function sortChildrenCustom(callable $sortFunc)
+    {
+        $this->ChildrenList->sortChildrenCustom($sortFunc);
+    }
 }

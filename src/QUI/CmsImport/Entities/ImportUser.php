@@ -22,6 +22,11 @@ class ImportUser extends AbstractImportEntity implements CustomQuiqqerIdInterfac
     protected $quiqqerId = null;
 
     /**
+     * @var int[]
+     */
+    protected $quiqqerGroupIds = [];
+
+    /**
      * @var int|string[] - Group identifiers
      */
     protected $groups = [];
@@ -37,6 +42,25 @@ class ImportUser extends AbstractImportEntity implements CustomQuiqqerIdInterfac
      * @var bool
      */
     protected $isSU = false;
+
+    /**
+     * Administrator flag - administrators have QUIQQER backend access
+     *
+     * @var bool
+     */
+    protected $isAdmin = false;
+
+    /**
+     * Collection of user addresses
+     *
+     * @var array
+     */
+    protected $addresses = [];
+
+    /**
+     * @var string|false
+     */
+    protected $image = false;
 
     /**
      * ImportUser constructor.
@@ -91,6 +115,24 @@ class ImportUser extends AbstractImportEntity implements CustomQuiqqerIdInterfac
     }
 
     /**
+     * @return int[]
+     */
+    public function getQuiqqerGroupIds(): array
+    {
+        return $this->quiqqerGroupIds;
+    }
+
+    /**
+     * Set IDs of existing QUIQQER groups
+     *
+     * @param int[] $quiqqerGroupIds
+     */
+    public function setQuiqqerGroupIds(array $quiqqerGroupIds): void
+    {
+        $this->quiqqerGroupIds = $quiqqerGroupIds;
+    }
+
+    /**
      * Set groups to the user
      *
      * @param array $groups - An array of unique ImportGroup identifiers
@@ -142,6 +184,55 @@ class ImportUser extends AbstractImportEntity implements CustomQuiqqerIdInterfac
     }
 
     /**
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return $this->isAdmin;
+    }
+
+    /**
+     * @param bool $isAdmin
+     */
+    public function setIsAdmin(bool $isAdmin): void
+    {
+        $this->isAdmin = $isAdmin;
+    }
+
+    /**
+     * @param array $address
+     *
+     * Available $address keys:
+     * [
+     *      'default' => true / false
+     *      'salutation',
+     *      'firstname',
+     *      'lastname',
+     *      'mail',
+     *      'company',
+     *      'street_no',
+     *      'zip',
+     *      'city',
+     *      'country',
+     *      'phone' => [123, 312],
+     *      'mobile' => [123, 312],
+     *      'fax' => [123, 321]
+     * ]
+     */
+    public function addAddress($address)
+    {
+        $this->addresses[] = $address;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAddresses()
+    {
+        return $this->addresses;
+    }
+
+    /**
      * Get the import section the ImportEntitiy belongs to
      *
      * @return string
@@ -149,5 +240,25 @@ class ImportUser extends AbstractImportEntity implements CustomQuiqqerIdInterfac
     public function getImportSection()
     {
         return QUI\CmsImport\Import::IMPORT_SECTION_USERS;
+    }
+
+    /**
+     * Get filepath to user image
+     *
+     * @return string|false
+     */
+    public function getImage(): string
+    {
+        return $this->image;
+    }
+
+    /**
+     * Set filepath to user image
+     *
+     * @param string $image
+     */
+    public function setImage(string $image): void
+    {
+        $this->image = $image;
     }
 }

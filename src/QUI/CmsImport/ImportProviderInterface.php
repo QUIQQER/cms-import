@@ -15,8 +15,6 @@ use QUI\CmsImport\MetaEntities\MetaHierarchy;
 use QUI\CmsImport\MetaEntities\ProjectList;
 use QUI\CmsImport\MetaEntities\SiteHierarchy;
 use QUI\CmsImport\MetaEntities\MetaList;
-use QUI\CmsImport\Provider\PMS\ImportProvider;
-
 
 /**
  * Interface ImportProviderInterface
@@ -231,4 +229,19 @@ interface ImportProviderInterface
      * @return Import
      */
     public function getImport();
+
+    /**
+     * Get all import features this Provider provides
+     *
+     * @return array
+     */
+    public function getImportFeatures();
+
+    /**
+     * This methods is executed after the import process finished. This allows the ImportProvider to do some
+     * own cleanup stuff and/or other features.
+     *
+     * @return void
+     */
+    public function onImportFinished();
 }

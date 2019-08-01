@@ -34,7 +34,7 @@ abstract class AbstractImportProvider implements ImportProviderInterface
      * @param string $msg
      * @return void
      */
-    protected function writeInfo($msg)
+    public function writeInfo($msg)
     {
         $this->ImportConsole->writeInfo($msg);
     }
@@ -45,7 +45,7 @@ abstract class AbstractImportProvider implements ImportProviderInterface
      * @param string $msg
      * @return void
      */
-    protected function writeWarning($msg)
+    public function writeWarning($msg)
     {
         $this->ImportConsole->writeWarning($msg);
     }
@@ -56,7 +56,7 @@ abstract class AbstractImportProvider implements ImportProviderInterface
      * @param string $msg
      * @return void
      */
-    protected function writeError($msg)
+    public function writeError($msg)
     {
         $this->ImportConsole->writeError($msg);
     }
@@ -68,7 +68,7 @@ abstract class AbstractImportProvider implements ImportProviderInterface
      * @param string $defaultValue (optional)
      * @return string
      */
-    protected function writePrompt($msg, $defaultValue = null)
+    public function writePrompt($msg, $defaultValue = null)
     {
         return $this->ImportConsole->writePrompt($msg, $defaultValue);
     }
@@ -79,7 +79,7 @@ abstract class AbstractImportProvider implements ImportProviderInterface
      * @param string $title
      * @return void
      */
-    protected function writeHeader($title)
+    public function writeHeader($title)
     {
         $this->ImportConsole->writeHeader($title);
     }
@@ -103,5 +103,36 @@ abstract class AbstractImportProvider implements ImportProviderInterface
     public function getImport()
     {
         return $this->Import;
+    }
+
+    /**
+     * Get all import features this Provider provides
+     *
+     * @return array
+     */
+    public function getImportFeatures()
+    {
+        return [
+            'importProjects'     => true,
+            'importSites'        => true,
+            'importTags'         => true,
+            'importMedia'        => true,
+            'importUsers'        => true,
+            'importGroups'       => true,
+            'importSystemConfig' => true,
+            'importTranslations' => true,
+            'importPermissions'  => true
+        ];
+    }
+
+    /**
+     * This methods is executed after the import process finished. This allows the ImportProvider to do some
+     * own cleanup stuff and/or other features.
+     *
+     * @return void
+     */
+    public function onImportFinished()
+    {
+        // nothing
     }
 }
