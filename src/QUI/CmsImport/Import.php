@@ -143,12 +143,32 @@ class Import extends QUI\QDOM
             try {
                 $this->importProjects();
             } catch (\Exception $Exception) {
+                QUI\System\Log::writeException($Exception);
+
                 $this->writeWarning(
                     'error.import_projects',
                     [
                         'error' => $Exception->getMessage()
                     ]
                 );
+            }
+        } else {
+            $ProjectList     = $this->ImportProvider->getProjectList();
+            $StandardProject = QUI::getProjectManager()->getStandard();
+
+            $this->importData['projects'] = [];
+
+            /** @var QUI\CmsImport\MetaEntities\ProjectEntity $ProjectEntity */
+            foreach ($ProjectList->walkChildren() as $ProjectEntity) {
+                $ImportProject                                           = $this->ImportProvider->getProject($ProjectEntity->getId());
+                $this->importData['projects'][$ImportProject->getName()] = $StandardProject;
+
+                $this->writeWarning('default_project_only', [
+                    'sourceProject' => $ImportProject->getName(),
+                    'targetProject' => $StandardProject->getName()
+                ]);
+
+                break;
             }
         }
 
@@ -157,6 +177,8 @@ class Import extends QUI\QDOM
             try {
                 $this->importTranslations();
             } catch (\Exception $Exception) {
+                QUI\System\Log::writeException($Exception);
+
                 $this->writeWarning(
                     'error.import_translations',
                     [
@@ -175,6 +197,8 @@ class Import extends QUI\QDOM
                 $OldProject = $Projects->getProject('old_standard_project');
                 $Projects->deleteProject($OldProject);
             } catch (\Exception $Exception) {
+                QUI\System\Log::writeException($Exception);
+
                 $this->writeWarning(
                     'error.delete_old_standard_project',
                     [
@@ -193,6 +217,8 @@ class Import extends QUI\QDOM
                     $this->importTagGroups();
                     $this->importTags();
                 } catch (\Exception $Exception) {
+                    QUI\System\Log::writeException($Exception);
+
                     $this->writeWarning(
                         'error.import_tags',
                         [
@@ -210,6 +236,8 @@ class Import extends QUI\QDOM
             try {
                 $this->importPermissions();
             } catch (\Exception $Exception) {
+                QUI\System\Log::writeException($Exception);
+
                 $this->writeWarning(
                     'error.import_permissions',
                     [
@@ -224,6 +252,8 @@ class Import extends QUI\QDOM
             try {
                 $this->importGroups();
             } catch (\Exception $Exception) {
+                QUI\System\Log::writeException($Exception);
+
                 $this->writeWarning(
                     'error.import_groups',
                     [
@@ -238,6 +268,8 @@ class Import extends QUI\QDOM
             try {
                 $this->importUsers();
             } catch (\Exception $Exception) {
+                QUI\System\Log::writeException($Exception);
+
                 $this->writeWarning(
                     'error.import_users',
                     [
@@ -252,6 +284,8 @@ class Import extends QUI\QDOM
             try {
                 $this->importSites();
             } catch (\Exception $Exception) {
+                QUI\System\Log::writeException($Exception);
+
                 $this->writeWarning(
                     'error.import_sites',
                     [
@@ -266,6 +300,8 @@ class Import extends QUI\QDOM
             try {
                 $this->importMedia();
             } catch (\Exception $Exception) {
+                QUI\System\Log::writeException($Exception);
+
                 $this->writeWarning(
                     'error.import_media',
                     [
@@ -280,6 +316,8 @@ class Import extends QUI\QDOM
             try {
                 $this->importSystemConfig();
             } catch (\Exception $Exception) {
+                QUI\System\Log::writeException($Exception);
+
                 $this->writeWarning(
                     'error.import_system_config',
                     [
