@@ -481,6 +481,10 @@
             <de><![CDATA[Beim System-Konfigurations-Import ist ein Fehler aufgetreten -> [error]]]></de>
             <en><![CDATA[An error occurred during system config import -> [error]]]></en>
         </locale>
+        <locale name="import.warning.default_project_only">
+            <de><![CDATA[Da keine Projekte vom Quell-System importiert werden, werden nur die Seiten des ersten Projekts des Quell-Systems importiert ("[sourceProject]"). Das Ziel-QUIQQER-Projekt ist "[targetProject]".]]></de>
+            <en><![CDATA[Since no projects are imported from the source system, only sites of the first source project are imported ("[sourceProject]"). The target QUIQQER project is "[targetProject]".]]></en>
+        </locale>
 
         <!-- review.log -->
         <locale name="import.header.review">
