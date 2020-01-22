@@ -428,8 +428,8 @@
             <en><![CDATA[Deleting all non-essential groups...]]></en>
         </locale>
         <locale name="import.msg.cleanup.delete_projects">
-            <de><![CDATA[Lösche alle Projekte (außer dem Standard-Projekt)...]]></de>
-            <en><![CDATA[Deleting all projcets (except for the standard project)...]]></en>
+            <de><![CDATA[Räume Projekte auf...]]></de>
+            <en><![CDATA[Cleanup projects...]]></en>
         </locale>
         <locale name="import.msg.cleanup.delete_crons">
             <de><![CDATA[Lösche alle Crons...]]></de>
