@@ -960,10 +960,9 @@ class Import extends QUI\QDOM
                 continue;
             }
 
-            $siteIdentifier       = $ChildSiteItem->getId();
-            $ImportSite           = $this->ImportProvider->getSite($siteIdentifier, $projectIdentifier, $lang);
-            $importQuiqqerSiteId  = $ImportSite->getQuiqqerId();
-            $importSiteAttributes = $ImportSite->getAttributes();
+            $siteIdentifier      = $ChildSiteItem->getId();
+            $ImportSite          = $this->ImportProvider->getSite($siteIdentifier, $projectIdentifier, $lang);
+            $importQuiqqerSiteId = $ImportSite->getQuiqqerId();
 
             $this->writeInfo('site_start', [
                 'siteIdentifier' => $siteIdentifier,
@@ -988,6 +987,16 @@ class Import extends QUI\QDOM
 
                 continue;
             }
+
+            try {
+                QUI::getEvents()->fireEvent(
+                    'quiqqerCmsImportSiteImport', [$ImportSite, $QuiqqerProject, $this->ImportProvider]
+                );
+            } catch (\Exception $Exception) {
+                QUI\System\Log::writeException($Exception);
+            }
+
+            $importSiteAttributes = $ImportSite->getAttributes();
 
             // Special case: QUIQQER root site
             if (empty($RootQuiqqerSite)) {
