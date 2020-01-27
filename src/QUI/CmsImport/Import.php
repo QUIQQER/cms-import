@@ -990,7 +990,8 @@ class Import extends QUI\QDOM
 
             try {
                 QUI::getEvents()->fireEvent(
-                    'quiqqerCmsImportSiteImport', [$ImportSite, $QuiqqerProject, $this->ImportProvider]
+                    'quiqqerCmsImportSiteImport',
+                    [$ImportSite, $QuiqqerProject, $this->ImportProvider]
                 );
             } catch (\Exception $Exception) {
                 QUI\System\Log::writeException($Exception);
