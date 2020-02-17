@@ -865,6 +865,10 @@ class Import extends QUI\QDOM
             $ImportTag     = $this->ImportProvider->getTag($tagIdentifier, $projectIdentifier, $lang);
             $tag           = $ImportTag->getTitle();
 
+            if (empty($tag)) {
+                $tag = $ImportTag->getIdentifier();
+            }
+
             if ($ImportTag->hasReviewFlags()) {
                 $this->reviewEntities[] = $ImportTag;
             }
