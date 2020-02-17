@@ -153,23 +153,20 @@ class Import extends QUI\QDOM
                 );
             }
         } else {
-            $ProjectList     = $this->ImportProvider->getProjectList();
+//            $ProjectList = new QUI\CmsImport\MetaEntities\ProjectList();
+//            $ProjectList->addChild(new QUI\CmsImport\MetaEntities\ProjectEntity('standard'));
+
+//            $ProjectList     = $this->ImportProvider->getProjectList();
             $StandardProject = QUI::getProjectManager()->getStandard();
 
-            $this->importData['projects'] = [];
+//            $this->importData['projects'] = [];
 
-            /** @var QUI\CmsImport\MetaEntities\ProjectEntity $ProjectEntity */
-            foreach ($ProjectList->walkChildren() as $ProjectEntity) {
-                $ImportProject                                           = $this->ImportProvider->getProject($ProjectEntity->getId());
-                $this->importData['projects'][$ImportProject->getName()] = $StandardProject;
+            $this->importData['projects']['default'] = $StandardProject;
 
-                $this->writeWarning('default_project_only', [
-                    'sourceProject' => $ImportProject->getName(),
-                    'targetProject' => $StandardProject->getName()
-                ]);
-
-                break;
-            }
+            $this->writeWarning('default_project_only', [
+                'sourceProject' => 'default',
+                'targetProject' => $StandardProject->getName()
+            ]);
         }
 
         // Translations
@@ -967,10 +964,9 @@ class Import extends QUI\QDOM
                 continue;
             }
 
-            $siteIdentifier       = $ChildSiteItem->getId();
-            $ImportSite           = $this->ImportProvider->getSite($siteIdentifier, $projectIdentifier, $lang);
-            $importQuiqqerSiteId  = $ImportSite->getQuiqqerId();
-            $importSiteAttributes = $ImportSite->getAttributes();
+            $siteIdentifier      = $ChildSiteItem->getId();
+            $ImportSite          = $this->ImportProvider->getSite($siteIdentifier, $projectIdentifier, $lang);
+            $importQuiqqerSiteId = $ImportSite->getQuiqqerId();
 
             $this->writeInfo('site_start', [
                 'siteIdentifier' => $siteIdentifier,
@@ -995,6 +991,17 @@ class Import extends QUI\QDOM
 
                 continue;
             }
+
+            try {
+                QUI::getEvents()->fireEvent(
+                    'quiqqerCmsImportSiteImport',
+                    [$ImportSite, $QuiqqerProject, $this->ImportProvider]
+                );
+            } catch (\Exception $Exception) {
+                QUI\System\Log::writeException($Exception);
+            }
+
+            $importSiteAttributes = $ImportSite->getAttributes();
 
             // Special case: QUIQQER root site
             if (empty($RootQuiqqerSite)) {
@@ -2155,10 +2162,49 @@ class Import extends QUI\QDOM
                 }
             }
 
-            rmdir($dir);
+//            rmdir($dir);
         }
 
-        $StandardProject->rename('old_standard_project');
+        /**
+         * If projects are imported, just rename the curernt standard project and delete
+         * it fully later on.
+         *
+         * If projects are NOT imported, cleanup all sites and media items of the current
+         * standard project (because this is where everything will be imported to).
+         */
+        if ($this->getAttribute('importProjects')) {
+            $StandardProject->rename('old_standard_project');
+        } else {
+            // Delete sites
+            $langs = QUI::availableLanguages();
+
+            foreach ($langs as $lang) {
+                $Project = new QUI\Projects\Project($StandardProject->getName(), $lang);
+                $siteIds = $Project->getSitesIds();
+
+                foreach ($siteIds as $siteId) {
+                    $Site = new QUI\Projects\Site\Edit($Project, $siteId['id']);
+                    $Site->delete();
+                    $Site->refresh();
+                    $Site->destroy();
+                }
+            }
+
+            // Truncate media tables
+            $project = $StandardProject->getName();
+
+            QUI::getDataBase()->delete(
+                $project.'_media',
+                [
+                    'id' => [
+                        'type'  => 'NOT',
+                        'value' => 1
+                    ]
+                ]
+            );
+
+            QUI::getDataBase()->table()->truncate($project.'_media_relations');
+        }
 
         /** @var QUI\Projects\Project $Project */
         foreach ($Projects->getProjects(true) as $Project) {
