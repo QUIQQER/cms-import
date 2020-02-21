@@ -138,6 +138,9 @@ class Import extends QUI\QDOM
         // ImportProvider config
         $this->ImportProvider->promptForConfig();
 
+        // Disable cache clear for performance
+        QUI\Cache\Manager::$noClearing = true;
+
         // Projects
         if ($this->getAttribute('importProjects')) {
             try {
