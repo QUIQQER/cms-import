@@ -1065,19 +1065,6 @@ class Import extends QUI\QDOM
 
             $ImportSite->setAttribute(self::ENTITY_ATTRIBUTE_QUIQQER_ID, $newSiteId);
 
-            // Set c_date in database
-            if (!empty($importSiteAttributes['c_date'])) {
-                QUI::getDataBase()->update(
-                    $sitesTbl,
-                    [
-                        'c_date' => $importSiteAttributes['c_date']
-                    ],
-                    [
-                        'id' => $newSiteId
-                    ]
-                );
-            }
-
             // Activate site
             if ($importSiteAttributes['active']) {
                 try {
@@ -1104,6 +1091,32 @@ class Import extends QUI\QDOM
 
             try {
                 $NewSite->save();
+
+                // Set specific site attributes directly via db query
+                $editAttributes = [
+                    'c_date',
+                    'c_user',
+                    'e_date',
+                    'e_user'
+                ];
+
+                $set = [];
+
+                foreach ($editAttributes as $editAttribute) {
+                    if (!empty($importSiteAttributes[$editAttribute])) {
+                        $set[$editAttribute] = $importSiteAttributes[$editAttribute];
+                    }
+                }
+
+                if (!empty($set)) {
+                    QUI::getDataBase()->update(
+                        $sitesTbl,
+                        $set,
+                        [
+                            'id' => $newSiteId
+                        ]
+                    );
+                }
             } catch (\Exception $Exception) {
                 QUI\System\Log::writeException($Exception);
 
