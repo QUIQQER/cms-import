@@ -384,6 +384,18 @@ class Import extends QUI\QDOM
 
             $this->writeInfo('project.success', ['project' => $NewProject->getName()]);
         }
+
+        // Explicitly execute a setup for each package again here
+        try {
+            QUI\Setup::executeEachPackageSetup();
+        } catch (\Exception $Exception) {
+            $this->writeError('project_create_error', [
+                'error' => $Exception->getMessage()
+            ]);
+
+
+            QUI\System\Log::writeException($Exception);
+        }
     }
 
     /**
