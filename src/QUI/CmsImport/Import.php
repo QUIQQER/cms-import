@@ -908,6 +908,7 @@ class Import extends QUI\QDOM
                 $quiqqerTag = $TagManager->add($tag, [
                     'title'     => $tag,
                     'desc'      => $ImportTag->getDescription() ?: null,
+                    'image'     => $ImportTag->getImage() ?: null,
                     'generator' => 'quiqqer/cms-import',
                     'generated' => true
                 ]);

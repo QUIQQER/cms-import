@@ -22,6 +22,11 @@ class ImportTag extends AbstractImportEntity
     protected $description;
 
     /**
+     * @var string
+     */
+    protected $image = null;
+
+    /**
      * @var string[] - ImportTagGroup identifiers
      */
     protected $tagGroups = [];
@@ -76,6 +81,22 @@ class ImportTag extends AbstractImportEntity
     public function addTagGroup($tagGroup)
     {
         $this->tagGroups[] = $tagGroup;
+    }
+
+    /**
+     * @return string
+     */
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+    /**
+     * @param string $image - QUIQQER Image URL
+     */
+    public function setImage(string $image)
+    {
+        $this->image = $image;
     }
 
     /**
