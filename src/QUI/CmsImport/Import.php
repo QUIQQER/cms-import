@@ -1894,7 +1894,18 @@ class Import extends QUI\QDOM
             $NewAddress        = false;
 
             foreach ($ImportUser->getAddresses() as $address) {
-                $NewAddress = $NewUser->addAddress($address, $SystemUser);
+                try {
+                    $NewAddress = $NewUser->addAddress($address, $SystemUser);
+                } catch (\Exception $Exception) {
+                    QUI\System\Log::writeException($Exception);
+
+                    $this->writeError('user_edit', [
+                        'identifier' => $ImportUser->getIdentifier(),
+                        'error'      => $Exception->getMessage()
+                    ], $ImportUser);
+
+                    continue;
+                }
 
                 // phone
                 if (!empty($address['phone'])) {
