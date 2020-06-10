@@ -553,9 +553,11 @@ class Import extends QUI\QDOM
                 $SiteHierarchy = $this->ImportProvider->getSiteHierarchy($projectIdentifier, $lang);
 
                 $importedSites[$lang] = $this->createSites($TargetProject, $projectIdentifier, $SiteHierarchy);
+                continue;
                 $this->createSiteLinks($TargetProject, $SiteHierarchy, $importedSites[$lang]);
             }
 
+            return;
             // Create language links for $lang
             foreach ($importedSites as $lang => $importSites) {
                 $SourceProject = $Projects->getProject($quiqqerProject, $lang);
@@ -975,11 +977,15 @@ class Import extends QUI\QDOM
         $sitesTbl = QUI::getDBProjectTableName('sites', $QuiqqerProject);
 
         /** @var SiteEntity $ChildSiteItem */
+        $counter = -1;
+
         foreach ($SiteTree->walkChildren() as $ChildSiteItem) {
+
             // Site links are not created as actual sites but as links (created after all sites are created)
             if ($ChildSiteItem->isLink()) {
                 continue;
             }
+            $counter++;
 
             $siteIdentifier      = $ChildSiteItem->getId();
             $ImportSite          = $this->ImportProvider->getSite($siteIdentifier, $projectIdentifier, $lang);
@@ -989,6 +995,14 @@ class Import extends QUI\QDOM
                 'siteIdentifier' => $siteIdentifier,
                 'siteTitle'      => $ImportSite->getAttribute('title')
             ]);
+            $type = $ImportSite->getAttribute('type');
+            QUI\System\Log::writeRecursive($type);
+            if ($counter > 20) {
+                QUI\System\Log::writeRecursive('return point erstellt');
+                return [];
+            }
+
+            continue;
 
             // Add to review pool
             if ($ImportSite->hasReviewFlags()) {
