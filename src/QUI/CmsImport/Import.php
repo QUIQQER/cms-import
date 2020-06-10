@@ -984,6 +984,7 @@ class Import extends QUI\QDOM
             if ($ChildSiteItem->isLink()) {
                 continue;
             }
+            // test
             $counter++;
 
             $siteIdentifier      = $ChildSiteItem->getId();
