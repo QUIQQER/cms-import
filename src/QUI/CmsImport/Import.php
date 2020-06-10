@@ -996,13 +996,13 @@ class Import extends QUI\QDOM
                 'siteTitle'      => $ImportSite->getAttribute('title')
             ]);
             $type = $ImportSite->getAttribute('type');
-            QUI\System\Log::writeRecursive($type);
-            if ($counter > 20) {
-                QUI\System\Log::writeRecursive('return point erstellt');
-                return [];
-            }
+//            QUI\System\Log::writeRecursive($type);
+//            if ($counter > 20) {
+//                QUI\System\Log::writeRecursive('return point erstellt');
+//                return [];
+//            }
 
-            continue;
+//            continue;
 
             // Add to review pool
             if ($ImportSite->hasReviewFlags()) {
