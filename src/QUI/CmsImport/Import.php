@@ -980,7 +980,6 @@ class Import extends QUI\QDOM
         $counter = -1;
 
         foreach ($SiteTree->walkChildren() as $ChildSiteItem) {
-
             // Site links are not created as actual sites but as links (created after all sites are created)
             if ($ChildSiteItem->isLink()) {
                 continue;
