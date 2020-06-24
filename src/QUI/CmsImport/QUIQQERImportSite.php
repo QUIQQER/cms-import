@@ -89,18 +89,24 @@ class QUIQQERImportSite extends Edit
         $PDO      = $DataBase->getPDO();
 
         // temporarily remove AUTO_INCREMENT from id column in `sites` to allow custom site IDs
+        /** time intensive query
+         * should only be done one time for the whole import
+         * ideally at the start of the import
+         *
+         * with existing IDs should this only be executed once
+         */
         if (!empty($params['id'])) {
             $_params['id'] = (int)$params['id'];
 
             // disable AUTO_INCREMENT
-            $Statement = $PDO->prepare("ALTER TABLE {$this->TABLE} MODIFY `id` INT(11) NOT NULL");
-            $Statement->execute();
+//            $Statement = $PDO->prepare("ALTER TABLE {$this->TABLE} MODIFY `id` INT(11) NOT NULL");
+//            $Statement->execute();
 
             $DataBase->insert($this->TABLE, $_params);
 
             // re-enable AUTO_INCREMENT
-            $Statement = $PDO->prepare("ALTER TABLE {$this->TABLE} MODIFY `id` INT(11) NOT NULL AUTO_INCREMENT");
-            $Statement->execute();
+//            $Statement = $PDO->prepare("ALTER TABLE {$this->TABLE} MODIFY `id` INT(11) NOT NULL AUTO_INCREMENT");
+//            $Statement->execute();
 
             $newId = $_params['id'];
         } else {

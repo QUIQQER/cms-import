@@ -207,6 +207,22 @@ class Import extends QUI\QDOM
                     ]
                 );
             }
+
+            /** Nexgam Import specific */
+            $DataBase = QUI::getDataBase();
+            $PDO      = $DataBase->getPDO();
+
+            $Statement = $PDO->prepare("ALTER TABLE `nexgamalt1`.`nexgam_de_sites` MODIFY `id` INT(11) NOT NULL");
+            $Statement->execute();
+
+            $Statement = $PDO->prepare("ALTER TABLE `nexgamalt1`.`nexgam_media` MODIFY `id` BIGINT(20) NOT NULL");
+            $Statement->execute();
+
+
+            $msg = 'set not null autoincrement FALSE';
+            $this->ConsoleTool->writeInfo($msg);
+            QUI\System\Log::writeRecursive($msg);
+            /** Nexgam Import specific */
         }
 
         // Tags / tag groups
@@ -329,6 +345,21 @@ class Import extends QUI\QDOM
         }
 
         $this->writeReviewLog();
+
+        /** Nexgam import Specific */
+        $DataBase = QUI::getDataBase();
+        $PDO      = $DataBase->getPDO();
+
+        $Statement = $PDO->prepare("ALTER TABLE `nexgamalt1`.`nexgam_de_sites` MODIFY `id` INT(11) NOT NULL AUTO_INCREMENT");
+        $Statement->execute();
+
+        $Statement = $PDO->prepare("ALTER TABLE `nexgamalt1`.`nexgam_media` MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT");
+        $Statement->execute();
+
+        $msg = 'set not null autoincrement TRUE';
+        $this->ConsoleTool->writeInfo($msg);
+        QUI\System\Log::writeRecursive($msg);
+        /** Nexgam import Specific */
 
         $this->ImportProvider->onImportFinished();
     }
@@ -520,6 +551,7 @@ class Import extends QUI\QDOM
 
                 $this->importData['tag'][$project][$lang] = [];
 
+                /** creating the Tags */
                 $this->createTags(
                     $TagProject,
                     $projectIdentifier,
@@ -1243,7 +1275,11 @@ class Import extends QUI\QDOM
         // Tags
         $this->writeInfo('site_tags_start');
 
+        /** for each Tag
+         * add Tag to Site if tag was found and Tag exists
+         */
         foreach ($ImportSite->getTags() as $tagIdentifier) {
+            /** Tag not found */
             if (empty($this->importData['tags'][$project][$lang][$tagIdentifier])) {
                 $this->writeWarning('site_tags_tag_not_found', [
                     'tagTitle' => $tagIdentifier
@@ -1254,6 +1290,7 @@ class Import extends QUI\QDOM
 
             $quiqqerTag = $this->importData['tags'][$project][$lang][$tagIdentifier];
 
+            /** check if tag exists */
             if (!$TagManager->existsTag($quiqqerTag)) {
                 $this->writeWarning('site_tags_tag_not_found', [
                     'tagTitle' => $quiqqerTag
@@ -1262,7 +1299,12 @@ class Import extends QUI\QDOM
                 continue;
             }
 
+            /** write tag to site */
             try {
+                /** this can be the source of the Cache Problem
+                 * it tries to get every Tag of any Parent Site
+                 *
+                 */
                 $TagManager->addTagToSite($QuiqqerSite->getId(), $quiqqerTag);
             } catch (\Exception $Exception) {
                 QUI\System\Log::writeException($Exception);
@@ -1271,7 +1313,7 @@ class Import extends QUI\QDOM
 
         // Tag Groups
         $this->writeInfo('site_tag_groups_start');
-
+        /** for each Tag Group */
         foreach ($ImportSite->getTagGroups() as $tagGroupIdentifier) {
             if (empty($this->importData['tagGroups'][$project][$lang][$tagGroupIdentifier])) {
                 $this->writeWarning('site_tags_tag_group_not_found', [

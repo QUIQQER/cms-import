@@ -75,14 +75,14 @@ class QUIQQERImportMediaFolder extends QUI\Projects\Media\Folder
             $data['id'] = (int)$customId;
 
             // disable AUTO_INCREMENT
-            $Statement = $PDO->prepare("ALTER TABLE {$table} MODIFY `id` BIGINT(20) NOT NULL");
-            $Statement->execute();
+//            $Statement = $PDO->prepare("ALTER TABLE {$table} MODIFY `id` BIGINT(20) NOT NULL");
+//            $Statement->execute();
 
             QUI::getDataBase()->insert($table, $data);
 
             // re-enable AUTO_INCREMENT
-            $Statement = $PDO->prepare("ALTER TABLE {$table} MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT");
-            $Statement->execute();
+//            $Statement = $PDO->prepare("ALTER TABLE {$table} MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT");
+//            $Statement->execute();
 
             $id = $data['id'];
         } else {
@@ -285,14 +285,14 @@ class QUIQQERImportMediaFolder extends QUI\Projects\Media\Folder
             $data['id'] = (int)$customId;
 
             // disable AUTO_INCREMENT
-            $Statement = $PDO->prepare("ALTER TABLE {$table} MODIFY `id` BIGINT(20) NOT NULL");
-            $Statement->execute();
+//            $Statement = $PDO->prepare("ALTER TABLE {$table} MODIFY `id` BIGINT(20) NOT NULL");
+//            $Statement->execute();
 
             QUI::getDataBase()->insert($table, $data);
 
             // re-enable AUTO_INCREMENT
-            $Statement = $PDO->prepare("ALTER TABLE {$table} MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT");
-            $Statement->execute();
+//            $Statement = $PDO->prepare("ALTER TABLE {$table} MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT");
+//            $Statement->execute();
 
             $id = $data['id'];
         } else {
