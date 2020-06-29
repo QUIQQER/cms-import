@@ -585,11 +585,11 @@ class Import extends QUI\QDOM
                 $SiteHierarchy = $this->ImportProvider->getSiteHierarchy($projectIdentifier, $lang);
 
                 $importedSites[$lang] = $this->createSites($TargetProject, $projectIdentifier, $SiteHierarchy);
-                continue;
+//                continue;
                 $this->createSiteLinks($TargetProject, $SiteHierarchy, $importedSites[$lang]);
             }
 
-            return;
+//            return;
             // Create language links for $lang
             foreach ($importedSites as $lang => $importSites) {
                 $SourceProject = $Projects->getProject($quiqqerProject, $lang);
