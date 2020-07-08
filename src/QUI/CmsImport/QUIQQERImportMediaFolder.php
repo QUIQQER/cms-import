@@ -270,6 +270,7 @@ class QUIQQERImportMediaFolder extends QUI\Projects\Media\Folder
             'title'        => $title,
             'short'        => '',
             'file'         => $filePath,
+            'pathHash'     => \md5($filePath),
             'alt'          => $title,
             'c_date'       => date('Y-m-d h:i:s'),
             'e_date'       => date('Y-m-d h:i:s'),
