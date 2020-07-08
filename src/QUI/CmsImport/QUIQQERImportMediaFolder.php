@@ -12,14 +12,14 @@ class QUIQQERImportMediaFolder extends QUI\Projects\Media\Folder
     /**
      * Adds / create a subfolder
      *
-     * @internal This is almost an exact copy of \QUI\Projects\Media\Folder::createFolder
-     * with the only difference that you can set a custom ID
-     *
      * @param string $foldername - Name of the new folder
      * @param int $customId (optional) - Custom QUIQQER Media ID
      *
      * @return QUI\Projects\Media\Folder
      * @throws QUI\Exception
+     * @internal This is almost an exact copy of \QUI\Projects\Media\Folder::createFolder
+     * with the only difference that you can set a custom ID
+     *
      */
     public function createFolder($foldername, $customId = null)
     {
@@ -52,6 +52,7 @@ class QUIQQERImportMediaFolder extends QUI\Projects\Media\Folder
         }
 
         FileUtils::mkdir($dir.$new_name);
+        $file = $this->getAttribute('file').$new_name.'/';
 
         $table     = $this->Media->getTable();
         $table_rel = $this->Media->getTable('relations');
@@ -60,10 +61,11 @@ class QUIQQERImportMediaFolder extends QUI\Projects\Media\Folder
             'title'     => $new_name,
             'short'     => $new_name,
             'type'      => 'folder',
-            'file'      => $this->getAttribute('file').$new_name.'/',
+            'file'      => $file,
+            'pathHash'  => \md5($file),
             'alt'       => $new_name,
-            'c_date'    => date('Y-m-d h:i:s'),
-            'e_date'    => date('Y-m-d h:i:s'),
+            'c_date'    => \date('Y-m-d h:i:s'),
+            'e_date'    => \date('Y-m-d h:i:s'),
             'c_user'    => $User->getId(),
             'e_user'    => $User->getId(),
             'mime_type' => 'folder'
@@ -113,9 +115,6 @@ class QUIQQERImportMediaFolder extends QUI\Projects\Media\Folder
     /**
      * Uploads a file to the Folder
      *
-     * @internal This is almost an exact copy of \QUI\Projects\Media\Folder::uploadFile
-     * with the only difference that you can set a custom ID
-     *
      * @param string $file - Path to the File
      * @param integer $options - Overwrite flags,
      *                           self::FILE_OVERWRITE_NONE
@@ -125,6 +124,9 @@ class QUIQQERImportMediaFolder extends QUI\Projects\Media\Folder
      *
      * @return QUI\Projects\Media\Item
      * @throws QUI\Exception
+     * @internal This is almost an exact copy of \QUI\Projects\Media\Folder::uploadFile
+     * with the only difference that you can set a custom ID
+     *
      */
     public function uploadFile($file, $options = self::FILE_OVERWRITE_NONE, $customId = null)
     {
