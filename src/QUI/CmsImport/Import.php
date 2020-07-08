@@ -388,6 +388,7 @@ class Import extends QUI\QDOM
 
         // Explicitly execute a setup for each package again here
         try {
+            QUI\Cache\Manager::clearCompleteQuiqqerCache();
             QUI\Setup::executeEachPackageSetup();
         } catch (\Exception $Exception) {
             $this->writeError('project_create_error', [
@@ -2249,7 +2250,8 @@ class Import extends QUI\QDOM
 
         /** @var QUI\Projects\Project $Project */
         foreach ($Projects->getProjects(true) as $Project) {
-            if ($Project->getName() === $StandardProject->getName()) {
+            if ($Project->getName() === $StandardProject->getName() ||
+                $Project->getName() === 'old_standard_project') {
                 // standard project is deleted at a later time
                 // because QUIQQER needs at least 1 project at any time
                 continue;
