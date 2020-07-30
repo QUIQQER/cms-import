@@ -1858,6 +1858,8 @@ class Import extends QUI\QDOM
                             $UserImageFolder::FILE_OVERWRITE_TRUE
                         );
 
+                        $UserImage->activate();
+
                         $NewUser->setAttribute('avatar', $UserImage->getUrl());
                     } catch (\Exception $Exception) {
                         $this->writeError('user_edit', [
