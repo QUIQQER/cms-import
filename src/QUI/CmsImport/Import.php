@@ -337,19 +337,22 @@ class Import extends QUI\QDOM
      * Start project import
      *
      * @return void
+     * @throws QUI\Exception
      */
     protected function importProjects()
     {
         $ProjectList = $this->ImportProvider->getProjectList();
         $Projects    = QUI::getProjectManager();
+        $allProjects = $Projects->getProjects();
 
         $this->importData['projects'] = [];
 
         /** @var QUI\CmsImport\MetaEntities\ProjectEntity $ProjectEntity */
         foreach ($ProjectList->walkChildren() as $ProjectEntity) {
-            $ImportProject = $this->ImportProvider->getProject($ProjectEntity->getId());
+            $ImportProject  = $this->ImportProvider->getProject($ProjectEntity->getId());
+            $newProjectName = $ImportProject->getName();
 
-            $this->writeHeader('project', ['project' => $ImportProject->getName()]);
+            $this->writeHeader('project', ['project' => $newProjectName]);
 
             if ($ImportProject->hasReviewFlags()) {
                 $this->reviewEntities[] = $ImportProject;
@@ -361,10 +364,20 @@ class Import extends QUI\QDOM
                 // the config from the filesystem.
                 QUI::$Configs = [];
 
-                $this->deleteProjectTables($ImportProject->getName(), $ProjectEntity->getLanguages());
+                // Check if project name already exists -> if so, append a number
+                $i               = 1;
+                $_newProjectName = $newProjectName;
+
+                while (\in_array($_newProjectName, $allProjects)) {
+                    $_newProjectName .= $newProjectName.'_'.$i++;
+                }
+
+                $newProjectName = $_newProjectName;
+
+                $this->deleteProjectTables($newProjectName, $ProjectEntity->getLanguages());
 
                 $NewProject = $Projects->createProject(
-                    $ImportProject->getName(),
+                    $newProjectName,
                     $ProjectEntity->getDefaultLanguage(),
                     $ProjectEntity->getLanguages()
                 );
