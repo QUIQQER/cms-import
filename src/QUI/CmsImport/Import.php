@@ -88,6 +88,13 @@ class Import extends QUI\QDOM
     protected $varDir;
 
     /**
+     * Is the AUTO_INCREMENT feature for a specific project in a specific project disabled?
+     *
+     * @var array
+     */
+    protected $projectTableAutoIncrementDisabled = [];
+
+    /**
      * Import constructor.
      *
      * @param ImportProviderInterface $ImportProvider
@@ -310,6 +317,15 @@ class Import extends QUI\QDOM
                     ]
                 );
             }
+        }
+
+        // Re-enable AUTO_INCREMENT in project tables
+        foreach ($this->projectTableAutoIncrementDisabled as $projectTable) {
+            $PDO       = QUI::getDataBase()->getPDO();
+            $Statement = $PDO->prepare("ALTER TABLE $projectTable MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT");
+            $Statement->execute();
+
+            $this->projectTableAutoIncrementDisabled[$projectTable] = false;
         }
 
         // System config
@@ -1010,17 +1026,29 @@ class Import extends QUI\QDOM
             }
 
             // Check if site ID has already been imported
-            if (!empty($importQuiqqerSiteId) && isset($importedSiteIds[$importQuiqqerSiteId])) {
-                $this->writeWarning(
-                    'site_duplicate_id',
-                    [
-                        'siteIdentifier' => $importQuiqqerSiteId,
-                        'siteTitle'      => $ImportSite->getAttribute('title')
-                    ],
-                    $ImportSite
-                );
+            if (!empty($importQuiqqerSiteId)) {
+                if (isset($importedSiteIds[$importQuiqqerSiteId])) {
+                    $this->writeWarning(
+                        'site_duplicate_id',
+                        [
+                            'siteIdentifier' => $importQuiqqerSiteId,
+                            'siteTitle'      => $ImportSite->getAttribute('title')
+                        ],
+                        $ImportSite
+                    );
 
-                continue;
+                    continue;
+                }
+
+                // Disable AUTO_INCREMENT feature for sites table
+                if (empty($this->projectTableAutoIncrementDisabled[$QuiqqerProject->table()])) {
+                    // disable AUTO_INCREMENT
+                    $PDO       = QUI::getDataBase()->getPDO();
+                    $Statement = $PDO->prepare("ALTER TABLE {$QuiqqerProject->table()} MODIFY `id` BIGINT(20) NOT NULL");
+                    $Statement->execute();
+
+                    $this->projectTableAutoIncrementDisabled[$QuiqqerProject->table()] = true;
+                }
             }
 
             try {
@@ -1384,17 +1412,28 @@ class Import extends QUI\QDOM
             }
 
             // Check if site ID has already been imported
-            if (!empty($importQuiqqerMediaId) && isset($importedMediaIds[$importQuiqqerMediaId])) {
-                $this->writeWarning(
-                    'media_duplicate_id',
-                    [
-                        'identifier' => $mediaItemIdentifier,
-                        'title'      => $ImportMediaItem->getTitle()
-                    ],
-                    $ImportMediaItem
-                );
+            if (!empty($importQuiqqerMediaId)) {
+                if (isset($importedMediaIds[$importQuiqqerMediaId])) {
+                    $this->writeWarning(
+                        'media_duplicate_id',
+                        [
+                            'identifier' => $mediaItemIdentifier,
+                            'title'      => $ImportMediaItem->getTitle()
+                        ],
+                        $ImportMediaItem
+                    );
 
-                continue;
+                    continue;
+                }
+
+                // Disable AUTO_INCREMENT feature for media table
+                if (empty($this->projectTableAutoIncrementDisabled[$QuiqqerProject->getMedia()->getTable()])) {
+                    $PDO       = QUI::getDataBase()->getPDO();
+                    $Statement = $PDO->prepare("ALTER TABLE {$QuiqqerProject->getMedia()->getTable()} MODIFY `id` BIGINT(20) NOT NULL");
+                    $Statement->execute();
+
+                    $this->projectTableAutoIncrementDisabled[$QuiqqerProject->getMedia()->getTable()] = true;
+                }
             }
 
             $newRootId = false;

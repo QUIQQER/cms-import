@@ -10,15 +10,15 @@ class QUIQQERImportSite extends Edit
     /**
      * Create a new Child
      *
-     * @internal This is an almost exact copy of QUI\Projects\Site\Edit::createChild with the only difference
-     * that a custom ID can be provided for a new Site ($params['id'])
-     *
      * @param array $params
      * @param array $childPermissions - [optional] permissions for the child
      * @param boolean|QUI\Users\User|QUI\Users\SystemUser $User - [optional] the user which create the site, optional
      *
      * @return Int
      * @throws QUI\Exception
+     * @internal This is an almost exact copy of QUI\Projects\Site\Edit::createChild with the only difference
+     * that a custom ID can be provided for a new Site ($params['id'])
+     *
      */
     public function createChild(
         $params = [],
@@ -92,16 +92,8 @@ class QUIQQERImportSite extends Edit
         if (!empty($params['id'])) {
             $_params['id'] = (int)$params['id'];
 
-            // disable AUTO_INCREMENT
-            $Statement = $PDO->prepare("ALTER TABLE {$this->TABLE} MODIFY `id` INT(11) NOT NULL");
-            $Statement->execute();
-
             $DataBase->insert($this->TABLE, $_params);
-
-            // re-enable AUTO_INCREMENT
-            $Statement = $PDO->prepare("ALTER TABLE {$this->TABLE} MODIFY `id` INT(11) NOT NULL AUTO_INCREMENT");
-            $Statement->execute();
-
+            
             $newId = $_params['id'];
         } else {
             $DataBase->insert($this->TABLE, $_params);
