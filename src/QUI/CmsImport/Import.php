@@ -385,7 +385,7 @@ class Import extends QUI\QDOM
                 $_newProjectName = $newProjectName;
 
                 while (\in_array($_newProjectName, $allProjects)) {
-                    $_newProjectName .= $newProjectName.'_'.$i++;
+                    $_newProjectName = $newProjectName.'_'.$i++;
                 }
 
                 $newProjectName = $_newProjectName;
