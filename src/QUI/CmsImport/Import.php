@@ -216,6 +216,19 @@ class Import extends QUI\QDOM
             }
         }
 
+        // Explicitly execute a setup for each package again here
+        try {
+            QUI\Cache\Manager::clearCompleteQuiqqerCache();
+            QUI\Setup::executeEachPackageSetup();
+        } catch (\Exception $Exception) {
+            $this->writeError('project_create_error', [
+                'error' => $Exception->getMessage()
+            ]);
+
+
+            QUI\System\Log::writeException($Exception);
+        }
+
         // Tags / tag groups
         if ($this->getAttribute('importTags')) {
             $this->writeHeader('importTags');
@@ -413,19 +426,6 @@ class Import extends QUI\QDOM
             $this->importData['projects'][$ImportProject->getName()] = $NewProject;
 
             $this->writeInfo('project.success', ['project' => $NewProject->getName()]);
-        }
-
-        // Explicitly execute a setup for each package again here
-        try {
-            QUI\Cache\Manager::clearCompleteQuiqqerCache();
-            QUI\Setup::executeEachPackageSetup();
-        } catch (\Exception $Exception) {
-            $this->writeError('project_create_error', [
-                'error' => $Exception->getMessage()
-            ]);
-
-
-            QUI\System\Log::writeException($Exception);
         }
     }
 
