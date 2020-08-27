@@ -95,6 +95,11 @@ class Import extends QUI\QDOM
     protected $projectTableAutoIncrementDisabled = [];
 
     /**
+     * @var QUI\Projects\Project
+     */
+    protected $OldStandardProject = null;
+
+    /**
      * Import constructor.
      *
      * @param ImportProviderInterface $ImportProvider
@@ -201,9 +206,7 @@ class Import extends QUI\QDOM
             $this->writeHeader('delete_old_standard_project');
 
             try {
-                $Projects   = QUI::getProjectManager();
-                $OldProject = $Projects->getProject('old_standard_project');
-                $Projects->deleteProject($OldProject);
+                QUI::getProjectManager()->deleteProject($this->OldStandardProject);
             } catch (\Exception $Exception) {
                 QUI\System\Log::writeException($Exception);
 
@@ -333,7 +336,7 @@ class Import extends QUI\QDOM
         }
 
         // Re-enable AUTO_INCREMENT in project tables
-        foreach ($this->projectTableAutoIncrementDisabled as $projectTable) {
+        foreach ($this->projectTableAutoIncrementDisabled as $projectTable => $v) {
             $PDO       = QUI::getDataBase()->getPDO();
             $Statement = $PDO->prepare("ALTER TABLE $projectTable MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT");
             $Statement->execute();
@@ -372,7 +375,14 @@ class Import extends QUI\QDOM
     {
         $ProjectList = $this->ImportProvider->getProjectList();
         $Projects    = QUI::getProjectManager();
-        $allProjects = $Projects->getProjects();
+
+        // this is a badfix! QUIQQER caches the content of the main conf file
+        // and at this point may have old config data; this forces QUIQQER to reload
+        // the config from the filesystem.
+        QUI::$Configs = [];
+
+        $allProjects        = $Projects->getProjects();
+        $standardProjectSet = false;
 
         $this->importData['projects'] = [];
 
@@ -411,7 +421,14 @@ class Import extends QUI\QDOM
                     $ProjectEntity->getLanguages()
                 );
 
-                $Projects->setConfigForProject($NewProject->getName(), $ImportProject->getAttributes());
+                $config = $ImportProject->getAttributes();
+
+                if (!$standardProjectSet) {
+                    $config['standard'] = 1;
+                    $standardProjectSet = true;
+                }
+
+                $Projects->setConfigForProject($NewProject->getName(), $config);
             } catch (\Exception $Exception) {
                 QUI\System\Log::writeException($Exception);
 
@@ -2270,6 +2287,12 @@ class Import extends QUI\QDOM
          */
         if ($this->getAttribute('importProjects')) {
             $StandardProject->rename('old_standard_project');
+            $this->OldStandardProject = $StandardProject;
+
+            // this is a badfix! QUIQQER caches the content of the main conf file
+            // and at this point may have old config data; this forces QUIQQER to reload
+            // the config from the filesystem.
+            QUI::$Configs = [];
         } else {
             // Delete sites
             $langs = QUI::availableLanguages();
@@ -2304,8 +2327,7 @@ class Import extends QUI\QDOM
 
         /** @var QUI\Projects\Project $Project */
         foreach ($Projects->getProjects(true) as $Project) {
-            if ($Project->getName() === $StandardProject->getName() ||
-                $Project->getName() === 'old_standard_project') {
+            if ($Project->getName() === $StandardProject->getName()) {
                 // standard project is deleted at a later time
                 // because QUIQQER needs at least 1 project at any time
                 continue;
