@@ -25,15 +25,15 @@ class Import extends QUI\QDOM
     /**
      * Import sections
      */
-    const IMPORT_SECTION_GENERAL      = 'general';
-    const IMPORT_SECTION_SITES        = 'sites';
-    const IMPORT_SECTION_MEDIA        = 'media';
-    const IMPORT_SECTION_USERS        = 'users';
-    const IMPORT_SECTION_GROUPS       = 'groups';
-    const IMPORT_SECTION_PERMISSIONS  = 'permissions';
-    const IMPORT_SECTION_PROJECTS     = 'projects';
+    const IMPORT_SECTION_GENERAL = 'general';
+    const IMPORT_SECTION_SITES = 'sites';
+    const IMPORT_SECTION_MEDIA = 'media';
+    const IMPORT_SECTION_USERS = 'users';
+    const IMPORT_SECTION_GROUPS = 'groups';
+    const IMPORT_SECTION_PERMISSIONS = 'permissions';
+    const IMPORT_SECTION_PROJECTS = 'projects';
     const IMPORT_SECTION_TRANSLATIONS = 'translations';
-    const IMPORT_SECTION_TAGS         = 'tags';
+    const IMPORT_SECTION_TAGS = 'tags';
 
     const ENTITY_ATTRIBUTE_QUIQQER_ID = 'quiqqerId';
 
@@ -152,7 +152,7 @@ class Import extends QUI\QDOM
         $this->ImportProvider->promptForConfig();
 
         // Disable cache clear/create for performance
-        QUI\Cache\Manager::$noClearing                       = true;
+        QUI\Cache\Manager::$noClearing = true;
         QUI\Projects\Media::$globalDisableMediaCacheCreation = true;
 
         // Projects
@@ -344,36 +344,32 @@ class Import extends QUI\QDOM
         $deSitesTable = "nexgam_de_sites";
         $mediaTable = "nexgam_media";
 
-        $resultMaxDeSites = QUI::getDataBase()->fetch([
-            'select' => ['id'],
-            'from'   => $deSitesTable,
-            'limit' => 1,
-            'order' => [
-                'id' => 'ASC'
-            ]
-        ]);
+        $query = "SELECT id FROM $deSitesTable ORDER BY id DESC LIMIT 1";
+        $resultMaxDeSites = QUI::getDataBase()->fetchSQL($query);
 
-        $resultMaxMedia = QUI::getDataBase()->fetch([
-            'select' => ['id'],
-            'from'   => $mediaTable,
-            'limit' => 1,
-            'order' => [
-                'id' => 'ASC'
-            ]
-        ]);
+
+        $query = "SELECT id FROM $mediaTable ORDER BY id DESC LIMIT 1";
+        $resultMaxMedia = QUI::getDataBase()->fetchSQL($query);
+
 
         QUI\System\Log::writeRecursive([
             'the results for getting the highest Ids for the DeSites and Media Tables are' => [
-                '$resultMaxMedia' => $resultMaxMedia,
+                '$resultMaxMedia'   => $resultMaxMedia,
                 '$resultMaxDeSites' => $resultMaxDeSites
             ]
         ]);
 
         // Re-enable AUTO_INCREMENT in project tables
         foreach ($this->projectTableAutoIncrementDisabled as $projectTable => $v) {
-            $PDO       = QUI::getDataBase()->getPDO();
-            $Statement = $PDO->prepare("ALTER TABLE $projectTable MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT");
-            $Statement->execute();
+            $PDO = QUI::getDataBase()->getPDO();
+            try {
+                $Statement = $PDO->prepare("ALTER TABLE $projectTable MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT");
+                $Statement->execute();
+            } catch (\Exception $Exception) {
+                QUI\System\Log::writeRecursive([
+                    'error Occured during setting AUTO_INCREMENT' => $Exception
+                ]);
+            }
 
             $this->projectTableAutoIncrementDisabled[$projectTable] = false;
         }
@@ -414,21 +410,21 @@ class Import extends QUI\QDOM
     protected function importProjects()
     {
         $ProjectList = $this->ImportProvider->getProjectList();
-        $Projects    = QUI::getProjectManager();
+        $Projects = QUI::getProjectManager();
 
         // this is a badfix! QUIQQER caches the content of the main conf file
         // and at this point may have old config data; this forces QUIQQER to reload
         // the config from the filesystem.
         QUI::$Configs = [];
 
-        $allProjects        = $Projects->getProjects();
+        $allProjects = $Projects->getProjects();
         $standardProjectSet = false;
 
         $this->importData['projects'] = [];
 
         /** @var QUI\CmsImport\MetaEntities\ProjectEntity $ProjectEntity */
         foreach ($ProjectList->walkChildren() as $ProjectEntity) {
-            $ImportProject  = $this->ImportProvider->getProject($ProjectEntity->getId());
+            $ImportProject = $this->ImportProvider->getProject($ProjectEntity->getId());
             $newProjectName = $ImportProject->getName();
 
             $this->writeHeader('project', ['project' => $newProjectName]);
@@ -444,11 +440,11 @@ class Import extends QUI\QDOM
                 QUI::$Configs = [];
 
                 // Check if project name already exists -> if so, append a number
-                $i               = 1;
+                $i = 1;
                 $_newProjectName = $newProjectName;
 
                 while (\in_array($_newProjectName, $allProjects)) {
-                    $_newProjectName = $newProjectName.'_'.$i++;
+                    $_newProjectName = $newProjectName . '_' . $i++;
                 }
 
                 $newProjectName = $_newProjectName;
@@ -504,12 +500,12 @@ class Import extends QUI\QDOM
      */
     protected function deleteProjectTables($project, $langs)
     {
-        $prefix = QUI_DB_PRFX.$project.'_';
+        $prefix = QUI_DB_PRFX . $project . '_';
         $tables = QUI::getDataBase()->table()->getTables();
 
         foreach ($tables as $tbl) {
             foreach ($langs as $lang) {
-                $tblPrefix = $prefix.$lang.'_';
+                $tblPrefix = $prefix . $lang . '_';
 
                 if (mb_strpos($tbl, $tblPrefix) === 0) {
                     QUI::getDataBase()->table()->delete($tbl);
@@ -633,9 +629,9 @@ class Import extends QUI\QDOM
 
         /** @var QUI\Projects\Project $QuiqqerProject */
         foreach ($this->importData['projects'] as $projectIdentifier => $QuiqqerProject) {
-            $langs          = $QuiqqerProject->getLanguages();
+            $langs = $QuiqqerProject->getLanguages();
             $quiqqerProject = $QuiqqerProject->getName();
-            $importedSites  = [];
+            $importedSites = [];
 
             // Create sites
             foreach ($langs as $lang) {
@@ -653,7 +649,7 @@ class Import extends QUI\QDOM
                 $SourceProject = $Projects->getProject($quiqqerProject, $lang);
 
                 foreach ($importSites as $quiqqerSiteId => $siteIdentifier) {
-                    $ImportSite  = $this->ImportProvider->getSite($siteIdentifier, $projectIdentifier, $lang);
+                    $ImportSite = $this->ImportProvider->getSite($siteIdentifier, $projectIdentifier, $lang);
                     $QuiqqerSite = new QUI\Projects\Site\Edit($SourceProject, $quiqqerSiteId);
 
                     $this->writeInfo('site_create_lang_links', [
@@ -668,7 +664,7 @@ class Import extends QUI\QDOM
                             continue;
                         }
 
-                        $TargetProject     = $Projects->getProject($quiqqerProject, $targetLang);
+                        $TargetProject = $Projects->getProject($quiqqerProject, $targetLang);
                         $quiqqerLinkSiteId = array_search($linkedSiteIdentifier, $importedSites[$targetLang]);
 
                         if (empty($quiqqerLinkSiteId)) {
@@ -745,7 +741,7 @@ class Import extends QUI\QDOM
     {
         $this->writeHeader('system_config_start');
 
-        $quiqqerConfigFile = CMS_DIR.'etc/conf.ini.php';
+        $quiqqerConfigFile = CMS_DIR . 'etc/conf.ini.php';
 
         $prompt = $this->ConsoleTool->writePrompt(
             QUI::getLocale()->get(
@@ -759,7 +755,7 @@ class Import extends QUI\QDOM
         );
 
         if (mb_strtolower($prompt) !== 'n') {
-            $backupFile = $quiqqerConfigFile.'.bak';
+            $backupFile = $quiqqerConfigFile . '.bak';
 
             $this->writeInfo('system_config_backup', [
                 'backupFile' => $backupFile
@@ -805,7 +801,7 @@ class Import extends QUI\QDOM
         /** @var QUI\Projects\Project $QuiqqerProject */
         foreach ($this->importData['projects'] as $projectIdentifier => $QuiqqerProject) {
             $TranslationList = $this->ImportProvider->getTranslationList($projectIdentifier);
-            $group           = 'project/'.$QuiqqerProject->getName();
+            $group = 'project/' . $QuiqqerProject->getName();
 
             /** @var MetaEntity $TranslationEntity */
             foreach ($TranslationList->walkChildren() as $TranslationEntity) {
@@ -892,15 +888,16 @@ class Import extends QUI\QDOM
         QUI\Projects\Project $QuiqqerProject,
         $projectIdentifier,
         ChildrenInterface $TagGroupTree
-    ) {
-        $lang    = $QuiqqerProject->getLang();
+    )
+    {
+        $lang = $QuiqqerProject->getLang();
         $project = $QuiqqerProject->getName();
 
         /** @var MetaEntity $TagGroupItem */
         foreach ($TagGroupTree->walkChildren() as $TagGroupItem) {
             $tagGroupIdentifier = $TagGroupItem->getId();
-            $ImportTagGroup     = $this->ImportProvider->getTagGroup($tagGroupIdentifier, $projectIdentifier, $lang);
-            $tagGroup           = $ImportTagGroup->getTitle();
+            $ImportTagGroup = $this->ImportProvider->getTagGroup($tagGroupIdentifier, $projectIdentifier, $lang);
+            $tagGroup = $ImportTagGroup->getTitle();
 
             if ($ImportTagGroup->hasReviewFlags()) {
                 $this->reviewEntities[] = $ImportTagGroup;
@@ -959,16 +956,17 @@ class Import extends QUI\QDOM
         QUI\Projects\Project $QuiqqerProject,
         $projectIdentifier,
         ChildrenInterface $TagList
-    ) {
-        $project    = $QuiqqerProject->getName();
-        $lang       = $QuiqqerProject->getLang();
+    )
+    {
+        $project = $QuiqqerProject->getName();
+        $lang = $QuiqqerProject->getLang();
         $TagManager = new TagManager($QuiqqerProject);
 
         /** @var MetaEntity $TagItem */
         foreach ($TagList->walkChildren() as $TagItem) {
             $tagIdentifier = $TagItem->getId();
-            $ImportTag     = $this->ImportProvider->getTag($tagIdentifier, $projectIdentifier, $lang);
-            $tag           = $ImportTag->getTitle();
+            $ImportTag = $this->ImportProvider->getTag($tagIdentifier, $projectIdentifier, $lang);
+            $tag = $ImportTag->getTitle();
 
             if (empty($tag)) {
                 $tag = $ImportTag->getIdentifier();
@@ -988,7 +986,7 @@ class Import extends QUI\QDOM
                         'project_tag_duplicate_title',
                         [
                             'tag'     => $tag,
-                            'newTag'  => $tag.'-1',
+                            'newTag'  => $tag . '-1',
                             'project' => $QuiqqerProject->getName(),
                             'lang'    => $lang
                         ],
@@ -1062,8 +1060,9 @@ class Import extends QUI\QDOM
         ChildrenInterface $SiteTree,
         QUIQQERImportSite $RootQuiqqerSite = null,
         &$importedSiteIds = []
-    ) {
-        $lang     = $QuiqqerProject->getLang();
+    )
+    {
+        $lang = $QuiqqerProject->getLang();
         $sitesTbl = QUI::getDBProjectTableName('sites', $QuiqqerProject);
 
         /** @var SiteEntity $ChildSiteItem */
@@ -1079,10 +1078,10 @@ class Import extends QUI\QDOM
             // test
             $counter++;
 
-            shell_exec('rm -rf '.VAR_DIR.'tmp');
+            shell_exec('rm -rf ' . VAR_DIR . 'tmp');
 
-            $siteIdentifier      = $ChildSiteItem->getId();
-            $ImportSite          = $this->ImportProvider->getSite($siteIdentifier, $projectIdentifier, $lang);
+            $siteIdentifier = $ChildSiteItem->getId();
+            $ImportSite = $this->ImportProvider->getSite($siteIdentifier, $projectIdentifier, $lang);
             $importQuiqqerSiteId = $ImportSite->getQuiqqerId();
 
             $this->writeInfo('site_start', [
@@ -1121,7 +1120,7 @@ class Import extends QUI\QDOM
                 // Disable AUTO_INCREMENT feature for sites table
                 if (empty($this->projectTableAutoIncrementDisabled[$QuiqqerProject->table()])) {
                     // disable AUTO_INCREMENT
-                    $PDO       = QUI::getDataBase()->getPDO();
+                    $PDO = QUI::getDataBase()->getPDO();
                     $Statement = $PDO->prepare("ALTER TABLE {$QuiqqerProject->table()} MODIFY `id` BIGINT(20) NOT NULL");
                     $Statement->execute();
 
@@ -1294,7 +1293,8 @@ class Import extends QUI\QDOM
         QUI\Projects\Project $QuiqqerProject,
         ChildrenInterface $SiteTree,
         $importSiteMap
-    ) {
+    )
+    {
         /** @var SiteEntity $ChildSiteItem */
         foreach ($SiteTree->walkChildren() as $ChildSiteItem) {
             if (!$ChildSiteItem->isLink() || !$ChildSiteItem->getParentId()) {
@@ -1306,9 +1306,9 @@ class Import extends QUI\QDOM
             }
 
             $quiqqerSiteIdentifier = $ChildSiteItem->getId();
-            $linkSiteIdentifier    = $ChildSiteItem->getParentId();
-            $childQuiqqerSiteId    = false;
-            $linkQuiqqerSiteId     = false;
+            $linkSiteIdentifier = $ChildSiteItem->getParentId();
+            $childQuiqqerSiteId = false;
+            $linkQuiqqerSiteId = false;
 
             foreach ($importSiteMap as $quiqqerSiteId => $siteIdentifier) {
                 if ($siteIdentifier === $linkSiteIdentifier) {
@@ -1347,9 +1347,9 @@ class Import extends QUI\QDOM
     protected function importSiteTags(ImportSite $ImportSite, QUI\Projects\Site\Edit $QuiqqerSite)
     {
         $QuiqqerProject = $QuiqqerSite->getProject();
-        $project        = $QuiqqerProject->getName();
-        $lang           = $QuiqqerProject->getLang();
-        $TagManager     = new TagManager($QuiqqerProject);
+        $project = $QuiqqerProject->getName();
+        $lang = $QuiqqerProject->getLang();
+        $TagManager = new TagManager($QuiqqerProject);
 
         // Tags
         $this->writeInfo('site_tags_start');
@@ -1437,7 +1437,7 @@ class Import extends QUI\QDOM
             }
 
             /** @var QUI\Tags\Groups\Group $TagGroup */
-            $TagGroup   = current($groups);
+            $TagGroup = current($groups);
             $tagGroupId = $TagGroup->getId();
 
             if (in_array($tagGroupId, $siteTagGroups)) {
@@ -1476,18 +1476,19 @@ class Import extends QUI\QDOM
         ChildrenInterface $MediaTree,
         QUIQQERImportMediaFolder $RootQuiqqerMediaFolder = null,
         &$importedMediaIds = []
-    ) {
+    )
+    {
         if (empty($RootQuiqqerMediaFolder)) {
             $RootQuiqqerMediaFolder = $this->getQuiqqerImportMediaFolder(1, $QuiqqerProject);
         }
 
         /** @var MetaEntity $ChildMediaItem */
         foreach ($MediaTree->walkChildren() as $ChildMediaItem) {
-            shell_exec('rm -rf '.VAR_DIR.'tmp');
+            shell_exec('rm -rf ' . VAR_DIR . 'tmp');
 
-            $mediaItemIdentifier   = $ChildMediaItem->getId();
-            $ImportMediaItem       = $this->ImportProvider->getMediaItem($mediaItemIdentifier, $projectIdentifier);
-            $importQuiqqerMediaId  = $ImportMediaItem->getQuiqqerId();
+            $mediaItemIdentifier = $ChildMediaItem->getId();
+            $ImportMediaItem = $this->ImportProvider->getMediaItem($mediaItemIdentifier, $projectIdentifier);
+            $importQuiqqerMediaId = $ImportMediaItem->getQuiqqerId();
             $importMediaAttributes = $ImportMediaItem->getAttributes();
 
             if ($ImportMediaItem->hasReviewFlags()) {
@@ -1523,7 +1524,7 @@ class Import extends QUI\QDOM
 
                 // Disable AUTO_INCREMENT feature for media table
                 if (empty($this->projectTableAutoIncrementDisabled[$QuiqqerProject->getMedia()->getTable()])) {
-                    $PDO       = QUI::getDataBase()->getPDO();
+                    $PDO = QUI::getDataBase()->getPDO();
                     $Statement = $PDO->prepare("ALTER TABLE {$QuiqqerProject->getMedia()->getTable()} MODIFY `id` BIGINT(20) NOT NULL");
                     $Statement->execute();
 
@@ -1602,24 +1603,24 @@ class Import extends QUI\QDOM
                             'file'       => $mediaFile
                         ], $ImportMediaItem);
                     } else {
-                        $mediaFileName         = basename($mediaFile);
+                        $mediaFileName = basename($mediaFile);
                         $deleteFileAfterUpload = false;
 
                         if ($RootQuiqqerMediaFolder->fileWithNameExists($mediaFileName)) {
                             $filePrefix = '1-';
 
                             if (!empty($importQuiqqerMediaId)) {
-                                $filePrefix = $importQuiqqerMediaId.'-';
+                                $filePrefix = $importQuiqqerMediaId . '-';
                             }
 
-                            copy($mediaFile, $this->varDir.$filePrefix.$mediaFileName);
+                            copy($mediaFile, $this->varDir . $filePrefix . $mediaFileName);
 
-                            $mediaFile             = $this->varDir.$filePrefix.$mediaFileName;
+                            $mediaFile = $this->varDir . $filePrefix . $mediaFileName;
                             $deleteFileAfterUpload = true;
 
                             $this->writeWarning('media_file_rename', [
                                 'originalFileName' => $mediaFileName,
-                                'newFileName'      => $filePrefix.$mediaFileName
+                                'newFileName'      => $filePrefix . $mediaFileName
                             ], $ImportMediaItem);
                         }
 
@@ -1740,9 +1741,10 @@ class Import extends QUI\QDOM
     protected function createGroups(
         ChildrenInterface $GroupTree,
         QUIQQERImportGroup $RootQuiqqerGroup = null
-    ) {
+    )
+    {
         $quiqqerRootGroupId = QUI::conf('globals', 'root');
-        $Permission         = new PermissionManager();
+        $Permission = new PermissionManager();
 
         if (empty($RootQuiqqerGroup)) {
             try {
@@ -1760,9 +1762,9 @@ class Import extends QUI\QDOM
 
         /** @var MetaEntity $ChildGroupItem */
         foreach ($GroupTree->walkChildren() as $ChildGroupItem) {
-            $groupIdentifier       = $ChildGroupItem->getId();
-            $ImportGroup           = $this->ImportProvider->getGroup($groupIdentifier);
-            $importQuiqqerGroupId  = $ImportGroup->getQuiqqerId();
+            $groupIdentifier = $ChildGroupItem->getId();
+            $ImportGroup = $this->ImportProvider->getGroup($groupIdentifier);
+            $importQuiqqerGroupId = $ImportGroup->getQuiqqerId();
             $importGroupAttributes = array_merge(
                 $ImportGroup->getAttributes(),
                 [
@@ -1896,10 +1898,10 @@ class Import extends QUI\QDOM
     protected function createUsers(MetaList $UserList)
     {
         $UserManager = new QUIQQERImportUserManager();
-        $SystemUser  = $UserManager->getSystemUser();
-        $DB          = QUI::getDataBase();
-        $usersTable  = QUI\Users\Manager::table();
-        $Media       = QUI::getProjectManager()->getStandard()->getMedia();
+        $SystemUser = $UserManager->getSystemUser();
+        $DB = QUI::getDataBase();
+        $usersTable = QUI\Users\Manager::table();
+        $Media = QUI::getProjectManager()->getStandard()->getMedia();
 
         /** @var MetaEntity $UserItem */
         foreach ($UserList->walkChildren() as $UserItem) {
@@ -1915,7 +1917,7 @@ class Import extends QUI\QDOM
             }
 
             $username = $ImportUser->getUsername();
-            $email    = $ImportUser->getAttribute('email');
+            $email = $ImportUser->getAttribute('email');
 
             if (empty($username) && !empty($email)) {
                 $this->writeInfo('user_set_email_as_username', [
@@ -2046,7 +2048,7 @@ class Import extends QUI\QDOM
 
             // Addresses
             $defaultAddressSet = false;
-            $NewAddress        = false;
+            $NewAddress = false;
 
             foreach ($ImportUser->getAddresses() as $address) {
                 try {
@@ -2174,7 +2176,7 @@ class Import extends QUI\QDOM
         /** @var MetaEntity $PermissionEntity */
         foreach ($PermissionList->walkChildren() as $PermissionEntity) {
             $ImportPermission = $this->ImportProvider->getPermission($PermissionEntity->getId());
-            $permission       = $ImportPermission->getPermission();
+            $permission = $ImportPermission->getPermission();
 
             if ($ImportPermission->hasReviewFlags()) {
                 $this->reviewEntities[] = $ImportPermission;
@@ -2201,7 +2203,7 @@ class Import extends QUI\QDOM
                 }
 
                 try {
-                    QUI\Translator::addUserVar('cms-import/permissions', $permission.'.title', $data);
+                    QUI\Translator::addUserVar('cms-import/permissions', $permission . '.title', $data);
                 } catch (\Exception $Exception) {
                     QUI\System\Log::writeException($Exception);
 
@@ -2224,7 +2226,7 @@ class Import extends QUI\QDOM
                 }
 
                 try {
-                    QUI\Translator::addUserVar('cms-import/permissions', $permission.'.description', $data);
+                    QUI\Translator::addUserVar('cms-import/permissions', $permission . '.description', $data);
                 } catch (\Exception $Exception) {
                     QUI\System\Log::writeException($Exception);
 
@@ -2245,8 +2247,8 @@ class Import extends QUI\QDOM
                 'type'  => $ImportPermission->getPermissionType(),
                 'area'  => $area,
                 'src'   => 'cms-import',
-                'title' => 'cms-import/permissions '.$permission.'.title',
-                'desc'  => 'cms-import/permissions '.$permission.'.description'
+                'title' => 'cms-import/permissions ' . $permission . '.title',
+                'desc'  => 'cms-import/permissions ' . $permission . '.description'
             ]);
 
             $ImportPermission->setAttribute(self::ENTITY_ATTRIBUTE_QUIQQER_ID, $permission);
@@ -2340,14 +2342,14 @@ class Import extends QUI\QDOM
         // Delete all projects (but leave one for now)
         $this->writeInfo('cleanup.delete_projects');
 
-        $Projects        = QUI::getProjectManager();
+        $Projects = QUI::getProjectManager();
         $StandardProject = $Projects->getStandard();
 
         // Delete media files of standard project first
         $dir = $StandardProject->getMedia()->getPath();
 
         if (is_dir($dir)) {
-            $it    = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
+            $it = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
             $files = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::CHILD_FIRST);
 
             foreach ($files as $file) {
@@ -2396,7 +2398,7 @@ class Import extends QUI\QDOM
             $project = $StandardProject->getName();
 
             QUI::getDataBase()->delete(
-                $project.'_media',
+                $project . '_media',
                 [
                     'id' => [
                         'type'  => 'NOT',
@@ -2405,7 +2407,7 @@ class Import extends QUI\QDOM
                 ]
             );
 
-            QUI::getDataBase()->table()->truncate($project.'_media_relations');
+            QUI::getDataBase()->table()->truncate($project . '_media_relations');
         }
 
         /** @var QUI\Projects\Project $Project */
@@ -2469,7 +2471,7 @@ class Import extends QUI\QDOM
      */
     protected function writeInfo($msg, $localeVars = [])
     {
-        $msg = QUI::getLocale()->get('quiqqer/cms-import', 'import.msg.'.$msg, $localeVars);
+        $msg = QUI::getLocale()->get('quiqqer/cms-import', 'import.msg.' . $msg, $localeVars);
         $this->ConsoleTool->writeInfo($msg);
     }
 
@@ -2483,7 +2485,7 @@ class Import extends QUI\QDOM
      */
     protected function writeWarning($msg, $localeVars = [], $ImportEntitiy = null)
     {
-        $msg = QUI::getLocale()->get('quiqqer/cms-import', 'import.warning.'.$msg, $localeVars);
+        $msg = QUI::getLocale()->get('quiqqer/cms-import', 'import.warning.' . $msg, $localeVars);
         $this->ConsoleTool->writeWarning($msg);
 
         if (empty($ImportEntitiy)) {
@@ -2515,7 +2517,7 @@ class Import extends QUI\QDOM
      */
     protected function writeError($msg, $localeVars = [], $ImportEntitiy = null)
     {
-        $msg = QUI::getLocale()->get('quiqqer/cms-import', 'import.error.'.$msg, $localeVars);
+        $msg = QUI::getLocale()->get('quiqqer/cms-import', 'import.error.' . $msg, $localeVars);
         $this->ConsoleTool->writeError($msg);
 
         if (empty($ImportEntitiy)) {
@@ -2535,7 +2537,7 @@ class Import extends QUI\QDOM
      */
     protected function writeHeader($msg, $localeVars = [])
     {
-        $msg = QUI::getLocale()->get('quiqqer/cms-import', 'import.header.'.$msg, $localeVars);
+        $msg = QUI::getLocale()->get('quiqqer/cms-import', 'import.header.' . $msg, $localeVars);
         $this->ConsoleTool->writeHeader($msg);
     }
 
@@ -2569,25 +2571,25 @@ class Import extends QUI\QDOM
                 $this->reviewFlags[$section] = [];
             }
 
-            $prefix = '#'.$ImportEntity->getIdentifier();
+            $prefix = '#' . $ImportEntity->getIdentifier();
 
             if ($ImportEntity->getAttribute(self::ENTITY_ATTRIBUTE_QUIQQER_ID)) {
-                $prefix .= ' (QUIQQER ID: #'.$ImportEntity->getAttribute(self::ENTITY_ATTRIBUTE_QUIQQER_ID).')';
+                $prefix .= ' (QUIQQER ID: #' . $ImportEntity->getAttribute(self::ENTITY_ATTRIBUTE_QUIQQER_ID) . ')';
             }
 
             foreach ($ImportEntity->getReviewFlags() as $reviewMsg) {
-                $this->reviewFlags[$section][] = $prefix.' - '.$reviewMsg;
+                $this->reviewFlags[$section][] = $prefix . ' - ' . $reviewMsg;
             }
         }
 
         $reviewLines = [];
-        $L           = QUI::getLocale();
-        $lg          = 'quiqqer/cms-import';
-        $sections    = [];
+        $L = QUI::getLocale();
+        $lg = 'quiqqer/cms-import';
+        $sections = [];
 
         foreach ($this->reviewFlags as $section => $reviewMessages) {
             if (!isset($sections[$section])) {
-                $reviewLines[] = "\n".$L->get($lg, 'review.section.header.'.$section);
+                $reviewLines[] = "\n" . $L->get($lg, 'review.section.header.' . $section);
                 $reviewLines[] = "==================================================\n";
 
                 $sections[$section] = true;
@@ -2602,7 +2604,7 @@ class Import extends QUI\QDOM
             return;
         }
 
-        $reviewFile = $this->varDir.'review.log';
+        $reviewFile = $this->varDir . 'review.log';
 
         file_put_contents($reviewFile, implode("\n", $reviewLines));
 
