@@ -344,14 +344,32 @@ class Import extends QUI\QDOM
         $deSitesTable = "nexgam_de_sites";
         $mediaTable = "nexgam_media";
 
-        $query = "SELECT id FROM $deSitesTable ORDER BY id DESC LIMIT 1";
-        $resultMaxDeSites = QUI::getDataBase()->fetchSQL($query);
+        try {
+            $query = "SELECT id FROM $mediaTable ORDER BY id DESC LIMIT 1";
+            $resultMaxMedia = intval(QUI::getDataBase()->fetchSQL($query)[0]['id']) + 1;
 
+            $query = "ALTER TABLE $mediaTable AUTO_INCREMENT=$resultMaxMedia;";
+            QUI::getDataBase()->execSQL($query);
+        } catch (\Exception $Exception) {
+            QUI\System\Log::writeRecursive([
+                'error Occured during setting AUTO_INCREMENT max Value' => $Exception,
+                'max value' => $resultMaxMedia,
+                'table' => $mediaTable,
+            ]);
+        }
+        try {
+            $query = "SELECT id FROM $deSitesTable ORDER BY id DESC LIMIT 1";
+            $resultMaxDeSites = intval(QUI::getDataBase()->fetchSQL($query)[0]['id']) + 1;
 
-        $query = "SELECT id FROM $mediaTable ORDER BY id DESC LIMIT 1";
-        $resultMaxMedia = QUI::getDataBase()->fetchSQL($query);
-
-
+            $query = "ALTER TABLE $deSitesTable AUTO_INCREMENT=$resultMaxDeSites;";
+            QUI::getDataBase()->execSQL($query);
+        } catch (\Exception $Exception) {
+            QUI\System\Log::writeRecursive([
+                'error Occured during setting AUTO_INCREMENT max Value' => $Exception,
+                'max value' => $resultMaxDeSites,
+                'table' => $deSitesTable,
+            ]);
+        }
         QUI\System\Log::writeRecursive([
             'the results for getting the highest Ids for the DeSites and Media Tables are' => [
                 '$resultMaxMedia'   => $resultMaxMedia,
@@ -888,7 +906,8 @@ class Import extends QUI\QDOM
         QUI\Projects\Project $QuiqqerProject,
         $projectIdentifier,
         ChildrenInterface $TagGroupTree
-    ) {
+    )
+    {
         $lang = $QuiqqerProject->getLang();
         $project = $QuiqqerProject->getName();
 
@@ -955,7 +974,8 @@ class Import extends QUI\QDOM
         QUI\Projects\Project $QuiqqerProject,
         $projectIdentifier,
         ChildrenInterface $TagList
-    ) {
+    )
+    {
         $project = $QuiqqerProject->getName();
         $lang = $QuiqqerProject->getLang();
         $TagManager = new TagManager($QuiqqerProject);
@@ -1058,7 +1078,8 @@ class Import extends QUI\QDOM
         ChildrenInterface $SiteTree,
         QUIQQERImportSite $RootQuiqqerSite = null,
         &$importedSiteIds = []
-    ) {
+    )
+    {
         $lang = $QuiqqerProject->getLang();
         $sitesTbl = QUI::getDBProjectTableName('sites', $QuiqqerProject);
 
@@ -1290,7 +1311,8 @@ class Import extends QUI\QDOM
         QUI\Projects\Project $QuiqqerProject,
         ChildrenInterface $SiteTree,
         $importSiteMap
-    ) {
+    )
+    {
         /** @var SiteEntity $ChildSiteItem */
         foreach ($SiteTree->walkChildren() as $ChildSiteItem) {
             if (!$ChildSiteItem->isLink() || !$ChildSiteItem->getParentId()) {
@@ -1472,7 +1494,8 @@ class Import extends QUI\QDOM
         ChildrenInterface $MediaTree,
         QUIQQERImportMediaFolder $RootQuiqqerMediaFolder = null,
         &$importedMediaIds = []
-    ) {
+    )
+    {
         if (empty($RootQuiqqerMediaFolder)) {
             $RootQuiqqerMediaFolder = $this->getQuiqqerImportMediaFolder(1, $QuiqqerProject);
         }
@@ -1736,7 +1759,8 @@ class Import extends QUI\QDOM
     protected function createGroups(
         ChildrenInterface $GroupTree,
         QUIQQERImportGroup $RootQuiqqerGroup = null
-    ) {
+    )
+    {
         $quiqqerRootGroupId = QUI::conf('globals', 'root');
         $Permission = new PermissionManager();
 
