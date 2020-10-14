@@ -408,6 +408,8 @@ class Import extends QUI\QDOM
                     'error' => $Exception->getMessage()
                 ], $ImportProject);
 
+
+                # delete me comment
                 continue;
             }
 
