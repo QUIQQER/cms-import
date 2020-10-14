@@ -888,8 +888,7 @@ class Import extends QUI\QDOM
         QUI\Projects\Project $QuiqqerProject,
         $projectIdentifier,
         ChildrenInterface $TagGroupTree
-    )
-    {
+    ){
         $lang = $QuiqqerProject->getLang();
         $project = $QuiqqerProject->getName();
 
@@ -956,8 +955,7 @@ class Import extends QUI\QDOM
         QUI\Projects\Project $QuiqqerProject,
         $projectIdentifier,
         ChildrenInterface $TagList
-    )
-    {
+    ){
         $project = $QuiqqerProject->getName();
         $lang = $QuiqqerProject->getLang();
         $TagManager = new TagManager($QuiqqerProject);
@@ -1060,8 +1058,7 @@ class Import extends QUI\QDOM
         ChildrenInterface $SiteTree,
         QUIQQERImportSite $RootQuiqqerSite = null,
         &$importedSiteIds = []
-    )
-    {
+    ){
         $lang = $QuiqqerProject->getLang();
         $sitesTbl = QUI::getDBProjectTableName('sites', $QuiqqerProject);
 
@@ -1293,8 +1290,7 @@ class Import extends QUI\QDOM
         QUI\Projects\Project $QuiqqerProject,
         ChildrenInterface $SiteTree,
         $importSiteMap
-    )
-    {
+    ){
         /** @var SiteEntity $ChildSiteItem */
         foreach ($SiteTree->walkChildren() as $ChildSiteItem) {
             if (!$ChildSiteItem->isLink() || !$ChildSiteItem->getParentId()) {
@@ -1476,8 +1472,7 @@ class Import extends QUI\QDOM
         ChildrenInterface $MediaTree,
         QUIQQERImportMediaFolder $RootQuiqqerMediaFolder = null,
         &$importedMediaIds = []
-    )
-    {
+    ){
         if (empty($RootQuiqqerMediaFolder)) {
             $RootQuiqqerMediaFolder = $this->getQuiqqerImportMediaFolder(1, $QuiqqerProject);
         }
