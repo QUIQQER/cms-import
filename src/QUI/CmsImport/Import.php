@@ -88,6 +88,18 @@ class Import extends QUI\QDOM
     protected $varDir;
 
     /**
+     * Is the AUTO_INCREMENT feature for a specific project in a specific project disabled?
+     *
+     * @var array
+     */
+    protected $projectTableAutoIncrementDisabled = [];
+
+    /**
+     * @var QUI\Projects\Project
+     */
+    protected $OldStandardProject = null;
+
+    /**
      * Import constructor.
      *
      * @param ImportProviderInterface $ImportProvider
@@ -194,9 +206,7 @@ class Import extends QUI\QDOM
             $this->writeHeader('delete_old_standard_project');
 
             try {
-                $Projects   = QUI::getProjectManager();
-                $OldProject = $Projects->getProject('old_standard_project');
-                $Projects->deleteProject($OldProject);
+                QUI::getProjectManager()->deleteProject($this->OldStandardProject);
             } catch (\Exception $Exception) {
                 QUI\System\Log::writeException($Exception);
 
@@ -223,6 +233,19 @@ class Import extends QUI\QDOM
             $this->ConsoleTool->writeInfo($msg);
             QUI\System\Log::writeRecursive($msg);
             /** Nexgam Import specific */
+        }
+
+        // Explicitly execute a setup for each package again here
+        try {
+            QUI\Cache\Manager::clearCompleteQuiqqerCache();
+            QUI\Setup::executeEachPackageSetup();
+        } catch (\Exception $Exception) {
+            $this->writeError('project_create_error', [
+                'error' => $Exception->getMessage()
+            ]);
+
+
+            QUI\System\Log::writeException($Exception);
         }
 
         // Tags / tag groups
@@ -328,6 +351,15 @@ class Import extends QUI\QDOM
             }
         }
 
+        // Re-enable AUTO_INCREMENT in project tables
+        foreach ($this->projectTableAutoIncrementDisabled as $projectTable => $v) {
+            $PDO       = QUI::getDataBase()->getPDO();
+            $Statement = $PDO->prepare("ALTER TABLE $projectTable MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT");
+            $Statement->execute();
+
+            $this->projectTableAutoIncrementDisabled[$projectTable] = false;
+        }
+
         // System config
         if ($this->getAttribute('importSystemConfig')) {
             try {
@@ -368,19 +400,29 @@ class Import extends QUI\QDOM
      * Start project import
      *
      * @return void
+     * @throws QUI\Exception
      */
     protected function importProjects()
     {
         $ProjectList = $this->ImportProvider->getProjectList();
         $Projects    = QUI::getProjectManager();
 
+        // this is a badfix! QUIQQER caches the content of the main conf file
+        // and at this point may have old config data; this forces QUIQQER to reload
+        // the config from the filesystem.
+        QUI::$Configs = [];
+
+        $allProjects        = $Projects->getProjects();
+        $standardProjectSet = false;
+
         $this->importData['projects'] = [];
 
         /** @var QUI\CmsImport\MetaEntities\ProjectEntity $ProjectEntity */
         foreach ($ProjectList->walkChildren() as $ProjectEntity) {
-            $ImportProject = $this->ImportProvider->getProject($ProjectEntity->getId());
+            $ImportProject  = $this->ImportProvider->getProject($ProjectEntity->getId());
+            $newProjectName = $ImportProject->getName();
 
-            $this->writeHeader('project', ['project' => $ImportProject->getName()]);
+            $this->writeHeader('project', ['project' => $newProjectName]);
 
             if ($ImportProject->hasReviewFlags()) {
                 $this->reviewEntities[] = $ImportProject;
@@ -392,15 +434,32 @@ class Import extends QUI\QDOM
                 // the config from the filesystem.
                 QUI::$Configs = [];
 
-                $this->deleteProjectTables($ImportProject->getName(), $ProjectEntity->getLanguages());
+                // Check if project name already exists -> if so, append a number
+                $i               = 1;
+                $_newProjectName = $newProjectName;
+
+                while (\in_array($_newProjectName, $allProjects)) {
+                    $_newProjectName = $newProjectName.'_'.$i++;
+                }
+
+                $newProjectName = $_newProjectName;
+
+                $this->deleteProjectTables($newProjectName, $ProjectEntity->getLanguages());
 
                 $NewProject = $Projects->createProject(
-                    $ImportProject->getName(),
+                    $newProjectName,
                     $ProjectEntity->getDefaultLanguage(),
                     $ProjectEntity->getLanguages()
                 );
 
-                $Projects->setConfigForProject($NewProject->getName(), $ImportProject->getAttributes());
+                $config = $ImportProject->getAttributes();
+
+                if (!$standardProjectSet) {
+                    $config['standard'] = 1;
+                    $standardProjectSet = true;
+                }
+
+                $Projects->setConfigForProject($NewProject->getName(), $config);
             } catch (\Exception $Exception) {
                 QUI\System\Log::writeException($Exception);
 
@@ -417,19 +476,6 @@ class Import extends QUI\QDOM
             $this->importData['projects'][$ImportProject->getName()] = $NewProject;
 
             $this->writeInfo('project.success', ['project' => $NewProject->getName()]);
-        }
-
-        // Explicitly execute a setup for each package again here
-        try {
-            QUI\Cache\Manager::clearCompleteQuiqqerCache();
-            QUI\Setup::executeEachPackageSetup();
-        } catch (\Exception $Exception) {
-            $this->writeError('project_create_error', [
-                'error' => $Exception->getMessage()
-            ]);
-
-
-            QUI\System\Log::writeException($Exception);
         }
     }
 
@@ -1045,17 +1091,29 @@ class Import extends QUI\QDOM
             }
 
             // Check if site ID has already been imported
-            if (!empty($importQuiqqerSiteId) && isset($importedSiteIds[$importQuiqqerSiteId])) {
-                $this->writeWarning(
-                    'site_duplicate_id',
-                    [
-                        'siteIdentifier' => $importQuiqqerSiteId,
-                        'siteTitle'      => $ImportSite->getAttribute('title')
-                    ],
-                    $ImportSite
-                );
+            if (!empty($importQuiqqerSiteId)) {
+                if (isset($importedSiteIds[$importQuiqqerSiteId])) {
+                    $this->writeWarning(
+                        'site_duplicate_id',
+                        [
+                            'siteIdentifier' => $importQuiqqerSiteId,
+                            'siteTitle'      => $ImportSite->getAttribute('title')
+                        ],
+                        $ImportSite
+                    );
 
-                continue;
+                    continue;
+                }
+
+                // Disable AUTO_INCREMENT feature for sites table
+                if (empty($this->projectTableAutoIncrementDisabled[$QuiqqerProject->table()])) {
+                    // disable AUTO_INCREMENT
+                    $PDO       = QUI::getDataBase()->getPDO();
+                    $Statement = $PDO->prepare("ALTER TABLE {$QuiqqerProject->table()} MODIFY `id` BIGINT(20) NOT NULL");
+                    $Statement->execute();
+
+                    $this->projectTableAutoIncrementDisabled[$QuiqqerProject->table()] = true;
+                }
             }
 
             try {
@@ -1429,17 +1487,28 @@ class Import extends QUI\QDOM
             }
 
             // Check if site ID has already been imported
-            if (!empty($importQuiqqerMediaId) && isset($importedMediaIds[$importQuiqqerMediaId])) {
-                $this->writeWarning(
-                    'media_duplicate_id',
-                    [
-                        'identifier' => $mediaItemIdentifier,
-                        'title'      => $ImportMediaItem->getTitle()
-                    ],
-                    $ImportMediaItem
-                );
+            if (!empty($importQuiqqerMediaId)) {
+                if (isset($importedMediaIds[$importQuiqqerMediaId])) {
+                    $this->writeWarning(
+                        'media_duplicate_id',
+                        [
+                            'identifier' => $mediaItemIdentifier,
+                            'title'      => $ImportMediaItem->getTitle()
+                        ],
+                        $ImportMediaItem
+                    );
 
-                continue;
+                    continue;
+                }
+
+                // Disable AUTO_INCREMENT feature for media table
+                if (empty($this->projectTableAutoIncrementDisabled[$QuiqqerProject->getMedia()->getTable()])) {
+                    $PDO       = QUI::getDataBase()->getPDO();
+                    $Statement = $PDO->prepare("ALTER TABLE {$QuiqqerProject->getMedia()->getTable()} MODIFY `id` BIGINT(20) NOT NULL");
+                    $Statement->execute();
+
+                    $this->projectTableAutoIncrementDisabled[$QuiqqerProject->getMedia()->getTable()] = true;
+                }
             }
 
             $newRootId = false;
@@ -1916,6 +1985,8 @@ class Import extends QUI\QDOM
                             $UserImageFolder::FILE_OVERWRITE_TRUE
                         );
 
+                        $UserImage->activate();
+
                         $NewUser->setAttribute('avatar', $UserImage->getUrl());
                     } catch (\Exception $Exception) {
                         $this->writeError('user_edit', [
@@ -2274,6 +2345,12 @@ class Import extends QUI\QDOM
          */
         if ($this->getAttribute('importProjects')) {
             $StandardProject->rename('old_standard_project');
+            $this->OldStandardProject = $StandardProject;
+
+            // this is a badfix! QUIQQER caches the content of the main conf file
+            // and at this point may have old config data; this forces QUIQQER to reload
+            // the config from the filesystem.
+            QUI::$Configs = [];
         } else {
             // Delete sites
             $langs = QUI::availableLanguages();
@@ -2308,8 +2385,7 @@ class Import extends QUI\QDOM
 
         /** @var QUI\Projects\Project $Project */
         foreach ($Projects->getProjects(true) as $Project) {
-            if ($Project->getName() === $StandardProject->getName() ||
-                $Project->getName() === 'old_standard_project') {
+            if ($Project->getName() === $StandardProject->getName()) {
                 // standard project is deleted at a later time
                 // because QUIQQER needs at least 1 project at any time
                 continue;

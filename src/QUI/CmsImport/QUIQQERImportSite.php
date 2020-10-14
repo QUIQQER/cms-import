@@ -99,14 +99,14 @@ class QUIQQERImportSite extends Edit
             $_params['id'] = (int)$params['id'];
 
             // disable AUTO_INCREMENT
-//            $Statement = $PDO->prepare("ALTER TABLE {$this->TABLE} MODIFY `id` INT(11) NOT NULL");
-//            $Statement->execute();
+            $Statement = $PDO->prepare("ALTER TABLE {$this->TABLE} MODIFY `id` INT(11) NOT NULL");
+            $Statement->execute();
 
             $DataBase->insert($this->TABLE, $_params);
 
             // re-enable AUTO_INCREMENT
-//            $Statement = $PDO->prepare("ALTER TABLE {$this->TABLE} MODIFY `id` INT(11) NOT NULL AUTO_INCREMENT");
-//            $Statement->execute();
+            $Statement = $PDO->prepare("ALTER TABLE {$this->TABLE} MODIFY `id` INT(11) NOT NULL AUTO_INCREMENT");
+            $Statement->execute();
 
             $newId = $_params['id'];
         } else {
