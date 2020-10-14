@@ -1736,8 +1736,7 @@ class Import extends QUI\QDOM
     protected function createGroups(
         ChildrenInterface $GroupTree,
         QUIQQERImportGroup $RootQuiqqerGroup = null
-    )
-    {
+    ) {
         $quiqqerRootGroupId = QUI::conf('globals', 'root');
         $Permission = new PermissionManager();
 
