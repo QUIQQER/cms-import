@@ -13,6 +13,7 @@ use QUI\CmsImport\Entities\ImportPermission;
 use QUI\CmsImport\MetaEntities\MetaEntity;
 use QUI\CmsImport\MetaEntities\MetaList;
 use QUI\CmsImport\MetaEntities\ChildrenInterface;
+use Nexgam\NexgamTemplate\importFktns;
 
 /**
  * Class Import
@@ -217,22 +218,6 @@ class Import extends QUI\QDOM
                     ]
                 );
             }
-
-            /** Nexgam Import specific */
-            $DataBase = QUI::getDataBase();
-            $PDO      = $DataBase->getPDO();
-
-            $Statement = $PDO->prepare("ALTER TABLE `nexgamalt1`.`nexgam_de_sites` MODIFY `id` INT(11) NOT NULL");
-            $Statement->execute();
-
-            $Statement = $PDO->prepare("ALTER TABLE `nexgamalt1`.`nexgam_media` MODIFY `id` BIGINT(20) NOT NULL");
-            $Statement->execute();
-
-
-            $msg = 'set not null autoincrement FALSE';
-            $this->ConsoleTool->writeInfo($msg);
-            QUI\System\Log::writeRecursive($msg);
-            /** Nexgam Import specific */
         }
 
         // Explicitly execute a setup for each package again here
@@ -351,6 +336,39 @@ class Import extends QUI\QDOM
             }
         }
 
+        /** get dataabse from config maybe */
+        $importFknts = new importFktns();
+        $projectDbName = $importFknts->getQuiDatabaseName();
+
+        /** get the highest ID from existing Sites and Media */
+        $deSitesTable = "nexgam_de_sites";
+        $mediaTable = "nexgam_media";
+
+        $resultMaxDeSites = QUI::getDataBase()->fetch([
+            'select' => ['id'],
+            'from'   => $deSitesTable,
+            'limit' => 1,
+            'order' => [
+                'id' => 'ASC'
+            ]
+        ]);
+
+        $resultMaxMedia = QUI::getDataBase()->fetch([
+            'select' => ['id'],
+            'from'   => $mediaTable,
+            'limit' => 1,
+            'order' => [
+                'id' => 'ASC'
+            ]
+        ]);
+
+        QUI\System\Log::writeRecursive([
+            'the results for getting the highest Ids for the DeSites and Media Tables are' => [
+                '$resultMaxMedia' => $resultMaxMedia,
+                '$resultMaxDeSites' => $resultMaxDeSites
+            ]
+        ]);
+
         // Re-enable AUTO_INCREMENT in project tables
         foreach ($this->projectTableAutoIncrementDisabled as $projectTable => $v) {
             $PDO       = QUI::getDataBase()->getPDO();
@@ -359,6 +377,12 @@ class Import extends QUI\QDOM
 
             $this->projectTableAutoIncrementDisabled[$projectTable] = false;
         }
+        /** Nexgam Import specific */
+        $msg = 'set not null autoincrement TRUE';
+        $this->ConsoleTool->writeInfo($msg);
+        QUI\System\Log::writeRecursive($msg);
+        /** Nexgam import Specific */
+
 
         // System config
         if ($this->getAttribute('importSystemConfig')) {
@@ -377,21 +401,6 @@ class Import extends QUI\QDOM
         }
 
         $this->writeReviewLog();
-
-        /** Nexgam import Specific */
-        $DataBase = QUI::getDataBase();
-        $PDO      = $DataBase->getPDO();
-
-        $Statement = $PDO->prepare("ALTER TABLE `nexgamalt1`.`nexgam_de_sites` MODIFY `id` INT(11) NOT NULL AUTO_INCREMENT");
-        $Statement->execute();
-
-        $Statement = $PDO->prepare("ALTER TABLE `nexgamalt1`.`nexgam_media` MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT");
-        $Statement->execute();
-
-        $msg = 'set not null autoincrement TRUE';
-        $this->ConsoleTool->writeInfo($msg);
-        QUI\System\Log::writeRecursive($msg);
-        /** Nexgam import Specific */
 
         $this->ImportProvider->onImportFinished();
     }
@@ -1114,6 +1123,11 @@ class Import extends QUI\QDOM
 
                     $this->projectTableAutoIncrementDisabled[$QuiqqerProject->table()] = true;
                 }
+                /** Nexgam Import specific */
+                $msg = 'set NOT NULL AUTO_INCREMENT FALSE';
+                $this->ConsoleTool->writeInfo($msg);
+                QUI\System\Log::writeRecursive($msg);
+                /** Nexgam Import specific */
             }
 
             try {
@@ -1509,6 +1523,11 @@ class Import extends QUI\QDOM
 
                     $this->projectTableAutoIncrementDisabled[$QuiqqerProject->getMedia()->getTable()] = true;
                 }
+                /** Nexgam Import specific */
+                $msg = 'set NOT NULL AUTO_INCREMENT FALSE';
+                $this->ConsoleTool->writeInfo($msg);
+                QUI\System\Log::writeRecursive($msg);
+                /** Nexgam Import specific */
             }
 
             $newRootId = false;
