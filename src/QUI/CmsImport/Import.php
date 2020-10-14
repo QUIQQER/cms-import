@@ -1069,6 +1069,8 @@ class Import extends QUI\QDOM
         /** @var SiteEntity $ChildSiteItem */
         $counter = -1;
 
+        QUI\Cache\Manager::$noClearing = true;
+
         foreach ($SiteTree->walkChildren() as $ChildSiteItem) {
             // Site links are not created as actual sites but as links (created after all sites are created)
             if ($ChildSiteItem->isLink()) {
@@ -1076,6 +1078,8 @@ class Import extends QUI\QDOM
             }
             // test
             $counter++;
+
+            shell_exec('rm -rf '.VAR_DIR.'tmp');
 
             $siteIdentifier      = $ChildSiteItem->getId();
             $ImportSite          = $this->ImportProvider->getSite($siteIdentifier, $projectIdentifier, $lang);
@@ -1479,6 +1483,8 @@ class Import extends QUI\QDOM
 
         /** @var MetaEntity $ChildMediaItem */
         foreach ($MediaTree->walkChildren() as $ChildMediaItem) {
+            shell_exec('rm -rf '.VAR_DIR.'tmp');
+
             $mediaItemIdentifier   = $ChildMediaItem->getId();
             $ImportMediaItem       = $this->ImportProvider->getMediaItem($mediaItemIdentifier, $projectIdentifier);
             $importQuiqqerMediaId  = $ImportMediaItem->getQuiqqerId();
