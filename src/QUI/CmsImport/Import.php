@@ -383,6 +383,12 @@ class Import extends QUI\QDOM
             try {
                 $Statement = $PDO->prepare("ALTER TABLE $projectTable MODIFY `id` BIGINT(20) NOT NULL AUTO_INCREMENT");
                 $Statement->execute();
+
+                /** Nexgam Import specific */
+                $msg = 'set not null autoincrement TRUE';
+                $this->ConsoleTool->writeInfo($msg);
+                QUI\System\Log::writeRecursive($msg);
+                /** Nexgam import Specific */
             } catch (\Exception $Exception) {
                 QUI\System\Log::writeRecursive([
                     'error Occured during setting AUTO_INCREMENT' => $Exception
@@ -391,11 +397,7 @@ class Import extends QUI\QDOM
 
             $this->projectTableAutoIncrementDisabled[$projectTable] = false;
         }
-        /** Nexgam Import specific */
-        $msg = 'set not null autoincrement TRUE';
-        $this->ConsoleTool->writeInfo($msg);
-        QUI\System\Log::writeRecursive($msg);
-        /** Nexgam import Specific */
+
 
 
         // System config
@@ -1140,12 +1142,14 @@ class Import extends QUI\QDOM
                     $Statement->execute();
 
                     $this->projectTableAutoIncrementDisabled[$QuiqqerProject->table()] = true;
+
+                    /** Nexgam Import specific */
+                    $msg = 'set NOT NULL AUTO_INCREMENT FALSE';
+                    $this->ConsoleTool->writeInfo($msg);
+                    QUI\System\Log::writeRecursive($msg);
+                    /** Nexgam Import specific */
                 }
-                /** Nexgam Import specific */
-                $msg = 'set NOT NULL AUTO_INCREMENT FALSE';
-                $this->ConsoleTool->writeInfo($msg);
-                QUI\System\Log::writeRecursive($msg);
-                /** Nexgam Import specific */
+
             }
 
             try {
@@ -1542,12 +1546,13 @@ class Import extends QUI\QDOM
                     $Statement->execute();
 
                     $this->projectTableAutoIncrementDisabled[$QuiqqerProject->getMedia()->getTable()] = true;
+
+                    /** Nexgam Import specific */
+                    $msg = 'set NOT NULL AUTO_INCREMENT FALSE';
+                    $this->ConsoleTool->writeInfo($msg);
+                    QUI\System\Log::writeRecursive($msg);
+                    /** Nexgam Import specific */
                 }
-                /** Nexgam Import specific */
-                $msg = 'set NOT NULL AUTO_INCREMENT FALSE';
-                $this->ConsoleTool->writeInfo($msg);
-                QUI\System\Log::writeRecursive($msg);
-                /** Nexgam Import specific */
             }
 
             $newRootId = false;
