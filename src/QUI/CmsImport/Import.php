@@ -1149,7 +1149,6 @@ class Import extends QUI\QDOM
                     QUI\System\Log::writeRecursive($msg);
                     /** Nexgam Import specific */
                 }
-
             }
 
             try {
