@@ -28,6 +28,9 @@ class MetaHierarchy extends MetaList
      */
     public function buildTree()
     {
+        // Children that are deleted from root
+        $deleteKeys = [];
+
         /** @var MetaEntity $Child */
         foreach ($this->children as $k => $Child) {
             if (!$Child->getParentId()) {
@@ -38,8 +41,12 @@ class MetaHierarchy extends MetaList
 
             if ($ParentChild) {
                 $ParentChild->addChild($Child);
-                unset($this->children[$k]);
+                $deleteKeys[] = $k;
             }
+        }
+
+        foreach ($deleteKeys as $deleteKey) {
+            unset($this->children[$deleteKey]);
         }
 
         $this->sorted = true;

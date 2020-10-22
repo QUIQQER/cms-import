@@ -2399,7 +2399,13 @@ class Import extends QUI\QDOM
             $langs = QUI::availableLanguages();
 
             foreach ($langs as $lang) {
-                $Project = new QUI\Projects\Project($StandardProject->getName(), $lang);
+                try {
+                    $Project = new QUI\Projects\Project($StandardProject->getName(), $lang);
+                } catch (\Exception $Exception) {
+                    QUI\System\Log::writeException($Exception);
+                    continue;
+                }
+
                 $siteIds = $Project->getSitesIds();
 
                 foreach ($siteIds as $siteId) {
